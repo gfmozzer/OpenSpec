@@ -1,8 +1,5 @@
-# Sitemap do Frontend Escrito
+# Mapa de Frontend
 
-<!-- Mapeamento visual das rotas do frontend. Quando tiver uma funcionalidade desenvolvida no backend, mas as telas ainda não existirem, registre um [GAP] -->
+Documento gerado a partir de `.sdd/state/frontend-map.yaml`.
 
-## Rotas
-- `[OK]` `/login` - Tela de Autenticação
-- `[OK]` `/dashboard` - Tela Principal
-- `[GAP]` `/configuracoes` - Falta construir e espetar a API de Settings
+- Sem rotas mapeadas.

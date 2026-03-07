@@ -1,3 +1,4 @@
+import { CLI_NAME } from '../branding.js';
 import type { SkillBundle, SkillCatalogEntry, SkillCatalogState } from './types.js';
 
 interface CuratedBundleSeed {
@@ -10,8 +11,26 @@ interface CuratedBundleSeed {
 
 const DEFAULT_TOOLS = ['codex', 'cursor', 'claude', 'gemini'];
 const DEFAULT_SOURCE_REPO = 'https://github.com/sickn33/antigravity-awesome-skills';
+const LOCAL_SDD_SKILL_IDS = new Set([
+  'source-intake-sdd',
+  'business-extractor-sdd',
+  'frontend-extractor-sdd',
+  'planning-normalizer-sdd',
+]);
 
 const CURATED_BUNDLES: CuratedBundleSeed[] = [
+  {
+    id: 'source-intake',
+    title: 'Source Intake',
+    domains: ['intake', 'planning', 'frontend'],
+    phases: ['discover', 'plan'],
+    skillIds: [
+      'source-intake-sdd',
+      'business-extractor-sdd',
+      'frontend-extractor-sdd',
+      'planning-normalizer-sdd',
+    ],
+  },
   {
     id: 'essentials-core',
     title: 'Essentials Core',
@@ -135,12 +154,15 @@ function priorityForIndex(index: number): number {
 }
 
 function buildSkillEntry(bundle: CuratedBundleSeed, skillId: string, index: number): SkillCatalogEntry {
+  const isLocalSkill = LOCAL_SDD_SKILL_IDS.has(skillId);
   return {
     id: skillId,
-    source_repo: DEFAULT_SOURCE_REPO,
-    source_path: `skills/${skillId}/SKILL.md`,
+    source_repo: isLocalSkill ? 'local://opensdd/sdd' : DEFAULT_SOURCE_REPO,
+    source_path: isLocalSkill ? `.sdd/skills/curated/${skillId}/SKILL.md` : `skills/${skillId}/SKILL.md`,
     title: titleFromSkillId(skillId),
-    description: `Skill curada para ${bundle.title.toLowerCase()} no fluxo SDD.`,
+    description: isLocalSkill
+      ? `Skill nativa do SDD para ${bundle.title.toLowerCase()}.`
+      : `Skill curada para ${bundle.title.toLowerCase()} no fluxo SDD.`,
     phases: bundle.phases,
     domains: bundle.domains,
     tools: DEFAULT_TOOLS,
@@ -161,11 +183,159 @@ export const DEFAULT_CURATED_SKILL_CATALOG: SkillCatalogState = {
   })),
 };
 
+export const SOURCE_INTAKE_SDD_SKILL_MD = `---
+name: source-intake-sdd
+description: Lê a pasta .sdd/deposito, indexa as fontes brutas e classifica o material de entrada do projeto.
+---
+
+# Source Intake SDD
+
+Use esta skill quando houver material bruto do projeto em \`.sdd/deposito/\`.
+
+## Objetivo
+
+Transformar um conjunto heterogeneo de documentos em um inventario operacional rastreavel.
+
+## Onde procurar
+
+- \`.sdd/deposito/prds/\`
+- \`.sdd/deposito/rfcs/\`
+- \`.sdd/deposito/briefings/\`
+- \`.sdd/deposito/historias/\`
+- \`.sdd/deposito/wireframes/\`
+- \`.sdd/deposito/html-mocks/\`
+- \`.sdd/deposito/referencias-visuais/\`
+- \`.sdd/deposito/entrevistas/\`
+- \`.sdd/deposito/anexos/\`
+- \`.sdd/deposito/legado/\`
+
+## Fluxo obrigatorio
+
+1. Liste as fontes existentes.
+2. Classifique cada fonte por tipo.
+3. Registre/atualize \`.sdd/state/source-index.yaml\`.
+4. Preencha para cada item:
+   - \`type\`
+   - \`path\`
+   - \`title\`
+   - \`status\`
+   - \`summary\`
+   - \`used_by\`
+   - \`consolidation_targets\`
+5. Nao gere backlog direto nesta etapa.
+
+## Regra de ouro
+
+- Fonte bruta nao e fonte canonica.
+- O objetivo aqui e inventariar e classificar.
+- O backlog so nasce depois da normalizacao semantica.
+`;
+
+export const BUSINESS_EXTRACTOR_SDD_SKILL_MD = `---
+name: business-extractor-sdd
+description: Extrai historias, regras de negocio, atores, integracoes e restricoes a partir das fontes do deposito.
+---
+
+# Business Extractor SDD
+
+Use esta skill quando o repositorio ja possui PRDs, briefings, historias ou documentos consolidados.
+
+## Saidas esperadas
+
+- atualizacao de contexto canônico:
+  - \`.sdd/state/architecture.yaml\`
+  - \`.sdd/state/service-catalog.yaml\`
+  - \`.sdd/state/tech-stack.yaml\`
+  - \`.sdd/state/integration-contracts.yaml\`
+- sugestoes de:
+  - RADs
+  - FEATs
+  - INSIGHTs apenas quando houver ambiguidade real
+
+## Como decidir o destino
+
+- Se o trecho descreve estrutura do sistema, consolide em contexto.
+- Se o trecho e uma decisao grande e aprovada, normalize em RAD.
+- Se o trecho ja e claro e executavel, normalize em FEAT.
+- Se o trecho estiver ambíguo, contraditório ou incompleto, normalize em INSIGHT.
+
+## Nao faca
+
+- Nao transforme PRD inteiro em task list direta.
+- Nao invente detalhes tecnicos nao presentes na fonte.
+`;
+
+export const FRONTEND_EXTRACTOR_SDD_SKILL_MD = `---
+name: frontend-extractor-sdd
+description: Extrai superficies, rotas, componentes, gaps e decisoes de frontend a partir de imagens, html, wireframes e referencias.
+---
+
+# Frontend Extractor SDD
+
+Use esta skill quando existir inspiracao visual ou definicao de UI/UX em \`.sdd/deposito/\`.
+
+## Fontes aceitas
+
+- wireframes
+- screenshots
+- imagens de referencia
+- html mockado
+- historias com impacto de interface
+
+## Saidas esperadas
+
+- \`.sdd/state/frontend-map.yaml\`
+- \`.sdd/state/frontend-gaps.yaml\`
+- \`.sdd/state/frontend-decisions.yaml\`
+
+## Criterios de classificacao
+
+- O que ja esta claramente definido como tela/rota entra em frontend-map.
+- O que esta faltando, mas necessario para cobrir jornada, entra em frontend-gaps.
+- O racional de UX, navegacao, layout, padroes e inspiracao entra em frontend-decisions.
+- Se uma superficie ja estiver bem definida e executavel, ela pode virar FEAT.
+`;
+
+export const PLANNING_NORMALIZER_SDD_SKILL_MD = `---
+name: planning-normalizer-sdd
+description: Converte o material extraído das fontes em backlog operacional do SDD, priorizando contexto, RADs e FEATs.
+---
+
+# Planning Normalizer SDD
+
+Use esta skill depois de inventariar as fontes e extrair negocio/frontend.
+
+## Missao
+
+Transformar conhecimento consolidado em artefatos operacionais do SDD.
+
+## Ordem de normalizacao
+
+1. contexto canônico
+2. RADs
+3. FEATs
+4. INSIGHTs apenas para excecoes
+
+## Regras
+
+- Nao passe por debate quando a fonte ja for consolidada e inequívoca.
+- Use debate apenas para incerteza, conflito, ambiguidade ou opcao arquitetural aberta.
+- Conecte FEATs com \`blocked_by\`, \`lock_domains\`, \`produces\` e \`consumes\` quando houver evidência suficiente.
+- Registre em \`.sdd/state/source-index.yaml\` quais fontes geraram cada RAD/FEAT.
+
+## Resultado minimo
+
+Ao final, o agente deve conseguir responder:
+- o que e contexto do sistema;
+- o que ja esta aprovado para planejamento;
+- o que ja pode entrar em execucao.
+`;
+
 export function buildCuratedBundlesMarkdown(): string {
   const lines: string[] = [
     '# Curadoria de Skills (PT-BR)',
     '',
-    'Este arquivo descreve a curadoria inicial de 60 skills para uso no SDD.',
+    `Este arquivo descreve a curadoria inicial de ${DEFAULT_CURATED_SKILL_CATALOG.skills.length} skills para uso no SDD.`,
     '',
     '## Objetivo',
     '- Reduzir o universo de 900+ skills para um conjunto pratico.',
@@ -211,14 +381,14 @@ Mapear e documentar, com base em evidencias do repositorio:
 
 ## Fluxo obrigatorio
 
-1. Execute \`openspec sdd init --frontend\` se a estrutura SDD ainda nao existir.
-2. Execute \`openspec sdd init-context --mode merge\`.
+1. Execute \`${CLI_NAME} sdd init --frontend\` se a estrutura SDD ainda nao existir.
+2. Execute \`${CLI_NAME} sdd init-context --mode merge\`.
 3. Leia os arquivos gerados:
    - \`.sdd/core/spec-tecnologica.md\`
    - \`.sdd/core/servicos.md\`
    - \`.sdd/core/arquitetura.md\`
    - \`.sdd/core/repo-map.md\`
-4. Valide com \`openspec sdd check --render\`.
+4. Valide com \`${CLI_NAME} sdd check --render\`.
 5. Registre qualquer duvida ou baixa confianca como item de revisao em \`.sdd/pendencias/tech-debt.md\`.
 
 ## Regras de qualidade
@@ -235,3 +405,11 @@ Mapear e documentar, com base em evidencias do repositorio:
 
 Apos a execucao, o projeto deve ter contexto inicial util o suficiente para um agente novo continuar sem inspecao ampla de codigo.
 `;
+
+export const BUILT_IN_SDD_SKILLS: Record<string, string> = {
+  'repo-context-bootstrap': REPO_CONTEXT_BOOTSTRAP_SKILL_MD,
+  'source-intake-sdd': SOURCE_INTAKE_SDD_SKILL_MD,
+  'business-extractor-sdd': BUSINESS_EXTRACTOR_SDD_SKILL_MD,
+  'frontend-extractor-sdd': FRONTEND_EXTRACTOR_SDD_SKILL_MD,
+  'planning-normalizer-sdd': PLANNING_NORMALIZER_SDD_SKILL_MD,
+};

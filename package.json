@@ -1,5 +1,5 @@
 {
-  "name": "@fission-ai/openspec",
+  "name": "opensdd",
   "version": "1.2.0",
   "description": "AI-native system for spec-driven development",
   "keywords": [
@@ -27,7 +27,7 @@
     }
   },
   "bin": {
-    "openspec": "./bin/openspec.js"
+    "opensdd": "./bin/opensdd.js"
   },
   "files": [
     "dist",
@@ -42,7 +42,7 @@
     "lint": "eslint src/",
     "build": "node build.js",
     "dev": "tsc --watch",
-    "dev:cli": "pnpm build && node bin/openspec.js",
+    "dev:cli": "pnpm build && node bin/opensdd.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",

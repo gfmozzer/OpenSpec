@@ -24,6 +24,7 @@ Este documento e gerado automaticamente a partir dos arquivos em \`.sdd/state/\`
 - Itens de divida tecnica: ${state.techDebt.items.length}
 - Itens na fila de finalize: ${state.finalizeQueue.items.length}
 - Catalogo de skills: ${state.skillCatalog.skills.length} skills / ${state.skillCatalog.bundles.length} bundles
+- Fontes brutas indexadas: ${state.sourceIndex.sources.length}
 - Modulo de frontend: ${frontendEnabled}
 
 ## Referencias
@@ -31,6 +32,7 @@ Este documento e gerado automaticamente a partir dos arquivos em \`.sdd/state/\`
 - \`.sdd/core/servicos.md\`
 - \`.sdd/core/spec-tecnologica.md\`
 - \`.sdd/core/repo-map.md\`
+- \`.sdd/core/fontes.md\`
 - \`.sdd/core/integracoes.md\`
 - \`.sdd/pendencias/backlog-features.md\`
 - \`.sdd/pendencias/backlog-graph.md\`
@@ -366,6 +368,29 @@ ${rows.length > 0 ? rows.join('\n') : '| - | - | - | Sem itens |'}
 `;
 }
 
+function renderSources(state: SddStateSnapshot): string {
+  const rows = state.sourceIndex.sources
+    .slice()
+    .sort((a, b) => a.path.localeCompare(b.path))
+    .map((item) => {
+      const usedBy = item.used_by.length > 0 ? item.used_by.join(', ') : '-';
+      const targets =
+        item.consolidation_targets.length > 0 ? item.consolidation_targets.join(', ') : '-';
+      return `| ${item.id} | ${item.type} | ${item.status} | ${item.title} | ${item.path} | ${usedBy} | ${targets} |`;
+    });
+
+  return `# Fontes Brutas
+
+Documento gerado a partir de \`.sdd/state/source-index.yaml\`.
+
+As fontes aqui listadas sao insumos do projeto, nao a fonte canonica do SDD.
+
+| ID | Tipo | Status | Titulo | Path | Usado por | Destinos de consolidacao |
+| --- | --- | --- | --- | --- | --- | --- |
+${rows.length > 0 ? rows.join('\n') : '| - | - | - | Sem fontes indexadas | - | - | - |'}
+`;
+}
+
 function renderIntegrationContracts(state: SddStateSnapshot): string {
   const contracts = state.integrationContracts.contracts.slice().sort((a, b) => a.localeCompare(b));
   const lines = contracts.map((contract) => `- ${contract}`);
@@ -389,6 +414,7 @@ export async function renderViews(
     fs.writeFile(path.join(paths.coreDir, 'servicos.md'), renderServices(state), 'utf-8'),
     fs.writeFile(path.join(paths.coreDir, 'spec-tecnologica.md'), renderTechStack(state), 'utf-8'),
     fs.writeFile(path.join(paths.coreDir, 'repo-map.md'), renderRepoMap(state), 'utf-8'),
+    fs.writeFile(path.join(paths.coreDir, 'fontes.md'), renderSources(state), 'utf-8'),
     fs.writeFile(path.join(paths.coreDir, 'integracoes.md'), renderIntegrationContracts(state), 'utf-8'),
     fs.writeFile(path.join(paths.pendenciasDir, 'backlog-features.md'), renderBacklog(state), 'utf-8'),
     fs.writeFile(path.join(paths.pendenciasDir, 'backlog-graph.md'), renderBacklogGraph(state), 'utf-8'),

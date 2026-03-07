@@ -28,7 +28,7 @@ export function getVerifyChangeSkillTemplate(): SkillTemplate {
 
 2. **Check status to understand the schema**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   opensdd status --change "<name>" --json
    \`\`\`
    Parse the JSON to understand:
    - \`schemaName\`: The workflow being used (e.g., "spec-driven")
@@ -37,7 +37,7 @@ export function getVerifyChangeSkillTemplate(): SkillTemplate {
 3. **Get the change directory and load artifacts**
 
    \`\`\`bash
-   openspec instructions apply --change "<name>" --json
+   opensdd instructions apply --change "<name>" --json
    \`\`\`
 
    This returns the change directory and context files. Read all available artifacts from \`contextFiles\`.
@@ -168,7 +168,7 @@ Use clear markdown with:
 - Specific, actionable recommendations
 - No vague suggestions like "consider reviewing"`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: 'Requires opensdd CLI.',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -197,7 +197,7 @@ export function getOpsxVerifyCommandTemplate(): CommandTemplate {
 
 2. **Check status to understand the schema**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   opensdd status --change "<name>" --json
    \`\`\`
    Parse the JSON to understand:
    - \`schemaName\`: The workflow being used (e.g., "spec-driven")
@@ -206,7 +206,7 @@ export function getOpsxVerifyCommandTemplate(): CommandTemplate {
 3. **Get the change directory and load artifacts**
 
    \`\`\`bash
-   openspec instructions apply --change "<name>" --json
+   opensdd instructions apply --change "<name>" --json
    \`\`\`
 
    This returns the change directory and context files. Read all available artifacts from \`contextFiles\`.

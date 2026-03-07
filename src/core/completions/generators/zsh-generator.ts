@@ -76,7 +76,7 @@ ${commandCases}
 
 ${commandFunctions}
 ${helpers}
-compdef _openspec openspec
+compdef _openspec opensdd
 `;
   }
 

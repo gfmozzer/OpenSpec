@@ -22,6 +22,7 @@ import {
 import { CORE_WORKFLOWS, ALL_WORKFLOWS, getProfileWorkflows } from '../core/profiles.js';
 import { OPENSPEC_DIR_NAME } from '../core/config.js';
 import { hasProjectConfigDrift } from '../core/profile-sync-drift.js';
+import { CLI_NAME } from '../core/branding.js';
 
 type ProfileAction = 'both' | 'delivery' | 'workflows' | 'keep';
 
@@ -198,7 +199,7 @@ function maybeWarnConfigDrift(
   if (!hasProjectConfigDrift(projectDir, state.workflows, state.delivery)) {
     return;
   }
-  console.log(colorize('Warning: Global config is not applied to this project. Run `openspec update` to sync.'));
+  console.log(colorize(`Warning: Global config is not applied to this project. Run \`${CLI_NAME} update\` to sync.`));
 }
 
 /**
@@ -299,7 +300,7 @@ export function registerConfigCommand(program: Command): void {
       if (!keyValidation.valid && !allowUnknown) {
         const reason = keyValidation.reason ? ` ${keyValidation.reason}.` : '';
         console.error(`Error: Invalid configuration key "${key}".${reason}`);
-        console.error('Use "openspec config list" to see available keys.');
+        console.error(`Use "${CLI_NAME} config list" to see available keys.`);
         console.error('Pass --allow-unknown to bypass this check.');
         process.exitCode = 1;
         return;
@@ -354,7 +355,7 @@ export function registerConfigCommand(program: Command): void {
     .action(async (options: { all?: boolean; yes?: boolean }) => {
       if (!options.all) {
         console.error('Error: --all flag is required for reset');
-        console.error('Usage: openspec config reset --all [-y]');
+        console.error(`Usage: ${CLI_NAME} config reset --all [-y]`);
         process.exitCode = 1;
         return;
       }
@@ -461,7 +462,7 @@ export function registerConfigCommand(program: Command): void {
         config.workflows = [...CORE_WORKFLOWS];
         // Preserve delivery setting
         saveGlobalConfig(config);
-        console.log('Config updated. Run `openspec update` in your projects to apply.');
+        console.log(`Config updated. Run \`${CLI_NAME} update\` in your projects to apply.`);
         return;
       }
 
@@ -473,7 +474,7 @@ export function registerConfigCommand(program: Command): void {
 
       // Non-interactive check
       if (!process.stdout.isTTY) {
-        console.error('Interactive mode required. Use `openspec config profile core` or set config via environment/flags.');
+        console.error(`Interactive mode required. Use \`${CLI_NAME} config profile core\` or set config via environment/flags.`);
         process.exitCode = 1;
         return;
       }
@@ -622,17 +623,17 @@ export function registerConfigCommand(program: Command): void {
 
           if (applyNow) {
             try {
-              execSync('npx openspec update', { stdio: 'inherit', cwd: projectDir });
-              console.log('Run `openspec update` in your other projects to apply.');
+              execSync(`npx ${CLI_NAME} update`, { stdio: 'inherit', cwd: projectDir });
+              console.log(`Run \`${CLI_NAME} update\` in your other projects to apply.`);
             } catch {
-              console.error('`openspec update` failed. Please run it manually to apply the profile changes.');
+              console.error(`\`${CLI_NAME} update\` failed. Please run it manually to apply the profile changes.`);
               process.exitCode = 1;
             }
             return;
           }
         }
 
-        console.log('Config updated. Run `openspec update` in your projects to apply.');
+        console.log(`Config updated. Run \`${CLI_NAME} update\` in your projects to apply.`);
       } catch (error) {
         if (isPromptCancellationError(error)) {
           console.log('Config profile cancelled.');

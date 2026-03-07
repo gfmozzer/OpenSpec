@@ -9,6 +9,7 @@ import {
   writeUpdatedSpec,
   type SpecUpdate,
 } from './specs-apply.js';
+import { CLI_NAME } from './branding.js';
 
 /**
  * Recursively copy a directory. Used when fs.rename fails (e.g. EPERM on Windows).
@@ -61,7 +62,7 @@ export class ArchiveCommand {
     try {
       await fs.access(changesDir);
     } catch {
-      throw new Error("No OpenSpec changes directory found. Run 'openspec init' first.");
+      throw new Error(`No OpenSpec changes directory found. Run '${CLI_NAME} init' first.`);
     }
 
     // Get change name interactively if not provided

@@ -36,12 +36,21 @@ describe('SddInitCommand', () => {
     expect(await exists(path.join(testDir, '.sdd', 'state', 'tech-debt.yaml'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'finalize-queue.yaml'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'skill-catalog.yaml'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'state', 'source-index.yaml'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'README.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'deposito', 'README.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'deposito', 'prds'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'deposito', 'wireframes'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'skills', 'bundles', 'curadoria-pt-br.md'))).toBe(true);
     expect(
       await exists(
         path.join(testDir, '.sdd', 'skills', 'curated', 'repo-context-bootstrap', 'SKILL.md')
       )
     ).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'skills', 'curated', 'source-intake-sdd', 'SKILL.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'skills', 'curated', 'business-extractor-sdd', 'SKILL.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'skills', 'curated', 'frontend-extractor-sdd', 'SKILL.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'skills', 'curated', 'planning-normalizer-sdd', 'SKILL.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'architecture.yaml'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'service-catalog.yaml'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'tech-stack.yaml'))).toBe(true);
@@ -51,8 +60,13 @@ describe('SddInitCommand', () => {
     expect(await exists(path.join(testDir, '.sdd', 'core', 'servicos.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'core', 'spec-tecnologica.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'core', 'repo-map.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'core', 'fontes.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'templates', 'template-1-spec.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'templates', 'template-2-plan.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'templates', 'template-3-tasks.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'templates', 'template-4-changelog.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'pendencias', 'backlog-features.md'))).toBe(true);
-    expect(await exists(path.join(testDir, '.sdd', 'agente.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'AGENT.md'))).toBe(true);
     expect(await exists(path.join(testDir, 'README.md'))).toBe(true);
     expect(await exists(path.join(testDir, 'AGENTS.md'))).toBe(true);
     expect(await exists(path.join(testDir, 'AGENT.md'))).toBe(true);
@@ -60,10 +74,10 @@ describe('SddInitCommand', () => {
     const skillCatalog = parseYaml(
       await fs.readFile(path.join(testDir, '.sdd', 'state', 'skill-catalog.yaml'), 'utf-8')
     ) as Record<string, any>;
-    expect(skillCatalog.skills).toHaveLength(60);
-    expect(skillCatalog.bundles).toHaveLength(6);
-    expect(result.skillsSeeded).toBe(60);
-    expect(result.localSkillsMaterialized).toBe(60);
+    expect(skillCatalog.skills).toHaveLength(64);
+    expect(skillCatalog.bundles).toHaveLength(7);
+    expect(result.skillsSeeded).toBe(64);
+    expect(result.localSkillsMaterialized).toBe(64);
 
     const projectConfig = await fs.readFile(path.join(testDir, 'openspec', 'config.yaml'), 'utf-8');
     const parsed = parseYaml(projectConfig) as Record<string, any>;
@@ -128,8 +142,26 @@ describe('SddInitCommand', () => {
     await command.execute(testDir);
 
     const migrated = parseYaml(await fs.readFile(catalogPath, 'utf-8')) as Record<string, any>;
-    expect(migrated.skills).toHaveLength(60);
-    expect(migrated.bundles).toHaveLength(6);
+    expect(migrated.skills).toHaveLength(64);
+    expect(migrated.bundles).toHaveLength(7);
+  });
+
+  it('merges missing built-in intake skills into existing catalog', async () => {
+    const command = new SddInitCommand();
+    await command.execute(testDir);
+
+    const catalogPath = path.join(testDir, '.sdd', 'state', 'skill-catalog.yaml');
+    const catalog = parseYaml(await fs.readFile(catalogPath, 'utf-8')) as Record<string, any>;
+    catalog.skills = catalog.skills.filter((entry: any) => !String(entry.id).endsWith('-sdd'));
+    catalog.bundles = catalog.bundles.filter((entry: any) => entry.id !== 'source-intake');
+    await fs.writeFile(catalogPath, stringifyYaml(catalog), 'utf-8');
+
+    await command.execute(testDir);
+
+    const merged = parseYaml(await fs.readFile(catalogPath, 'utf-8')) as Record<string, any>;
+    expect(merged.skills.some((entry: any) => entry.id === 'source-intake-sdd')).toBe(true);
+    expect(merged.skills.some((entry: any) => entry.id === 'planning-normalizer-sdd')).toBe(true);
+    expect(merged.bundles.some((entry: any) => entry.id === 'source-intake')).toBe(true);
   });
 
   it('bootstraps initial architecture, stack and repo map from an existing project', async () => {

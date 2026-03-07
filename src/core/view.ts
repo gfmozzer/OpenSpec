@@ -3,6 +3,7 @@ import * as path from 'path';
 import chalk from 'chalk';
 import { getTaskProgressForChange, formatTaskStatus } from '../utils/task-progress.js';
 import { MarkdownParser } from './parsers/markdown-parser.js';
+import { CLI_NAME } from './branding.js';
 
 export class ViewCommand {
   async execute(targetPath: string = '.'): Promise<void> {
@@ -75,7 +76,7 @@ export class ViewCommand {
     }
 
     console.log('\n' + '═'.repeat(60));
-    console.log(chalk.dim(`\nUse ${chalk.white('openspec list --changes')} or ${chalk.white('openspec list --specs')} for detailed views`));
+    console.log(chalk.dim(`\nUse ${chalk.white(`${CLI_NAME} list --changes`)} or ${chalk.white(`${CLI_NAME} list --specs`)} for detailed views`));
   }
 
   private async getChangesData(openspecDir: string): Promise<{

@@ -6,6 +6,7 @@ import { Validator } from '../core/validation/validator.js';
 import type { Spec } from '../core/schemas/index.js';
 import { isInteractive } from '../utils/interactive.js';
 import { getSpecIds } from '../utils/item-discovery.js';
+import { CLI_NAME } from '../core/branding.js';
 
 const SPECS_DIR = 'openspec/specs';
 
@@ -115,7 +116,7 @@ export function registerSpecCommand(rootProgram: typeof program) {
 
   // Deprecation notice for noun-based commands
   specCommand.hook('preAction', () => {
-    console.error('Warning: The "openspec spec ..." commands are deprecated. Prefer verb-first commands (e.g., "openspec show", "openspec validate --specs").');
+    console.error(`Warning: The "${CLI_NAME} spec ..." commands are deprecated. Prefer verb-first commands (e.g., "${CLI_NAME} show", "${CLI_NAME} validate --specs").`);
   });
 
   specCommand

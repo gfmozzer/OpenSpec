@@ -20,6 +20,7 @@ import {
   type TaskItem,
   type ApplyInstructions,
 } from './shared.js';
+import { CLI_NAME } from '../../core/branding.js';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -363,12 +364,12 @@ export async function generateApplyInstructions(
 
   if (missingArtifacts.length > 0) {
     state = 'blocked';
-    instruction = `Cannot apply this change yet. Missing artifacts: ${missingArtifacts.join(', ')}.\nUse the openspec-continue-change skill to create the missing artifacts first.`;
+    instruction = `Cannot apply this change yet. Missing artifacts: ${missingArtifacts.join(', ')}.\nUse the openspec-continue-change skill or run ${CLI_NAME} instructions to create the missing artifacts first.`;
   } else if (tracksFile && !tracksFileExists) {
     // Tracking file configured but doesn't exist yet
     const tracksFilename = path.basename(tracksFile);
     state = 'blocked';
-    instruction = `The ${tracksFilename} file is missing and must be created.\nUse openspec-continue-change to generate the tracking file.`;
+    instruction = `The ${tracksFilename} file is missing and must be created.\nUse openspec-continue-change or run ${CLI_NAME} instructions to generate the tracking file.`;
   } else if (tracksFile && tracksFileExists && total === 0) {
     // Tracking file exists but contains no tasks
     const tracksFilename = path.basename(tracksFile);
@@ -440,7 +441,7 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
     console.log('### ⚠️ Blocked');
     console.log();
     console.log(`Missing artifacts: ${missingArtifacts.join(', ')}`);
-    console.log('Use the openspec-continue-change skill to create these first.');
+    console.log(`Use the openspec-continue-change skill or run ${CLI_NAME} instructions to create these first.`);
     console.log();
   }
 

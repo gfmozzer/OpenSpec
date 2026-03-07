@@ -1,4 +1,4 @@
-# Manual de Uso do OpenSpec SDD (PT-BR)
+# Manual de Uso do OpenSDD (PT-BR)
 
 Este manual foi escrito para um leigo que quer usar o sistema para desenvolver software com apoio de agentes.
 
@@ -28,9 +28,9 @@ Regra prática:
 
 ```mermaid
 flowchart LR
-  A[Instalar OpenSpec] --> B[openspec init]
-  B --> C[openspec sdd init --frontend]
-  C --> D[openspec sdd init-context]
+  A[Instalar OpenSDD] --> B[opensdd init]
+  B --> C[opensdd sdd init --frontend]
+  C --> D[opensdd sdd init-context]
   D --> E[INSIGHT]
   E --> F[DEBATE]
   F -->|Aprovado| G[RADAR]
@@ -40,8 +40,8 @@ flowchart LR
   J --> K[START]
   K --> L[Workspace .sdd/active/FEAT]
   L --> M[Implementação]
-  M --> N[openspec archive]
-  N --> O[openspec sdd finalize]
+  M --> N[opensdd archive]
+  N --> O[opensdd sdd finalize]
   O --> P[Docs atualizadas + handoff]
 ```
 
@@ -49,10 +49,10 @@ flowchart LR
 
 ```mermaid
 mindmap
-  root((OpenSpec SDD))
+  root((OpenSDD))
     Instalação
-      openspec init
-      openspec sdd init --frontend
+      opensdd init
+      opensdd sdd init --frontend
       bootstrap de stack
     Descoberta
       insight
@@ -94,7 +94,18 @@ AGENT.md                                  # Espelho compatível com ferramentas 
 README.md                                 # Entrada principal para humano e agente
 
 .sdd/                                     # Memória operacional do projeto
-├── agente.md                             # Guia operacional interno do SDD
+├── README.md                             # Painel interno do SDD
+├── AGENT.md                              # Guia operacional interno do SDD
+├── deposito/                             # Fontes brutas e documentos importados
+│   ├── prds/                             # PRDs e documentos de produto
+│   ├── rfcs/                             # RFCs e documentos técnicos
+│   ├── historias/                        # Histórias do usuário
+│   ├── wireframes/                       # Wireframes, imagens e esboços
+│   ├── html-mocks/                       # HTMLs, protótipos e experimentos visuais
+│   ├── referencias-visuais/              # Inspirações de frontend
+│   ├── entrevistas/                      # Descoberta com usuário/negócio
+│   ├── anexos/                           # Material complementar
+│   └── legado/                           # Documentos herdados
 ├── active/                               # Execução viva por FEAT
 │   └── FEAT-###/
 │      ├── 1-spec.md                      # O que a FEAT precisa entregar
@@ -107,6 +118,7 @@ README.md                                 # Entrada principal para humano e agen
 │   ├── servicos.md                       # Catálogo de serviços
 │   ├── spec-tecnologica.md               # Stack tecnológica
 │   ├── repo-map.md                       # Mapa dos diretórios relevantes
+│   ├── fontes.md                         # Inventário das fontes brutas indexadas
 │   ├── frontend-map.md                   # O que existe no frontend
 │   ├── frontend-decisions.md             # Por que o frontend foi feito assim
 │   └── adrs/                             # ADRs por FEAT consolidada
@@ -130,6 +142,7 @@ README.md                                 # Entrada principal para humano e agen
    ├── tech-stack.yaml                    # Stack
    ├── integration-contracts.yaml         # Contratos/integrações
    ├── repo-map.yaml                      # Mapa do repositório
+   ├── source-index.yaml                  # Índice canônico das fontes brutas
    ├── frontend-map.yaml                  # Frontend existente
    ├── frontend-gaps.yaml                 # Gaps de frontend
    └── frontend-decisions.yaml            # Decisões de frontend
@@ -142,41 +155,123 @@ openspec/
 
 ## 5. Instalação e primeiro uso
 
-### 5.1 Instalar o OpenSpec
+### 5.1 Pré-requisitos
+
+- Node.js `20.19.0` ou superior
+- `npm` ou `pnpm`
+
+### 5.2 Como instalar o comando `opensdd`
+
+Você tem 2 formas de instalar.
+
+#### Opção A: instalar a sua cópia local deste fork
+
+Use isso se você quer instalar exatamente esta versão do repositório:
 
 ```bash
-npm install -g @fission-ai/openspec@latest
+cd /caminho/do/seu-fork
+pnpm install
+pnpm run build
+npm install -g .
 ```
 
-### 5.2 Entrar no projeto
+Alternativa para desenvolvimento local:
+
+```bash
+cd /caminho/do/seu-fork
+pnpm install
+pnpm run build
+npm link
+```
+
+#### Opção B: instalar um pacote publicado com nome próprio
+
+Use isso apenas se você publicar este fork no npm com nome próprio. Exemplo:
+
+```bash
+npm install -g opensdd@latest
+```
+
+Importante:
+- esse comando so funciona depois que o seu pacote estiver publicado;
+- enquanto isso nao acontecer, use a Opcao A.
+
+Regra pratica:
+- `npm install -g .` instala a sua copia local deste fork;
+- `npm link` serve para desenvolvimento local com seu fork.
+- `npm install -g opensdd@latest` so vale quando esse pacote existir publicado.
+
+### 5.3 Como instalar o OpenSDD dentro do repositório do seu projeto
+
+Depois de instalar o comando `opensdd`, va para o repositório onde voce quer usar o sistema:
 
 ```bash
 cd seu-projeto
 ```
 
-### 5.3 Inicializar o OpenSpec
+Agora inicialize a base do OpenSDD dentro desse repositório.
+
+Se voce nao quer configurar nenhuma IDE/agente agora:
 
 ```bash
-openspec init
+opensdd init --tools none
 ```
 
-Isso cria a base do OpenSpec no repositório.
-
-### 5.4 Inicializar o SDD
+Se voce ja quer configurar ferramentas na instalacao:
 
 ```bash
-openspec sdd init --frontend
+opensdd init --tools codex,cursor
+```
+
+Ou:
+
+```bash
+opensdd init --tools all
+```
+
+Isso cria a base do OpenSDD dentro do seu repositório.
+
+### 5.4 Instalar o SDD dentro do repositório
+
+Depois do `opensdd init`, rode:
+
+```bash
+opensdd sdd init --frontend
 ```
 
 Isso cria:
 - a pasta `.sdd/`;
+- o dashboard interno `.sdd/README.md`;
 - os YAMLs canônicos;
-- os guias `README.md`, `AGENTS.md`, `AGENT.md` e `.sdd/agente.md`;
+- os guias `README.md`, `AGENTS.md`, `AGENT.md` e `.sdd/AGENT.md`;
 - as views em `.sdd/core/` e `.sdd/pendencias/`.
-- o catalogo curado de 60 skills em `.sdd/state/skill-catalog.yaml`;
+- o catalogo curado de 64 skills em `.sdd/state/skill-catalog.yaml`;
 - as skills curadas locais em `.sdd/skills/curated/`.
+- os templates em `.sdd/templates/`.
+- a pasta `.sdd/deposito/` para documentos brutos.
+- o índice `.sdd/state/source-index.yaml` para rastrear essas fontes.
 
-### 5.5 O que acontece automaticamente no primeiro `sdd init`
+Esse e o comando que efetivamente instala o "servico" SDD dentro do seu projeto.
+
+### 5.5 Instalação completa em um projeto novo
+
+Se o projeto esta vazio ou acabou de nascer, o fluxo completo e:
+
+```bash
+cd /caminho/do/seu-fork
+pnpm install
+pnpm run build
+npm install -g .
+cd seu-projeto
+opensdd init --tools none
+opensdd sdd init --frontend
+opensdd sdd check --render
+opensdd sdd onboard system
+```
+
+Se estiver usando o seu fork local, troque apenas a forma de instalar o comando `opensdd`. O restante e igual.
+
+### 5.6 O que acontece automaticamente no primeiro `sdd init`
 
 Se o projeto já tiver uma base instalada, o SDD tenta gerar contexto inicial automaticamente.
 
@@ -188,17 +283,17 @@ Exemplos:
 - se detectar diretórios como `src/`, `test/`, `docs/`, `openspec/`, ele monta o `repo-map`;
 - ele cria um nó inicial de arquitetura;
 - ele cria um serviço inicial no catálogo.
-- ele semeia a curadoria padrao de skills (6 bundles / 60 skills);
+- ele semeia a curadoria padrao de skills (7 bundles / 64 skills);
 - ele tenta sincronizar automaticamente essas skills para ferramentas detectadas (ex.: `.codex`, `.cursor`, `.claude`).
 
 Ou seja: você não começa no vazio.
 
-### 5.6 Quando o projeto já existe (legado)
+### 5.7 Quando o projeto já existe (legado)
 
 Se você vai trabalhar em base grande já existente (ex.: Chatwoot customizado), rode:
 
 ```bash
-openspec sdd init-context
+opensdd sdd init-context
 ```
 
 Esse comando faz inspeção mais profunda e tenta preencher:
@@ -208,10 +303,25 @@ Esse comando faz inspeção mais profunda e tenta preencher:
 - `integration-contracts.yaml`
 - `repo-map.yaml`
 
-### 5.7 Validar e renderizar
+Fluxo recomendado para projeto legado:
 
 ```bash
-openspec sdd check --render
+cd /caminho/do/seu-fork
+pnpm install
+pnpm run build
+npm install -g .
+cd projeto-legado
+opensdd init --tools none
+opensdd sdd init --frontend
+opensdd sdd init-context
+opensdd sdd check --render
+opensdd sdd onboard system
+```
+
+### 5.8 Validar e renderizar
+
+```bash
+opensdd sdd check --render
 ```
 
 Use isso logo após o `init`.
@@ -221,17 +331,17 @@ Use isso logo após o `init`.
 Suponha que você criou um projeto NestJS e só instalou a base inicial. Faça:
 
 ```bash
-openspec init
-openspec sdd init --frontend
-openspec sdd init-context
-openspec sdd check --render
-openspec sdd onboard system
+opensdd init --tools none
+opensdd sdd init --frontend
+opensdd sdd init-context
+opensdd sdd check --render
+opensdd sdd onboard system
 ```
 
 Depois leia:
 - `README.md`
 - `AGENTS.md`
-- `.sdd/agente.md`
+- `.sdd/AGENT.md`
 - `.sdd/core/index.md`
 - `.sdd/core/arquitetura.md`
 - `.sdd/core/servicos.md`
@@ -242,10 +352,41 @@ Isso já vira o primeiro contexto do projeto.
 
 ## 7. Como usar o sistema no dia a dia
 
+### 7.0 Como começar com documentos consolidados
+
+Se voce ja tem PRD, briefing, RFC, wireframe, html de esboco, imagens ou referencias visuais, nao comece por `insight`.
+
+Coloque o material em `.sdd/deposito/`, por exemplo:
+
+```text
+.sdd/deposito/prds/PRD-inicial.md
+.sdd/deposito/historias/jornadas.md
+.sdd/deposito/wireframes/home.png
+.sdd/deposito/html-mocks/dashboard.html
+```
+
+Regra:
+- o deposito guarda fonte bruta;
+- a fonte canonica continua em `.sdd/state/*.yaml`;
+- o inventario oficial dessas fontes fica em `.sdd/state/source-index.yaml`;
+- a view humana dessas fontes fica em `.sdd/core/fontes.md`.
+
+Fluxo recomendado:
+1. colocar os documentos no deposito;
+2. usar a skill `source-intake-sdd` para indexar as fontes;
+3. usar `business-extractor-sdd` para extrair regras, historias, atores e integracoes;
+4. usar `frontend-extractor-sdd` para extrair rotas, superficies, gaps e decisoes de frontend;
+5. usar `planning-normalizer-sdd` para converter isso em contexto, `RADs`, `FEATs` e `INSIGHTs` apenas quando houver ambiguidade.
+
+Resumo objetivo:
+- documento bruto nao vira task direto;
+- ele vira contexto, `RAD` ou `FEAT`;
+- debate so entra quando a fonte estiver ambigua, conflituosa ou incompleta.
+
 ### 7.1 Como registrar uma ideia
 
 ```bash
-openspec sdd insight "Clientes precisam marcar banho online"
+opensdd sdd insight "Clientes precisam marcar banho online"
 ```
 
 O que isso faz:
@@ -256,7 +397,7 @@ O que isso faz:
 ### 7.2 Como iniciar um debate
 
 ```bash
-openspec sdd debate INS-001
+opensdd sdd debate INS-001
 ```
 
 O que isso faz:
@@ -269,7 +410,7 @@ O que isso faz:
 Depois de preencher o arquivo do debate:
 
 ```bash
-openspec sdd decide DEB-001 --outcome radar --rationale "Dor principal do negócio"
+opensdd sdd decide DEB-001 --outcome radar --rationale "Dor principal do negócio"
 ```
 
 O que isso faz:
@@ -280,7 +421,7 @@ O que isso faz:
 ### 7.4 Como reprovar um debate
 
 ```bash
-openspec sdd decide DEB-001 --outcome discard --rationale "Não é prioridade agora"
+opensdd sdd decide DEB-001 --outcome discard --rationale "Não é prioridade agora"
 ```
 
 O que isso faz:
@@ -293,7 +434,7 @@ O que isso faz:
 Planejamento começa no `RAD`.
 
 ```bash
-openspec sdd breakdown RAD-001 --mode graph --incremental --titles "API de agendamento,Calendário por loja,Tela do cliente"
+opensdd sdd breakdown RAD-001 --mode graph --incremental --titles "API de agendamento,Calendário por loja,Tela do cliente"
 ```
 
 O que isso faz:
@@ -313,7 +454,7 @@ No SDD, há dois níveis:
 Exemplo criando FEAT direta:
 
 ```bash
-openspec sdd start "Criar endpoint de healthcheck"
+opensdd sdd start "Criar endpoint de healthcheck"
 ```
 
 2. Criar a lista de tarefas internas da execução:
@@ -328,20 +469,20 @@ O comando gera:
 ### 7.7 Como iniciar a execução de uma FEAT
 
 ```bash
-openspec sdd start FEAT-001
+opensdd sdd start FEAT-001
 ```
 
 O que isso faz:
 - marca a FEAT como `IN_PROGRESS`;
 - valida bloqueios e conflitos;
-- cria um `change` do OpenSpec;
+- cria um `change` dentro de `openspec/changes`;
 - cria o workspace ativo da FEAT;
 - sugere skills e bundles.
 
 ### 7.8 Como saber o que pode começar agora
 
 ```bash
-openspec sdd next
+opensdd sdd next
 ```
 
 O que isso faz:
@@ -353,7 +494,7 @@ O que isso faz:
 ### 7.9 Como gerar contexto para um agente
 
 ```bash
-openspec sdd context FEAT-001 --json
+opensdd sdd context FEAT-001 --json
 ```
 
 O que isso faz:
@@ -370,14 +511,14 @@ O que isso faz:
 ### 7.10 Como fazer onboarding de um agente novo
 
 ```bash
-openspec sdd onboard system
+opensdd sdd onboard system
 ```
 
 Ou:
 
 ```bash
-openspec sdd onboard RAD-001
-openspec sdd onboard FEAT-001
+opensdd sdd onboard RAD-001
+opensdd sdd onboard FEAT-001
 ```
 
 Use:
@@ -395,13 +536,13 @@ Aqui existe uma distinção importante:
 Passo 1:
 
 ```bash
-openspec archive <change-name>
+opensdd archive <change-name>
 ```
 
 Passo 2:
 
 ```bash
-openspec sdd finalize --ref FEAT-001
+opensdd sdd finalize --ref FEAT-001
 ```
 
 Resumo:
@@ -411,7 +552,7 @@ Resumo:
 ### 7.12 Como finalizar uma execução
 
 ```bash
-openspec sdd finalize --ref FEAT-001
+opensdd sdd finalize --ref FEAT-001
 ```
 
 O que isso faz:
@@ -419,20 +560,20 @@ O que isso faz:
 - gera ADR;
 - desbloqueia dependentes;
 - atualiza arquitetura, serviços, stack e repo-map;
-- sincroniza `README.md`, `.sdd/agente.md`, `AGENTS.md` e `AGENT.md`.
+- sincroniza `README.md`, `.sdd/AGENT.md`, `AGENTS.md` e `AGENT.md`.
 
 ### 7.13 Como registrar gap de frontend
 
 Abrir um gap:
 
 ```bash
-openspec sdd fgap add "Tela de prontuário ainda não existe" --origin FEAT-005 --routes /prontuario
+opensdd sdd fgap add "Tela de prontuário ainda não existe" --origin FEAT-005 --routes /prontuario
 ```
 
 Marcar como resolvido:
 
 ```bash
-openspec sdd fgap done FGAP-001 --feature FEAT-008 --files src/pages/prontuario.tsx --routes /prontuario
+opensdd sdd fgap done FGAP-001 --feature FEAT-008 --files src/pages/prontuario.tsx --routes /prontuario
 ```
 
 ### 7.14 Como usar skills
@@ -440,108 +581,122 @@ openspec sdd fgap done FGAP-001 --feature FEAT-008 --files src/pages/prontuario.
 Listar bundles:
 
 ```bash
-openspec sdd skills bundles
+opensdd sdd skills bundles
 ```
 
 Pedir sugestão:
 
 ```bash
-openspec sdd skills suggest --phase plan --domains backend,api
+opensdd sdd skills suggest --phase plan --domains backend,api
 ```
 
 Sincronizar:
 
 ```bash
-openspec sdd skills sync --all
+opensdd sdd skills sync --all
 ```
 
 Observacao:
-- no `openspec sdd init`, a sincronizacao ja roda automaticamente para ferramentas detectadas;
+- no `opensdd sdd init`, a sincronizacao ja roda automaticamente para ferramentas detectadas;
 - use `skills sync` quando instalar uma nova IDE/agente depois.
+- para fontes consolidadas, as skills principais sao:
+  - `source-intake-sdd`
+  - `business-extractor-sdd`
+  - `frontend-extractor-sdd`
+  - `planning-normalizer-sdd`
 
 ## 8. Tabela de comandos e o que cada um faz
 
 | Comando | Para que serve |
 | --- | --- |
-| `openspec init` | Inicializa a base do OpenSpec |
-| `openspec sdd init --frontend` | Inicializa a memória SDD e carrega skills curadas |
-| `openspec sdd init-context` | Inspeciona projeto existente e completa contexto inicial |
-| `openspec sdd check --render` | Valida e renderiza |
-| `openspec sdd insight "<texto>"` | Cria um insight |
-| `openspec sdd debate INS-###` | Abre debate |
-| `openspec sdd decide DEB-### --outcome radar` | Aprova debate |
-| `openspec sdd decide DEB-### --outcome discard` | Reprova debate |
-| `openspec sdd breakdown RAD-### --mode graph` | Planeja um RAD em FEATs |
-| `openspec sdd start FEAT-###` | Inicia execução |
-| `openspec sdd start "texto livre"` | Cria FEAT direta e já inicia |
-| `openspec sdd next` | Diz o que começar agora |
-| `openspec sdd context FEAT-###` | Gera contexto da FEAT |
-| `openspec sdd onboard system` | Gera onboarding global |
-| `openspec archive <change-name>` | Arquiva a mudança técnica |
-| `openspec sdd finalize --ref FEAT-###` | Consolida memória e conclui FEAT |
-| `openspec sdd fgap add ...` | Registra gap de frontend |
-| `openspec sdd fgap done ...` | Marca gap resolvido |
-| `openspec sdd skills bundles` | Lista bundles |
-| `openspec sdd skills suggest ...` | Sugere skills |
-| `openspec sdd skills sync --all` | Sincroniza skills curadas |
+| `opensdd init` | Inicializa a base do OpenSDD |
+| `opensdd sdd init --frontend` | Inicializa a memória SDD e carrega skills curadas |
+| `opensdd sdd init-context` | Inspeciona projeto existente e completa contexto inicial |
+| `opensdd sdd check --render` | Valida e renderiza |
+| `opensdd sdd insight "<texto>"` | Cria um insight |
+| `opensdd sdd debate INS-###` | Abre debate |
+| `opensdd sdd decide DEB-### --outcome radar` | Aprova debate |
+| `opensdd sdd decide DEB-### --outcome discard` | Reprova debate |
+| `opensdd sdd breakdown RAD-### --mode graph` | Planeja um RAD em FEATs |
+| `opensdd sdd start FEAT-###` | Inicia execução |
+| `opensdd sdd start "texto livre"` | Cria FEAT direta e já inicia |
+| `opensdd sdd next` | Diz o que começar agora |
+| `opensdd sdd context FEAT-###` | Gera contexto da FEAT |
+| `opensdd sdd onboard system` | Gera onboarding global |
+| `opensdd archive <change-name>` | Arquiva a mudança técnica |
+| `opensdd sdd finalize --ref FEAT-###` | Consolida memória e conclui FEAT |
+| `opensdd sdd fgap add ...` | Registra gap de frontend |
+| `opensdd sdd fgap done ...` | Marca gap resolvido |
+| `opensdd sdd skills bundles` | Lista bundles |
+| `opensdd sdd skills suggest ...` | Sugere skills |
+| `opensdd sdd skills sync --all` | Sincroniza skills curadas |
+
+## 8.1 Fluxo rapido para PRD e documentos consolidados
+
+1. Copie o material para `.sdd/deposito/`.
+2. Indexe e classifique as fontes com `source-intake-sdd`.
+3. Extraia negocio com `business-extractor-sdd`.
+4. Extraia frontend com `frontend-extractor-sdd`.
+5. Normalize em contexto, `RADs` e `FEATs` com `planning-normalizer-sdd`.
+6. So use `insight/debate` para excecoes e ambiguidades.
 
 ## 9. Exemplo completo: como a Marina usaria
 
 ### 9.1 Marina instala e cria a base
 
 ```bash
-openspec init
-openspec sdd init --frontend
-openspec sdd init-context
-openspec sdd check --render
-openspec sdd onboard system
+opensdd init --tools none
+opensdd sdd init --frontend
+opensdd sdd init-context
+opensdd sdd check --render
+opensdd sdd onboard system
 ```
 
 ### 9.2 Marina despeja ideias
 
 ```bash
-openspec sdd insight "Clientes precisam agendar banho online"
-openspec sdd insight "Veterinario precisa registrar prontuario digital"
-openspec sdd insight "Quero programa de fidelidade"
+opensdd sdd insight "Clientes precisam agendar banho online"
+opensdd sdd insight "Veterinario precisa registrar prontuario digital"
+opensdd sdd insight "Quero programa de fidelidade"
 ```
 
 ### 9.3 Marina debate e aprova
 
 ```bash
-openspec sdd debate INS-001
-openspec sdd decide DEB-001 --outcome radar --rationale "Dor principal"
+opensdd sdd debate INS-001
+opensdd sdd decide DEB-001 --outcome radar --rationale "Dor principal"
 ```
 
 ### 9.4 Marina quebra em trabalho executável
 
 ```bash
-openspec sdd breakdown RAD-001 --mode graph --incremental --titles "API de agendamento,Calendario por loja,Tela de agendamento"
+opensdd sdd breakdown RAD-001 --mode graph --incremental --titles "API de agendamento,Calendario por loja,Tela de agendamento"
 ```
 
 ### 9.5 Marina inicia execução
 
 ```bash
-openspec sdd next
-openspec sdd start FEAT-001
-openspec sdd context FEAT-001
+opensdd sdd next
+opensdd sdd start FEAT-001
+opensdd sdd context FEAT-001
 ```
 
 ### 9.6 Marina aparece com insight no meio do caminho
 
 ```bash
-openspec sdd insight "Cada loja tem catalogo diferente de servicos"
-openspec sdd debate INS-009
-openspec sdd decide DEB-009 --outcome radar --rationale "Impacta agendamento"
-openspec sdd breakdown RAD-006 --mode graph --incremental --titles "Catalogo de servicos por loja"
+opensdd sdd insight "Cada loja tem catalogo diferente de servicos"
+opensdd sdd debate INS-009
+opensdd sdd decide DEB-009 --outcome radar --rationale "Impacta agendamento"
+opensdd sdd breakdown RAD-006 --mode graph --incremental --titles "Catalogo de servicos por loja"
 ```
 
 ### 9.7 Marina arquiva e consolida
 
 ```bash
-openspec archive <change-name>
-openspec sdd finalize --ref FEAT-001
-openspec sdd check --render
-openspec sdd onboard system
+opensdd archive <change-name>
+opensdd sdd finalize --ref FEAT-001
+opensdd sdd check --render
+opensdd sdd onboard system
 ```
 
 ## 10. Como conversar com o agente em português
@@ -550,7 +705,7 @@ Use algo assim no começo da sessão:
 
 ```text
 Responda em português do Brasil.
-Use o fluxo do OpenSpec SDD.
+Use o fluxo do OpenSDD.
 Antes de executar, me diga se estou em insight, debate, radar, breakdown, feat ou finalize.
 Se a tarefa impactar a arquitetura, stack, frontend ou onboarding, atualize a documentação.
 ```
@@ -571,7 +726,7 @@ Se a implementação mudou algo importante e isso não entrou em:
 - `README.md`
 - `AGENTS.md`
 - `AGENT.md`
-- `.sdd/agente.md`
+- `.sdd/AGENT.md`
 - `.sdd/core/*.md`
 - `.sdd/state/*.yaml`
 

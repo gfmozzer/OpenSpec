@@ -69,7 +69,7 @@ ${commandCases}
     }
 }
 
-Register-ArgumentCompleter -CommandName openspec -ScriptBlock $openspecCompleter
+Register-ArgumentCompleter -CommandName opensdd -ScriptBlock $openspecCompleter
 `;
   }
 

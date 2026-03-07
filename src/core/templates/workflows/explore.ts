@@ -288,7 +288,7 @@ But this summary is optional. Sometimes the thinking IS the value.
 - **Do explore the codebase** - Ground discussions in reality
 - **Do question assumptions** - Including the user's and your own`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: 'Requires opensdd CLI.',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }

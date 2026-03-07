@@ -12,7 +12,7 @@ export function getOnboardSkillTemplate(): SkillTemplate {
     description: 'Guided onboarding for OpenSpec - walk through a complete workflow cycle with narration and real codebase work.',
     instructions: getOnboardInstructions(),
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: 'Requires opensdd CLI.',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -28,9 +28,9 @@ Before starting, check if the OpenSpec CLI is installed:
 
 \`\`\`bash
 # Unix/macOS
-openspec --version 2>&1 || echo "CLI_NOT_INSTALLED"
+opensdd --version 2>&1 || echo "CLI_NOT_INSTALLED"
 # Windows (PowerShell)
-# if (Get-Command openspec -ErrorAction SilentlyContinue) { openspec --version } else { echo "CLI_NOT_INSTALLED" }
+# if (Get-Command opensdd -ErrorAction SilentlyContinue) { opensdd --version } else { echo "CLI_NOT_INSTALLED" }
 \`\`\`
 
 **If CLI not installed:**
@@ -183,7 +183,7 @@ Let me create one for our task.
 
 **DO:** Create the change with a derived kebab-case name:
 \`\`\`bash
-openspec new change "<derived-name>"
+opensdd new change "<derived-name>"
 \`\`\`
 
 **SHOW:**
@@ -252,7 +252,7 @@ Does this capture the intent? I can adjust before we save it.
 
 After approval, save the proposal:
 \`\`\`bash
-openspec instructions proposal --change "<name>" --json
+opensdd instructions proposal --change "<name>" --json
 \`\`\`
 Then write the content to \`openspec/changes/<name>/proposal.md\`.
 

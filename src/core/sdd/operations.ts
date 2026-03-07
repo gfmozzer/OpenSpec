@@ -2,6 +2,7 @@ import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import { createChange } from '../../utils/change-utils.js';
 import { AI_TOOLS } from '../config.js';
+import { CLI_NAME } from '../branding.js';
 import { suggestSkills } from './skills.js';
 import {
   allocateEntityId,
@@ -25,6 +26,7 @@ import {
   type SddPaths,
   type SddRuntimeConfig,
 } from './state.js';
+import { BUILT_IN_SDD_SKILLS } from './default-skills.js';
 import type {
   BacklogItem,
   DiscoveryRecord,
@@ -58,7 +60,7 @@ function slugify(value: string): string {
 
 function ensureMemoryInitialized(paths: SddPaths): Promise<void> {
   return fs.access(paths.memoryRoot).catch(() => {
-    throw new Error(`Diretorio ${paths.memoryRoot} nao encontrado. Execute "openspec sdd init".`);
+    throw new Error(`Diretorio ${paths.memoryRoot} nao encontrado. Execute "${CLI_NAME} sdd init".`);
   });
 }
 
@@ -317,12 +319,12 @@ function buildActivePlanDoc(feature: BacklogItem, recommendedBundles: string[]):
 function buildActiveTasksDoc(feature: BacklogItem): string {
   return `# Tasks ${feature.id}
 
-1. Entender contexto com \`openspec sdd context ${feature.id}\`.
+1. Entender contexto com \`${CLI_NAME} sdd context ${feature.id}\`.
 2. Confirmar plano e tarefas técnicas.
 3. Implementar com rastreabilidade no changelog.
 4. Atualizar, se houve impacto, a documentação operacional e canônica:
    - \`README.md\`
-   - \`.sdd/agente.md\`
+   - \`.sdd/AGENT.md\`
    - \`AGENTS.md\`
    - \`AGENT.md\`
    - \`.sdd/core/arquitetura.md\`
@@ -1435,7 +1437,7 @@ export class SddContextCommand {
         : '';
       const readOrder = [
         'README.md',
-        '.sdd/agente.md',
+        '.sdd/AGENT.md',
         '.sdd/core/index.md',
         '.sdd/core/arquitetura.md',
         '.sdd/core/servicos.md',
@@ -1503,7 +1505,7 @@ export class SddContextCommand {
         related_debates: snapshot.discoveryIndex.records
           .filter((record) => record.type === 'DEB' && record.related_ids.includes(ref))
           .map((record) => record.id),
-        read_order: ['README.md', '.sdd/agente.md', '.sdd/core/index.md', '.sdd/pendencias/backlog-graph.md'],
+        read_order: ['README.md', '.sdd/AGENT.md', '.sdd/core/index.md', '.sdd/pendencias/backlog-graph.md'],
         core_docs: coreDocs,
       };
     }
@@ -1519,7 +1521,7 @@ export class SddContextCommand {
         source_feature: gap.origin_feature || '',
         resolved_by_feature: gap.resolved_by_feature || '',
         routes: gap.route_targets,
-        read_order: ['README.md', '.sdd/agente.md', '.sdd/core/frontend-map.md', '.sdd/pendencias/frontend-gaps.md'],
+        read_order: ['README.md', '.sdd/AGENT.md', '.sdd/core/frontend-map.md', '.sdd/pendencias/frontend-gaps.md'],
         core_docs: coreDocs,
       };
     }
@@ -1532,7 +1534,7 @@ export class SddContextCommand {
       target_type: type,
       summary: `${debt.title} [${debt.status}]`,
       related_refs: debt.related_refs,
-      read_order: ['README.md', '.sdd/agente.md', '.sdd/pendencias/tech-debt.md'],
+      read_order: ['README.md', '.sdd/AGENT.md', '.sdd/pendencias/tech-debt.md'],
       core_docs: coreDocs,
     };
   }
@@ -1551,7 +1553,7 @@ export class SddOnboardCommand {
 
     const baseReadOrder = [
       'README.md',
-      '.sdd/agente.md',
+      '.sdd/AGENT.md',
       '.sdd/core/index.md',
       '.sdd/core/arquitetura.md',
       '.sdd/core/servicos.md',
@@ -1639,9 +1641,9 @@ export class SddOnboardCommand {
           bundles: bundlesForSkills(snapshot.skillCatalog, featSkills),
         },
         proximos_passos: [
-          `openspec sdd start ${normalized}`,
-          `openspec sdd context ${normalized}`,
-          `openspec sdd finalize --ref ${normalized}`,
+          `${CLI_NAME} sdd start ${normalized}`,
+          `${CLI_NAME} sdd context ${normalized}`,
+          `${CLI_NAME} sdd finalize --ref ${normalized}`,
         ],
       };
     }
@@ -1879,6 +1881,9 @@ export class SddNextCommand {
 }
 
 function buildCuratedSkillContent(entry: SkillCatalogEntry): string {
+  if (BUILT_IN_SDD_SKILLS[entry.id]) {
+    return BUILT_IN_SDD_SKILLS[entry.id];
+  }
   const domainLine = entry.domains.length > 0 ? entry.domains.join(', ') : 'geral';
   const phaseLine = entry.phases.length > 0 ? entry.phases.join(', ') : 'all';
   return `---
@@ -1961,7 +1966,7 @@ export class SddFrontendGapCommand {
 
     const { config, paths } = await getRuntime(projectRoot);
     if (!config.frontend.enabled) {
-      throw new Error('Modulo de frontend desativado. Execute "openspec sdd init --frontend".');
+      throw new Error(`Modulo de frontend desativado. Execute "${CLI_NAME} sdd init --frontend".`);
     }
 
     const snapshot = await loadStateSnapshot(paths, config);
@@ -2020,7 +2025,7 @@ export class SddFrontendGapCommand {
   ) {
     const { config, paths } = await getRuntime(projectRoot);
     if (!config.frontend.enabled) {
-      throw new Error('Modulo de frontend desativado. Execute "openspec sdd init --frontend".');
+      throw new Error(`Modulo de frontend desativado. Execute "${CLI_NAME} sdd init --frontend".`);
     }
 
     const snapshot = await loadStateSnapshot(paths, config);

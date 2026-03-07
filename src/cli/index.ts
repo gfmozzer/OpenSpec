@@ -4,6 +4,7 @@ import ora from 'ora';
 import path from 'path';
 import { promises as fs } from 'fs';
 import { AI_TOOLS } from '../core/config.js';
+import { CLI_NAME } from '../core/branding.js';
 import { UpdateCommand } from '../core/update.js';
 import { ListCommand } from '../core/list.js';
 import { ArchiveCommand } from '../core/archive.js';
@@ -47,18 +48,17 @@ function getCommandPath(command: Command): string {
 
   while (current) {
     const name = current.name();
-    // Skip the root 'openspec' command
-    if (name && name !== 'openspec') {
+    if (name && name !== CLI_NAME) {
       names.unshift(name);
     }
     current = current.parent;
   }
 
-  return names.join(':') || 'openspec';
+  return names.join(':') || CLI_NAME;
 }
 
 program
-  .name('openspec')
+  .name(CLI_NAME)
   .description('AI-native system for spec-driven development')
   .version(version);
 
@@ -140,7 +140,7 @@ program
   .option('--no-interactive', 'Disable interactive prompts')
   .action(async (options?: { tool?: string; noInteractive?: boolean }) => {
     try {
-      console.log('Note: "openspec experimental" is deprecated. Use "openspec init" instead.');
+      console.log(`Note: "${CLI_NAME} experimental" is deprecated. Use "${CLI_NAME} init" instead.`);
       const { InitCommand } = await import('../core/init.js');
       const initCommand = new InitCommand({
         tools: options?.tool,
@@ -211,7 +211,7 @@ const changeCmd = program
 
 // Deprecation notice for noun-based commands
 changeCmd.hook('preAction', () => {
-  console.error('Warning: The "openspec change ..." commands are deprecated. Prefer verb-first commands (e.g., "openspec list", "openspec validate --changes").');
+  console.error(`Warning: The "${CLI_NAME} change ..." commands are deprecated. Prefer verb-first commands (e.g., "${CLI_NAME} list", "${CLI_NAME} validate --changes").`);
 });
 
 changeCmd
@@ -238,7 +238,7 @@ changeCmd
   .option('--long', 'Show id and title with counts')
   .action(async (options?: { json?: boolean; long?: boolean }) => {
     try {
-      console.error('Warning: "openspec change list" is deprecated. Use "openspec list".');
+      console.error(`Warning: "${CLI_NAME} change list" is deprecated. Use "${CLI_NAME} list".`);
       const changeCommand = new ChangeCommand();
       await changeCommand.list(options);
     } catch (error) {

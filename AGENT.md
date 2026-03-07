@@ -17,7 +17,7 @@ This file mirrors `AGENTS.md` for tools that still require the singular filename
 - Package manager: `pnpm`
 - Install deps: `pnpm install`
 - Build output goes to `dist/`.
-- Main CLI entrypoint: `bin/openspec.js`
+- Main CLI entrypoint: `bin/opensdd.js`
 
 ## Build, Test, Lint Commands
 
@@ -41,44 +41,41 @@ This file mirrors `AGENTS.md` for tools that still require the singular filename
 ## SDD Workflow (What agents should use)
 
 <!-- SDD:ROOT-AGENTS:START -->
-
 ## SDD Operational Contract
 
 Agents working in this repository must treat documentation sync as part of feature completion.
 
 Required execution order:
-
-1. Run `openspec sdd onboard system` before broad work.
-2. Run `openspec sdd start FEAT-###` before implementation.
-3. Use `openspec sdd context FEAT-###` before coding.
+1. Run `opensdd sdd onboard system` before broad work.
+2. Run `opensdd sdd start FEAT-###` before implementation.
+3. Use `opensdd sdd context FEAT-###` before coding.
 4. Before archive/finalize, update the documentation affected by the feature:
    - `README.md`
    - `.sdd/AGENT.md`
    - `.sdd/core/*.md`
    - `AGENTS.md`
    - `AGENT.md`
-5. Run `openspec sdd finalize --ref FEAT-###` to consolidate memory.
+5. Run `opensdd sdd finalize --ref FEAT-###` to consolidate memory.
 
 Canonical state lives in `.sdd/state/*.yaml`. Markdown files are operational views or guides derived from that state.
-
 <!-- SDD:ROOT-AGENTS:END -->
 
 For planning/execution memory and handoff, prefer these commands:
 
-1. `openspec sdd init --frontend`
-2. `openspec sdd check --render`
-3. `openspec sdd onboard system`
-4. `openspec sdd next`
-5. `openspec sdd start FEAT-###`
-6. `openspec sdd context FEAT-###`
-7. `openspec sdd finalize --ref FEAT-###`
+1. `opensdd sdd init --frontend`
+2. `opensdd sdd check --render`
+3. `opensdd sdd onboard system`
+4. `opensdd sdd next`
+5. `opensdd sdd start FEAT-###`
+6. `opensdd sdd context FEAT-###`
+7. `opensdd sdd finalize --ref FEAT-###`
 
 Discovery pipeline for ideas:
 
-1. `openspec sdd insight "..."`
-2. `openspec sdd debate INS-###`
-3. `openspec sdd decide DEB-### --outcome radar|discard`
-4. `openspec sdd breakdown RAD-### --mode graph --incremental`
+1. `opensdd sdd insight "..."`
+2. `opensdd sdd debate INS-###`
+3. `opensdd sdd decide DEB-### --outcome radar|discard`
+4. `opensdd sdd breakdown RAD-### --mode graph --incremental`
 
 ## Coding Guidelines
 

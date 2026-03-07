@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { CLI_NAME } from '../branding.js';
 import {
   ID_PATTERNS,
   type BacklogItem,
@@ -9,7 +10,7 @@ import {
 } from './types.js';
 import { loadProjectSddConfig, loadStateSnapshot, resolveSddPaths } from './state.js';
 import { renderViews } from './views.js';
-import { validateSddGuideDocs } from './docs-sync.js';
+import { syncSddGuideDocs, validateSddGuideDocs } from './docs-sync.js';
 
 export interface SddCheckOptions {
   render?: boolean;
@@ -254,7 +255,7 @@ export class SddCheckCommand {
     const warnings: string[] = [];
 
     if (!existsSync(paths.memoryRoot)) {
-      throw new Error(`Diretorio de memoria SDD nao encontrado em ${paths.memoryRoot}. Execute "openspec sdd init".`);
+      throw new Error(`Diretorio de memoria SDD nao encontrado em ${paths.memoryRoot}. Execute "${CLI_NAME} sdd init".`);
     }
 
     const requiredFiles = [
@@ -264,6 +265,7 @@ export class SddCheckCommand {
       paths.stateFiles.finalizeQueue,
       paths.stateFiles.skillCatalog,
       paths.stateFiles.unblockEvents,
+      paths.stateFiles.sourceIndex,
     ];
     for (const filePath of requiredFiles) {
       if (!existsSync(filePath)) {
@@ -395,6 +397,7 @@ export class SddCheckCommand {
     const shouldRender = options.render ?? config.views.autoRender;
     if (shouldRender && errors.length === 0) {
       await renderViews(paths, config, snapshot);
+      await syncSddGuideDocs(projectRoot, paths);
     }
     const coreFiles = [
       path.join(paths.coreDir, 'index.md'),

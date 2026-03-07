@@ -37,7 +37,7 @@ This skill allows you to batch-archive changes, handling spec conflicts intellig
 
    For each selected change, collect:
 
-   a. **Artifact status** - Run \`openspec status --change "<name>" --json\`
+   a. **Artifact status** - Run \`opensdd status --change "<name>" --json\`
       - Parse \`schemaName\` and \`artifacts\` list
       - Note which artifacts are \`done\` vs other states
 
@@ -246,7 +246,7 @@ No active changes found. Create a new change to get started.
 - Archive directory target uses current date: YYYY-MM-DD-<name>
 - If archive target exists, fail that change but continue with others`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: 'Requires opensdd CLI.',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -284,7 +284,7 @@ This skill allows you to batch-archive changes, handling spec conflicts intellig
 
    For each selected change, collect:
 
-   a. **Artifact status** - Run \`openspec status --change "<name>" --json\`
+   a. **Artifact status** - Run \`opensdd status --change "<name>" --json\`
       - Parse \`schemaName\` and \`artifacts\` list
       - Note which artifacts are \`done\` vs other states
 

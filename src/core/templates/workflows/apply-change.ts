@@ -27,7 +27,7 @@ export function getApplyChangeSkillTemplate(): SkillTemplate {
 
 2. **Check status to understand the schema**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   opensdd status --change "<name>" --json
    \`\`\`
    Parse the JSON to understand:
    - \`schemaName\`: The workflow being used (e.g., "spec-driven")
@@ -36,7 +36,7 @@ export function getApplyChangeSkillTemplate(): SkillTemplate {
 3. **Get apply instructions**
 
    \`\`\`bash
-   openspec instructions apply --change "<name>" --json
+   opensdd instructions apply --change "<name>" --json
    \`\`\`
 
    This returns:
@@ -156,7 +156,7 @@ This skill supports the "actions on a change" model:
 - **Can be invoked anytime**: Before all artifacts are done (if tasks exist), after partial implementation, interleaved with other actions
 - **Allows artifact updates**: If implementation reveals design issues, suggest updating artifacts - not phase-locked, work fluidly`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: 'Requires opensdd CLI.',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -184,7 +184,7 @@ export function getOpsxApplyCommandTemplate(): CommandTemplate {
 
 2. **Check status to understand the schema**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   opensdd status --change "<name>" --json
    \`\`\`
    Parse the JSON to understand:
    - \`schemaName\`: The workflow being used (e.g., "spec-driven")
@@ -193,7 +193,7 @@ export function getOpsxApplyCommandTemplate(): CommandTemplate {
 3. **Get apply instructions**
 
    \`\`\`bash
-   openspec instructions apply --change "<name>" --json
+   opensdd instructions apply --change "<name>" --json
    \`\`\`
 
    This returns:

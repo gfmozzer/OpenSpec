@@ -39,6 +39,6 @@ sdd:
   enabled: true
   memoryDir: .sdd
   frontend:
-    enabled: false
+    enabled: true
   views:
     autoRender: true

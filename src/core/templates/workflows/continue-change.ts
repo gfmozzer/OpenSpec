@@ -32,7 +32,7 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
 
 2. **Check current status**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   opensdd status --change "<name>" --json
    \`\`\`
    Parse the JSON to understand current state. The response includes:
    - \`schemaName\`: The workflow schema being used (e.g., "spec-driven")
@@ -55,7 +55,7 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
    - Pick the FIRST artifact with \`status: "ready"\` from the status output
    - Get its instructions:
      \`\`\`bash
-     openspec instructions <artifact-id> --change "<name>" --json
+     opensdd instructions <artifact-id> --change "<name>" --json
      \`\`\`
    - Parse the JSON. The key fields are:
      - \`context\`: Project background (constraints for you - do NOT include in output)
@@ -80,7 +80,7 @@ export function getContinueChangeSkillTemplate(): SkillTemplate {
 
 4. **After creating an artifact, show progress**
    \`\`\`bash
-   openspec status --change "<name>"
+   opensdd status --change "<name>"
    \`\`\`
 
 **Output**
@@ -118,7 +118,7 @@ For other schemas, follow the \`instruction\` field from the CLI output.
   - Do NOT copy \`<context>\`, \`<rules>\`, \`<project_context>\` blocks into the artifact
   - These guide what you write, but should never appear in the output`,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: 'Requires opensdd CLI.',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }
@@ -151,7 +151,7 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
 
 2. **Check current status**
    \`\`\`bash
-   openspec status --change "<name>" --json
+   opensdd status --change "<name>" --json
    \`\`\`
    Parse the JSON to understand current state. The response includes:
    - \`schemaName\`: The workflow schema being used (e.g., "spec-driven")
@@ -174,7 +174,7 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
    - Pick the FIRST artifact with \`status: "ready"\` from the status output
    - Get its instructions:
      \`\`\`bash
-     openspec instructions <artifact-id> --change "<name>" --json
+     opensdd instructions <artifact-id> --change "<name>" --json
      \`\`\`
    - Parse the JSON. The key fields are:
      - \`context\`: Project background (constraints for you - do NOT include in output)
@@ -199,7 +199,7 @@ export function getOpsxContinueCommandTemplate(): CommandTemplate {
 
 4. **After creating an artifact, show progress**
    \`\`\`bash
-   openspec status --change "<name>"
+   opensdd status --change "<name>"
    \`\`\`
 
 **Output**

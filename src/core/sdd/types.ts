@@ -27,6 +27,26 @@ export const ExecutionKindSchema = z.enum([
   'documentation',
 ]);
 export const PlanningModeSchema = z.enum(['local_plan', 'direct_tasks']);
+export const SourceDocumentTypeSchema = z.enum([
+  'prd',
+  'rfc',
+  'briefing',
+  'historia',
+  'wireframe',
+  'html_mock',
+  'referencia_visual',
+  'entrevista',
+  'anexo',
+  'legado',
+  'outro',
+]);
+export const SourceDocumentStatusSchema = z.enum([
+  'RAW',
+  'INDEXED',
+  'NORMALIZED',
+  'PLANNED',
+  'ARCHIVED',
+]);
 
 export const DiscoveryTypeSchema = z.enum(['INS', 'DEB', 'RAD']);
 export const DiscoveryStatusSchema = z.enum([
@@ -174,6 +194,20 @@ export const SkillBundleSchema = z.object({
   skill_ids: StringArraySchema,
 });
 
+export const SourceDocumentRecordSchema = z.object({
+  id: z.string().min(1),
+  type: SourceDocumentTypeSchema,
+  path: z.string().min(1),
+  title: z.string().min(1),
+  status: SourceDocumentStatusSchema.default('RAW'),
+  summary: NullableStringSchema,
+  imported_at: NullableStringSchema,
+  updated_at: NullableStringSchema,
+  used_by: StringArraySchema,
+  notes: StringArraySchema,
+  consolidation_targets: StringArraySchema,
+});
+
 export const ArchitectureNodeSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -290,6 +324,11 @@ export const SkillCatalogStateSchema = z.object({
   bundles: z.array(SkillBundleSchema).default([]),
 });
 
+export const SourceIndexStateSchema = z.object({
+  version: z.literal(1),
+  sources: z.array(SourceDocumentRecordSchema).default([]),
+});
+
 export const FrontendGapsStateSchema = z.object({
   version: z.literal(1),
   items: z.array(FrontendGapRecordSchema).default([]),
@@ -341,6 +380,7 @@ export type FinalizeQueueItem = z.infer<typeof FinalizeQueueItemSchema>;
 export type UnblockEvent = z.infer<typeof UnblockEventSchema>;
 export type SkillCatalogEntry = z.infer<typeof SkillCatalogEntrySchema>;
 export type SkillBundle = z.infer<typeof SkillBundleSchema>;
+export type SourceDocumentRecord = z.infer<typeof SourceDocumentRecordSchema>;
 export type ArchitectureNode = z.infer<typeof ArchitectureNodeSchema>;
 export type ServiceRecord = z.infer<typeof ServiceRecordSchema>;
 export type TechStackRecord = z.infer<typeof TechStackRecordSchema>;
@@ -354,6 +394,7 @@ export type TechDebtState = z.infer<typeof TechDebtStateSchema>;
 export type FinalizeQueueState = z.infer<typeof FinalizeQueueStateSchema>;
 export type UnblockEventsState = z.infer<typeof UnblockEventsStateSchema>;
 export type SkillCatalogState = z.infer<typeof SkillCatalogStateSchema>;
+export type SourceIndexState = z.infer<typeof SourceIndexStateSchema>;
 export type FrontendGapsState = z.infer<typeof FrontendGapsStateSchema>;
 export type FrontendMapState = z.infer<typeof FrontendMapStateSchema>;
 export type ArchitectureState = z.infer<typeof ArchitectureStateSchema>;

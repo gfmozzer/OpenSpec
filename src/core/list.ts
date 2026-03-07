@@ -4,6 +4,7 @@ import { getTaskProgressForChange, formatTaskStatus } from '../utils/task-progre
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { MarkdownParser } from './parsers/markdown-parser.js';
+import { CLI_NAME } from './branding.js';
 
 interface ChangeInfo {
   name: string;
@@ -85,7 +86,7 @@ export class ListCommand {
       try {
         await fs.access(changesDir);
       } catch {
-        throw new Error("No OpenSpec changes directory found. Run 'openspec init' first.");
+        throw new Error(`No OpenSpec changes directory found. Run '${CLI_NAME} init' first.`);
       }
 
       // Get all directories in changes (excluding archive)

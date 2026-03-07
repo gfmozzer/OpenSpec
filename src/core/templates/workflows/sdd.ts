@@ -55,7 +55,7 @@ Se houver divergencia entre codigo e documentacao, proponha ajuste nos documento
 - **Evitar suposicoes:** validar com o usuario quando houver incerteza de direcao arquitetural.
     `,
     license: 'MIT',
-    compatibility: 'Requires openspec CLI.',
+    compatibility: 'Requires opensdd CLI.',
     metadata: { author: 'openspec', version: '1.0' },
   };
 }

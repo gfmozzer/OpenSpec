@@ -4,6 +4,7 @@ import { COMMAND_REGISTRY } from '../core/completions/command-registry.js';
 import { detectShell, SupportedShell } from '../utils/shell-detection.js';
 import { CompletionProvider } from '../core/completions/completion-provider.js';
 import { getArchivedChangeIds } from '../utils/item-discovery.js';
+import { CLI_NAME } from '../core/branding.js';
 
 interface GenerateOptions {
   shell?: string;
@@ -58,7 +59,7 @@ export class CompletionCommand {
 
       // No shell specified and cannot auto-detect
       console.error('Error: Could not auto-detect shell. Please specify shell explicitly.');
-      console.error(`Usage: openspec completion ${operationName} [shell]`);
+      console.error(`Usage: ${CLI_NAME} completion ${operationName} [shell]`);
       console.error(`Currently supported: ${CompletionFactory.getSupportedShells().join(', ')}`);
       process.exitCode = 1;
       return null;

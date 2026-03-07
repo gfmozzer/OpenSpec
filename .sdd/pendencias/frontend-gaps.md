@@ -1,9 +1,7 @@
-# Filas de Gaps de Frontend
+# Gaps de Frontend
 
-<!-- Lista de interfaces não implementadas ou endpoints expostos sem tela correspondente -->
+Documento gerado a partir de `.sdd/state/frontend-gaps.yaml`.
 
-## Gaps Pendentes
-- [ ] Construir Rota de Configurações do Usuário (Precisa bater em `PATCH /api/users/settings`)
-
-## Gaps Resolvidos (Mover para frontend-map.md e apagar daqui!)
-<!-- Deixe limpo sempre que possível -->
+| ID | Status | Titulo | Feature de origem | Resolvido por |
+| --- | --- | --- | --- | --- |
+| - | - | Sem gaps | - | - |

@@ -12,6 +12,7 @@ import {
   FrontendGapsStateSchema,
   FrontendMapStateSchema,
   RepoMapStateSchema,
+  SourceIndexStateSchema,
   SkillCatalogStateSchema,
   ServiceCatalogStateSchema,
   TechStackStateSchema,
@@ -25,17 +26,26 @@ import {
   type FrontendMapState,
   type IntegrationContractsState,
   type RepoMapState,
+  type SourceIndexState,
   type SkillCatalogState,
   type ServiceCatalogState,
   type TechStackState,
   type TechDebtState,
   type UnblockEventsState,
 } from './types.js';
+import { CLI_NAME } from '../branding.js';
 import {
   DEFAULT_CURATED_SKILL_CATALOG,
-  REPO_CONTEXT_BOOTSTRAP_SKILL_MD,
+  BUILT_IN_SDD_SKILLS,
   buildCuratedBundlesMarkdown,
 } from './default-skills.js';
+import {
+  buildSddInternalReadme,
+  TEMPLATE_1_SPEC_MD,
+  TEMPLATE_2_PLAN_MD,
+  TEMPLATE_3_TASKS_MD,
+  TEMPLATE_4_CHANGELOG_MD,
+} from './default-bootstrap-files.js';
 
 export interface SddRuntimeConfig {
   enabled: boolean;
@@ -58,6 +68,7 @@ export interface SddPaths {
   stateDir: string;
   skillsDir: string;
   templatesDir: string;
+  depositoDir: string;
   stateFiles: {
     discoveryIndex: string;
     backlog: string;
@@ -73,6 +84,7 @@ export interface SddPaths {
     integrationContracts: string;
     frontendDecisions: string;
     repoMap: string;
+    sourceIndex: string;
   };
 }
 
@@ -91,6 +103,7 @@ export interface SddStateSnapshot {
   integrationContracts: IntegrationContractsState;
   frontendDecisions?: FrontendDecisionsState;
   repoMap: RepoMapState;
+  sourceIndex: SourceIndexState;
 }
 
 const DEFAULT_SDD_CONFIG: SddRuntimeConfig = {
@@ -223,6 +236,7 @@ export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): 
     stateDir,
     skillsDir: path.join(memoryRoot, 'skills'),
     templatesDir: path.join(memoryRoot, 'templates'),
+    depositoDir: path.join(memoryRoot, 'deposito'),
     stateFiles: {
       discoveryIndex: path.join(stateDir, 'discovery-index.yaml'),
       backlog: path.join(stateDir, 'backlog.yaml'),
@@ -238,6 +252,7 @@ export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): 
       integrationContracts: path.join(stateDir, 'integration-contracts.yaml'),
       frontendDecisions: path.join(stateDir, 'frontend-decisions.yaml'),
       repoMap: path.join(stateDir, 'repo-map.yaml'),
+      sourceIndex: path.join(stateDir, 'source-index.yaml'),
     },
   };
 }
@@ -261,6 +276,17 @@ export async function ensureBaseStructure(paths: SddPaths): Promise<void> {
     ensureDir(path.join(paths.coreDir, 'dados')),
     ensureDir(path.join(paths.coreDir, 'integracoes')),
     ensureDir(path.join(paths.coreDir, 'adrs')),
+    ensureDir(paths.depositoDir),
+    ensureDir(path.join(paths.depositoDir, 'prds')),
+    ensureDir(path.join(paths.depositoDir, 'rfcs')),
+    ensureDir(path.join(paths.depositoDir, 'briefings')),
+    ensureDir(path.join(paths.depositoDir, 'historias')),
+    ensureDir(path.join(paths.depositoDir, 'wireframes')),
+    ensureDir(path.join(paths.depositoDir, 'html-mocks')),
+    ensureDir(path.join(paths.depositoDir, 'referencias-visuais')),
+    ensureDir(path.join(paths.depositoDir, 'entrevistas')),
+    ensureDir(path.join(paths.depositoDir, 'anexos')),
+    ensureDir(path.join(paths.depositoDir, 'legado')),
   ]);
 }
 
@@ -290,15 +316,57 @@ async function ensureCuratedSkillCatalog(filePath: string): Promise<void> {
     return;
   }
 
-  if (parsed.data.skills.length === 0 && parsed.data.bundles.length === 0) {
+  const existing = parsed.data;
+  if (existing.skills.length === 0 && existing.bundles.length === 0) {
     await fs.writeFile(filePath, stringifyYaml(DEFAULT_CURATED_SKILL_CATALOG), 'utf-8');
+    return;
+  }
+
+  const skillById = new Map(existing.skills.map((entry) => [entry.id, entry]));
+  let changed = false;
+  for (const defaultSkill of DEFAULT_CURATED_SKILL_CATALOG.skills) {
+    if (!skillById.has(defaultSkill.id)) {
+      skillById.set(defaultSkill.id, defaultSkill);
+      changed = true;
+    }
+  }
+
+  const bundleById = new Map(existing.bundles.map((entry) => [entry.id, entry]));
+  for (const defaultBundle of DEFAULT_CURATED_SKILL_CATALOG.bundles) {
+    const existingBundle = bundleById.get(defaultBundle.id);
+    if (!existingBundle) {
+      bundleById.set(defaultBundle.id, defaultBundle);
+      changed = true;
+      continue;
+    }
+
+    const mergedSkillIds = Array.from(new Set([...existingBundle.skill_ids, ...defaultBundle.skill_ids]));
+    if (mergedSkillIds.length !== existingBundle.skill_ids.length) {
+      bundleById.set(defaultBundle.id, {
+        ...existingBundle,
+        skill_ids: mergedSkillIds,
+      });
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    await fs.writeFile(
+      filePath,
+      stringifyYaml({
+        version: 1,
+        skills: Array.from(skillById.values()).sort((a, b) => a.id.localeCompare(b.id)),
+        bundles: Array.from(bundleById.values()).sort((a, b) => a.id.localeCompare(b.id)),
+      }),
+      'utf-8'
+    );
   }
 }
 
 export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig): Promise<void> {
   await writeYamlIfMissing(paths.configFile, {
     version: 1,
-    generatedBy: 'openspec sdd init',
+    generatedBy: `${CLI_NAME} sdd init`,
     frontend: { enabled: config.frontend.enabled },
     views: { autoRender: config.views.autoRender },
   });
@@ -318,6 +386,7 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
   await writeYamlIfMissing(paths.stateFiles.techStack, { version: 1, items: [] });
   await writeYamlIfMissing(paths.stateFiles.integrationContracts, { version: 1, contracts: [] });
   await writeYamlIfMissing(paths.stateFiles.repoMap, { version: 1, items: [] });
+  await writeYamlIfMissing(paths.stateFiles.sourceIndex, { version: 1, sources: [] });
 
   if (config.frontend.enabled) {
     await writeYamlIfMissing(paths.stateFiles.frontendGaps, { version: 1, items: [] });
@@ -329,13 +398,24 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
     path.join(paths.coreDir, 'arquitetura.md'),
     '# Arquitetura\n\nDocumento arquitetural de alto nivel do projeto.\n'
   );
+  await writeFileIfMissing(path.join(paths.memoryRoot, 'README.md'), buildSddInternalReadme());
   await writeFileIfMissing(
     path.join(paths.skillsDir, 'bundles', 'curadoria-pt-br.md'),
     buildCuratedBundlesMarkdown()
   );
+  for (const [skillId, content] of Object.entries(BUILT_IN_SDD_SKILLS)) {
+    await writeFileIfMissing(path.join(paths.skillsDir, 'curated', skillId, 'SKILL.md'), content);
+  }
   await writeFileIfMissing(
-    path.join(paths.skillsDir, 'curated', 'repo-context-bootstrap', 'SKILL.md'),
-    REPO_CONTEXT_BOOTSTRAP_SKILL_MD
+    path.join(paths.depositoDir, 'README.md'),
+    `# Deposito de Fontes Brutas\n\nEsta pasta guarda PRDs, RFCs, wireframes, HTMLs, referencias visuais, entrevistas e outros insumos consolidados.\n\nRegra: nada aqui e fonte canonica. O inventario oficial fica em \`.sdd/state/source-index.yaml\`.\n`
+  );
+  await writeFileIfMissing(path.join(paths.templatesDir, 'template-1-spec.md'), TEMPLATE_1_SPEC_MD);
+  await writeFileIfMissing(path.join(paths.templatesDir, 'template-2-plan.md'), TEMPLATE_2_PLAN_MD);
+  await writeFileIfMissing(path.join(paths.templatesDir, 'template-3-tasks.md'), TEMPLATE_3_TASKS_MD);
+  await writeFileIfMissing(
+    path.join(paths.templatesDir, 'template-4-changelog.md'),
+    TEMPLATE_4_CHANGELOG_MD
   );
 }
 
@@ -365,6 +445,7 @@ export async function loadStateSnapshot(
     await readYaml(paths.stateFiles.integrationContracts)
   );
   const repoMap = RepoMapStateSchema.parse(await readYaml(paths.stateFiles.repoMap));
+  const sourceIndex = SourceIndexStateSchema.parse(await readYaml(paths.stateFiles.sourceIndex));
 
   let frontendGaps: FrontendGapsState | undefined;
   let frontendMap: FrontendMapState | undefined;
@@ -392,6 +473,7 @@ export async function loadStateSnapshot(
     integrationContracts,
     frontendDecisions,
     repoMap,
+    sourceIndex,
   };
 }
 
@@ -487,6 +569,13 @@ export async function saveFrontendDecisionsState(
 
 export async function saveRepoMapState(paths: SddPaths, state: RepoMapState): Promise<void> {
   await writeYaml(paths.stateFiles.repoMap, state);
+}
+
+export async function saveSourceIndexState(
+  paths: SddPaths,
+  state: SourceIndexState
+): Promise<void> {
+  await writeYaml(paths.stateFiles.sourceIndex, state);
 }
 
 export async function allocateEntityId(paths: SddPaths, type: SddCounterType): Promise<string> {

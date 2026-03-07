@@ -443,4 +443,36 @@ describe('sdd operations', () => {
     expect(feature.target).toBe(start.featureId);
     expect(Array.isArray(feature.proximos_passos)).toBe(true);
   });
+
+  it('renders source inventory and ships built-in intake skills', async () => {
+    const sourceIndexPath = path.join(testDir, '.sdd', 'state', 'source-index.yaml');
+    const sourceIndex = await readYamlFile<Record<string, any>>(sourceIndexPath);
+    sourceIndex.sources.push({
+      id: 'SRC-001',
+      type: 'prd',
+      path: '.sdd/deposito/prds/produto.md',
+      title: 'PRD inicial',
+      status: 'INDEXED',
+      summary: 'Escopo inicial do produto',
+      imported_at: '2026-03-07T12:00:00.000Z',
+      updated_at: '2026-03-07T12:00:00.000Z',
+      used_by: ['RAD-001'],
+      notes: ['fonte consolidada'],
+      consolidation_targets: ['contexto', 'radar'],
+    });
+    await writeYamlFile(sourceIndexPath, sourceIndex);
+
+    const report = await new SddCheckCommand().execute(testDir, { render: true });
+    expect(report.valid).toBe(true);
+
+    const fontes = await fs.readFile(path.join(testDir, '.sdd', 'core', 'fontes.md'), 'utf-8');
+    expect(fontes).toContain('PRD inicial');
+    expect(fontes).toContain('.sdd/deposito/prds/produto.md');
+
+    const intakeSkill = await fs.readFile(
+      path.join(testDir, '.sdd', 'skills', 'curated', 'source-intake-sdd', 'SKILL.md'),
+      'utf-8'
+    );
+    expect(intakeSkill).toContain('.sdd/deposito/');
+  });
 });

@@ -4,6 +4,7 @@ import { Validator } from '../core/validation/validator.js';
 import { isInteractive, resolveNoInteractive } from '../utils/interactive.js';
 import { getActiveChangeIds, getSpecIds } from '../utils/item-discovery.js';
 import { nearestMatches } from '../utils/match.js';
+import { CLI_NAME } from '../core/branding.js';
 
 type ItemType = 'change' | 'spec';
 
@@ -95,10 +96,10 @@ export class ValidateCommand {
 
   private printNonInteractiveHint(): void {
     console.error('Nothing to validate. Try one of:');
-    console.error('  openspec validate --all');
-    console.error('  openspec validate --changes');
-    console.error('  openspec validate --specs');
-    console.error('  openspec validate <item-name>');
+    console.error(`  ${CLI_NAME} validate --all`);
+    console.error(`  ${CLI_NAME} validate --changes`);
+    console.error(`  ${CLI_NAME} validate --specs`);
+    console.error(`  ${CLI_NAME} validate <item-name>`);
     console.error('Or run in an interactive terminal.');
   }
 
@@ -119,7 +120,7 @@ export class ValidateCommand {
 
     if (!opts.typeOverride && isChange && isSpec) {
       console.error(`Ambiguous item '${itemName}' matches both a change and a spec.`);
-      console.error('Pass --type change|spec, or use: openspec change validate / openspec spec validate');
+      console.error(`Pass --type change|spec, or use: ${CLI_NAME} change validate / ${CLI_NAME} spec validate`);
       process.exitCode = 1;
       return;
     }
@@ -171,7 +172,7 @@ export class ValidateCommand {
     if (type === 'change') {
       bullets.push('- Ensure change has deltas in specs/: use headers ## ADDED/MODIFIED/REMOVED/RENAMED Requirements');
       bullets.push('- Each requirement MUST include at least one #### Scenario: block');
-      bullets.push('- Debug parsed deltas: openspec change show <id> --json --deltas-only');
+      bullets.push(`- Debug parsed deltas: ${CLI_NAME} change show <id> --json --deltas-only`);
     } else {
       bullets.push('- Ensure spec includes ## Purpose and ## Requirements sections');
       bullets.push('- Each requirement MUST include at least one #### Scenario: block');

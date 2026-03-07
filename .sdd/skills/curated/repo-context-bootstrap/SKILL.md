@@ -18,14 +18,14 @@ Mapear e documentar, com base em evidências do repositório:
 
 ## Fluxo obrigatório
 
-1. Execute `openspec sdd init --frontend` se a estrutura SDD ainda não existir.
-2. Execute `openspec sdd init-context --mode merge`.
+1. Execute `opensdd sdd init --frontend` se a estrutura SDD ainda não existir.
+2. Execute `opensdd sdd init-context --mode merge`.
 3. Leia os arquivos gerados:
    - `.sdd/core/spec-tecnologica.md`
    - `.sdd/core/servicos.md`
    - `.sdd/core/arquitetura.md`
    - `.sdd/core/repo-map.md`
-4. Valide com `openspec sdd check --render`.
+4. Valide com `opensdd sdd check --render`.
 5. Registre qualquer dúvida ou baixa confiança como item de revisão em `.sdd/pendencias/tech-debt.md`.
 
 ## Regras de qualidade
