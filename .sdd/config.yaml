@@ -1,0 +1,6 @@
+version: 1
+generatedBy: openspec sdd init
+frontend:
+  enabled: false
+views:
+  autoRender: true
