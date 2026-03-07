@@ -2,6 +2,6 @@
 
 Documento gerado a partir de `.sdd/state/backlog.yaml`.
 
-| ID | Status | Titulo | Origem | Escala | Bloqueado por |
-| --- | --- | --- | --- | --- | --- |
-| - | - | Sem itens | - | - | - |
+| ID | Status | Titulo | Origem | Escala | Tipo | Modo | Grupo paralelo | Bloqueado por |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| - | - | Sem itens | - | - | - | - | - | - |

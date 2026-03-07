@@ -1901,7 +1901,7 @@ export class SddSkillsSyncCommand {
   async execute(
     projectRoot: string,
     options?: { bundles?: string[]; all?: boolean; tools?: string[] }
-  ): Promise<{ synced: number; tools: string[] }> {
+  ): Promise<{ synced: number; local_synced: number; tools: string[] }> {
     const { paths } = await getRuntime(projectRoot);
     const catalog = await loadSkillCatalogState(paths);
 
@@ -1911,8 +1911,15 @@ export class SddSkillsSyncCommand {
       return entry.bundle_ids.some((bundle) => bundleFilter.has(bundle));
     });
 
+    await fs.mkdir(path.join(paths.skillsDir, 'curated'), { recursive: true });
+    for (const entry of selected) {
+      const localDir = path.join(paths.skillsDir, 'curated', `sdd-curated-${entry.id}`);
+      await fs.mkdir(localDir, { recursive: true });
+      await fs.writeFile(path.join(localDir, 'SKILL.md'), buildCuratedSkillContent(entry), 'utf-8');
+    }
+
     if (selected.length === 0) {
-      return { synced: 0, tools: [] };
+      return { synced: 0, local_synced: 0, tools: [] };
     }
 
     const targetTools = (options?.tools && options.tools.length > 0
@@ -1938,7 +1945,7 @@ export class SddSkillsSyncCommand {
       syncedTools.push(tool.value);
     }
 
-    return { synced: selected.length, tools: syncedTools };
+    return { synced: selected.length, local_synced: selected.length, tools: syncedTools };
   }
 }
 

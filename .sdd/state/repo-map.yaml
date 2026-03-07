@@ -1,0 +1,22 @@
+version: 1
+items:
+  - path: src
+    kind: source
+    service_ref: ""
+    notes: Codigo-fonte principal
+  - path: test
+    kind: test
+    service_ref: ""
+    notes: Testes automatizados
+  - path: docs
+    kind: docs
+    service_ref: ""
+    notes: Documentacao
+  - path: openspec
+    kind: openspec
+    service_ref: ""
+    notes: Runtime do OpenSpec
+  - path: package.json
+    kind: manifest
+    service_ref: ""
+    notes: Manifesto principal

@@ -1,16 +1,7 @@
-# Mapa de Arquitetura
+# Arquitetura
 
-<!-- Diagrama da Arquitetura Macro da Aplicação -->
+Documento gerado a partir de `.sdd/state/architecture.yaml`.
 
-```mermaid
-graph TD
-    %% Substitua por sua arquitetura real
-    A[Cliente] --> B(API Gateway)
-    B --> C{Serviço Core}
-    C -->|gRPC| D[Microsserviço B]
-    C -->|Lê/Escreve| E[(Banco de Dados)]
-```
-
-## Componentes Principais
-- **Componente A**: 
-- **Componente B**: 
+| ID | Nome | Tipo | Descricao | Paths | Depends On |
+| --- | --- | --- | --- | --- | --- |
+| arch-fission-ai-openspec | @fission-ai/openspec | service | Servico inicial detectado no bootstrap de contexto | src | - |

@@ -31,12 +31,33 @@ Este documento e gerado automaticamente a partir dos arquivos em \`.sdd/state/\`
 - \`.sdd/core/servicos.md\`
 - \`.sdd/core/spec-tecnologica.md\`
 - \`.sdd/core/repo-map.md\`
+- \`.sdd/core/integracoes.md\`
 - \`.sdd/pendencias/backlog-features.md\`
 - \`.sdd/pendencias/backlog-graph.md\`
 - \`.sdd/pendencias/progress.md\`
 - \`.sdd/pendencias/unblocked.md\`
 - \`.sdd/pendencias/tech-debt.md\`
 ${config.frontend.enabled ? '- `.sdd/core/frontend-map.md`\n- `.sdd/core/frontend-decisions.md`\n- `.sdd/pendencias/frontend-gaps.md`' : ''}
+`;
+}
+
+function renderArchitecture(state: SddStateSnapshot): string {
+  const rows = state.architecture.nodes
+    .slice()
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((node) => {
+      const paths = node.repo_paths.length > 0 ? node.repo_paths.join(', ') : '-';
+      const deps = node.depends_on.length > 0 ? node.depends_on.join(', ') : '-';
+      return `| ${node.id} | ${node.name} | ${node.kind} | ${node.description || '-'} | ${paths} | ${deps} |`;
+    });
+
+  return `# Arquitetura
+
+Documento gerado a partir de \`.sdd/state/architecture.yaml\`.
+
+| ID | Nome | Tipo | Descricao | Paths | Depends On |
+| --- | --- | --- | --- | --- | --- |
+${rows.length > 0 ? rows.join('\n') : '| - | - | - | Sem nos mapeados | - | - |'}
 `;
 }
 
@@ -345,6 +366,18 @@ ${rows.length > 0 ? rows.join('\n') : '| - | - | - | Sem itens |'}
 `;
 }
 
+function renderIntegrationContracts(state: SddStateSnapshot): string {
+  const contracts = state.integrationContracts.contracts.slice().sort((a, b) => a.localeCompare(b));
+  const lines = contracts.map((contract) => `- ${contract}`);
+
+  return `# Integracoes e Contratos
+
+Documento gerado a partir de \`.sdd/state/integration-contracts.yaml\`.
+
+${lines.length > 0 ? lines.join('\n') : '- Sem contratos mapeados.'}
+`;
+}
+
 export async function renderViews(
   paths: SddPaths,
   config: SddRuntimeConfig,
@@ -352,9 +385,11 @@ export async function renderViews(
 ): Promise<void> {
   const writes: Array<Promise<void>> = [
     fs.writeFile(path.join(paths.coreDir, 'index.md'), renderCoreIndex(state, config), 'utf-8'),
+    fs.writeFile(path.join(paths.coreDir, 'arquitetura.md'), renderArchitecture(state), 'utf-8'),
     fs.writeFile(path.join(paths.coreDir, 'servicos.md'), renderServices(state), 'utf-8'),
     fs.writeFile(path.join(paths.coreDir, 'spec-tecnologica.md'), renderTechStack(state), 'utf-8'),
     fs.writeFile(path.join(paths.coreDir, 'repo-map.md'), renderRepoMap(state), 'utf-8'),
+    fs.writeFile(path.join(paths.coreDir, 'integracoes.md'), renderIntegrationContracts(state), 'utf-8'),
     fs.writeFile(path.join(paths.pendenciasDir, 'backlog-features.md'), renderBacklog(state), 'utf-8'),
     fs.writeFile(path.join(paths.pendenciasDir, 'backlog-graph.md'), renderBacklogGraph(state), 'utf-8'),
     fs.writeFile(path.join(paths.pendenciasDir, 'discovery.md'), renderDiscovery(state), 'utf-8'),

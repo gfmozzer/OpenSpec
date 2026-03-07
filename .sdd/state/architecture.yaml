@@ -1,0 +1,9 @@
+version: 1
+nodes:
+  - id: arch-fission-ai-openspec
+    name: "@fission-ai/openspec"
+    kind: service
+    description: Servico inicial detectado no bootstrap de contexto
+    repo_paths:
+      - src
+    depends_on: []

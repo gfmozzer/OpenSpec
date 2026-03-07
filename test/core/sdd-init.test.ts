@@ -28,7 +28,7 @@ describe('SddInitCommand', () => {
 
   it('creates .sdd baseline files and updates openspec/config.yaml', async () => {
     const command = new SddInitCommand();
-    await command.execute(testDir);
+    const result = await command.execute(testDir);
 
     expect(await exists(path.join(testDir, '.sdd'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'discovery-index.yaml'))).toBe(true);
@@ -36,6 +36,12 @@ describe('SddInitCommand', () => {
     expect(await exists(path.join(testDir, '.sdd', 'state', 'tech-debt.yaml'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'finalize-queue.yaml'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'skill-catalog.yaml'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'skills', 'bundles', 'curadoria-pt-br.md'))).toBe(true);
+    expect(
+      await exists(
+        path.join(testDir, '.sdd', 'skills', 'curated', 'repo-context-bootstrap', 'SKILL.md')
+      )
+    ).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'architecture.yaml'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'service-catalog.yaml'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'state', 'tech-stack.yaml'))).toBe(true);
@@ -50,6 +56,14 @@ describe('SddInitCommand', () => {
     expect(await exists(path.join(testDir, 'README.md'))).toBe(true);
     expect(await exists(path.join(testDir, 'AGENTS.md'))).toBe(true);
     expect(await exists(path.join(testDir, 'AGENT.md'))).toBe(true);
+
+    const skillCatalog = parseYaml(
+      await fs.readFile(path.join(testDir, '.sdd', 'state', 'skill-catalog.yaml'), 'utf-8')
+    ) as Record<string, any>;
+    expect(skillCatalog.skills).toHaveLength(60);
+    expect(skillCatalog.bundles).toHaveLength(6);
+    expect(result.skillsSeeded).toBe(60);
+    expect(result.localSkillsMaterialized).toBe(60);
 
     const projectConfig = await fs.readFile(path.join(testDir, 'openspec', 'config.yaml'), 'utf-8');
     const parsed = parseYaml(projectConfig) as Record<string, any>;
@@ -102,6 +116,20 @@ describe('SddInitCommand', () => {
     const updated = parseYaml(await fs.readFile(backlogPath, 'utf-8')) as Record<string, any>;
     expect(updated.items).toHaveLength(1);
     expect(updated.items[0].id).toBe('FEAT-001');
+  });
+
+  it('migrates legacy empty skill catalog to curated defaults', async () => {
+    const command = new SddInitCommand();
+    await command.execute(testDir);
+
+    const catalogPath = path.join(testDir, '.sdd', 'state', 'skill-catalog.yaml');
+    await fs.writeFile(catalogPath, stringifyYaml({ version: 1, skills: [], bundles: [] }), 'utf-8');
+
+    await command.execute(testDir);
+
+    const migrated = parseYaml(await fs.readFile(catalogPath, 'utf-8')) as Record<string, any>;
+    expect(migrated.skills).toHaveLength(60);
+    expect(migrated.bundles).toHaveLength(6);
   });
 
   it('bootstraps initial architecture, stack and repo map from an existing project', async () => {

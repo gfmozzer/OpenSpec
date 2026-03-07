@@ -1,0 +1,17 @@
+version: 1
+items:
+  - layer: runtime
+    technology: nodejs
+    version: ">=20.19.0"
+    purpose: Runtime principal do projeto
+    constraints: []
+  - layer: language
+    technology: typescript
+    version: ^5.9.3
+    purpose: Linguagem principal
+    constraints: []
+  - layer: test
+    technology: vitest
+    version: ^3.2.4
+    purpose: Testes
+    constraints: []

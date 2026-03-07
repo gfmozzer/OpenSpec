@@ -1,0 +1,10 @@
+version: 1
+services:
+  - id: fission-ai-openspec
+    name: "@fission-ai/openspec"
+    responsibility: Servico inicial detectado no bootstrap de contexto
+    owner_refs: []
+    repo_paths:
+      - src
+    contracts: []
+    external_dependencies: []

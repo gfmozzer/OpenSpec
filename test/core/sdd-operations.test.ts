@@ -162,6 +162,7 @@ describe('sdd operations', () => {
     });
 
     expect(result.tools).toContain('codex');
+    expect(result.local_synced).toBe(1);
     const skillFile = path.join(
       testDir,
       '.codex',
@@ -171,6 +172,17 @@ describe('sdd operations', () => {
     );
     const content = await fs.readFile(skillFile, 'utf-8');
     expect(content).toContain('Skill Sync Test');
+
+    const localSkillFile = path.join(
+      testDir,
+      '.sdd',
+      'skills',
+      'curated',
+      'sdd-curated-skill-sync-test',
+      'SKILL.md'
+    );
+    const localContent = await fs.readFile(localSkillFile, 'utf-8');
+    expect(localContent).toContain('Skill Sync Test');
   });
 
   it('creates and resolves frontend gaps when frontend module is enabled', async () => {

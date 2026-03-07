@@ -349,6 +349,13 @@ async function inferIntegrationContracts(projectRoot: string, packageJson: Recor
   if (compose.includes('kafka')) contracts.add('infra:kafka');
   if (compose.includes('rabbitmq')) contracts.add('infra:rabbitmq');
 
+  if (typeof packageJson?.bin === 'object' && packageJson.bin) {
+    contracts.add('interface:cli');
+  }
+  if (typeof packageJson?.publishConfig === 'object' && packageJson.publishConfig) {
+    contracts.add('distribution:npm');
+  }
+
   return Array.from(contracts).sort();
 }
 

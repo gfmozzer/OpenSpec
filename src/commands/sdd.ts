@@ -148,6 +148,9 @@ export function registerSddCommand(program: Command): void {
       console.log(`Diretorio de memoria: ${result.memoryDir}`);
       console.log(`Modulo de frontend: ${result.frontendEnabled ? 'ativado' : 'desativado'}`);
       console.log(`Views geradas: ${result.rendered ? 'sim' : 'nao'}`);
+      console.log(`Skills curadas carregadas: ${result.skillsSeeded}`);
+      console.log(`Skills locais geradas: ${result.localSkillsMaterialized}`);
+      console.log(`Ferramentas sincronizadas: ${result.syncedTools.length > 0 ? result.syncedTools.join(', ') : 'nenhuma detectada'}`);
     });
 
   sddCmd
@@ -557,6 +560,7 @@ export function registerSddCommand(program: Command): void {
       });
 
       console.log(chalk.green(`Skills sincronizadas: ${result.synced}`));
+      console.log(`Skills locais (.sdd/skills/curated): ${result.local_synced}`);
       console.log(`Ferramentas atualizadas: ${result.tools.length > 0 ? result.tools.join(', ') : 'nenhuma'}`);
     });
 

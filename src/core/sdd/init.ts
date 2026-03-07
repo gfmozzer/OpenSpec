@@ -10,6 +10,7 @@ import {
 import { renderViews } from './views.js';
 import { syncSddGuideDocs } from './docs-sync.js';
 import { bootstrapInitialContext, type BootstrapContextReport } from './bootstrap.js';
+import { SddSkillsSyncCommand } from './operations.js';
 
 export interface SddInitOptions {
   frontendEnabled?: boolean;
@@ -21,6 +22,9 @@ export interface SddInitResult {
   memoryDir: string;
   frontendEnabled: boolean;
   rendered: boolean;
+  skillsSeeded: number;
+  localSkillsMaterialized: number;
+  syncedTools: string[];
   contextBootstrap: BootstrapContextReport;
 }
 
@@ -50,6 +54,7 @@ export class SddInitCommand {
       mode: 'empty-only',
       deep: false,
     });
+    const skillsSync = await new SddSkillsSyncCommand().execute(projectRoot, { all: true });
 
     const shouldRender = options.render ?? config.views.autoRender;
     if (shouldRender) {
@@ -63,6 +68,9 @@ export class SddInitCommand {
       memoryDir: paths.memoryRoot,
       frontendEnabled: config.frontend.enabled,
       rendered: shouldRender,
+      skillsSeeded: skillsSync.synced,
+      localSkillsMaterialized: skillsSync.local_synced,
+      syncedTools: skillsSync.tools,
       contextBootstrap,
     };
   }

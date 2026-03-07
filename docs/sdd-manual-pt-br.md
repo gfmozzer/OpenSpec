@@ -173,6 +173,8 @@ Isso cria:
 - os YAMLs canônicos;
 - os guias `README.md`, `AGENTS.md`, `AGENT.md` e `.sdd/agente.md`;
 - as views em `.sdd/core/` e `.sdd/pendencias/`.
+- o catalogo curado de 60 skills em `.sdd/state/skill-catalog.yaml`;
+- as skills curadas locais em `.sdd/skills/curated/`.
 
 ### 5.5 O que acontece automaticamente no primeiro `sdd init`
 
@@ -186,6 +188,8 @@ Exemplos:
 - se detectar diretórios como `src/`, `test/`, `docs/`, `openspec/`, ele monta o `repo-map`;
 - ele cria um nó inicial de arquitetura;
 - ele cria um serviço inicial no catálogo.
+- ele semeia a curadoria padrao de skills (6 bundles / 60 skills);
+- ele tenta sincronizar automaticamente essas skills para ferramentas detectadas (ex.: `.codex`, `.cursor`, `.claude`).
 
 Ou seja: você não começa no vazio.
 
@@ -451,12 +455,16 @@ Sincronizar:
 openspec sdd skills sync --all
 ```
 
+Observacao:
+- no `openspec sdd init`, a sincronizacao ja roda automaticamente para ferramentas detectadas;
+- use `skills sync` quando instalar uma nova IDE/agente depois.
+
 ## 8. Tabela de comandos e o que cada um faz
 
 | Comando | Para que serve |
 | --- | --- |
 | `openspec init` | Inicializa a base do OpenSpec |
-| `openspec sdd init --frontend` | Inicializa a memória SDD |
+| `openspec sdd init --frontend` | Inicializa a memória SDD e carrega skills curadas |
 | `openspec sdd init-context` | Inspeciona projeto existente e completa contexto inicial |
 | `openspec sdd check --render` | Valida e renderiza |
 | `openspec sdd insight "<texto>"` | Cria um insight |

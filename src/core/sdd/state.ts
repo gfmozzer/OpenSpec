@@ -31,6 +31,11 @@ import {
   type TechDebtState,
   type UnblockEventsState,
 } from './types.js';
+import {
+  DEFAULT_CURATED_SKILL_CATALOG,
+  REPO_CONTEXT_BOOTSTRAP_SKILL_MD,
+  buildCuratedBundlesMarkdown,
+} from './default-skills.js';
 
 export interface SddRuntimeConfig {
   enabled: boolean;
@@ -270,7 +275,24 @@ async function writeFileIfMissing(filePath: string, content: string): Promise<vo
   if (await fileExists(filePath)) {
     return;
   }
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(filePath, content, 'utf-8');
+}
+
+async function ensureCuratedSkillCatalog(filePath: string): Promise<void> {
+  if (!(await fileExists(filePath))) {
+    await fs.writeFile(filePath, stringifyYaml(DEFAULT_CURATED_SKILL_CATALOG), 'utf-8');
+    return;
+  }
+
+  const parsed = SkillCatalogStateSchema.safeParse(await readYaml(filePath));
+  if (!parsed.success) {
+    return;
+  }
+
+  if (parsed.data.skills.length === 0 && parsed.data.bundles.length === 0) {
+    await fs.writeFile(filePath, stringifyYaml(DEFAULT_CURATED_SKILL_CATALOG), 'utf-8');
+  }
 }
 
 export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig): Promise<void> {
@@ -289,7 +311,7 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
   await writeYamlIfMissing(paths.stateFiles.backlog, { version: 1, items: [] });
   await writeYamlIfMissing(paths.stateFiles.techDebt, { version: 1, items: [] });
   await writeYamlIfMissing(paths.stateFiles.finalizeQueue, { version: 1, items: [] });
-  await writeYamlIfMissing(paths.stateFiles.skillCatalog, { version: 1, skills: [], bundles: [] });
+  await ensureCuratedSkillCatalog(paths.stateFiles.skillCatalog);
   await writeYamlIfMissing(paths.stateFiles.unblockEvents, { version: 1, events: [] });
   await writeYamlIfMissing(paths.stateFiles.architecture, { version: 1, nodes: [] });
   await writeYamlIfMissing(paths.stateFiles.serviceCatalog, { version: 1, services: [] });
@@ -306,6 +328,14 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
   await writeFileIfMissing(
     path.join(paths.coreDir, 'arquitetura.md'),
     '# Arquitetura\n\nDocumento arquitetural de alto nivel do projeto.\n'
+  );
+  await writeFileIfMissing(
+    path.join(paths.skillsDir, 'bundles', 'curadoria-pt-br.md'),
+    buildCuratedBundlesMarkdown()
+  );
+  await writeFileIfMissing(
+    path.join(paths.skillsDir, 'curated', 'repo-context-bootstrap', 'SKILL.md'),
+    REPO_CONTEXT_BOOTSTRAP_SKILL_MD
   );
 }
 
