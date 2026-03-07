@@ -91,46 +91,88 @@ program.hook('postAction', async () => {
 const availableToolIds = AI_TOOLS.filter((tool) => tool.skillsDir).map((tool) => tool.value);
 const toolsOptionDescription = `Configure AI tools non-interactively. Use "all", "none", or a comma-separated list of: ${availableToolIds.join(', ')}`;
 
+async function runInitCommand(
+  targetPath: string,
+  options?: { tools?: string; force?: boolean; profile?: string }
+): Promise<void> {
+  // Validate that the path is a valid directory
+  const resolvedPath = path.resolve(targetPath);
+
+  try {
+    const stats = await fs.stat(resolvedPath);
+    if (!stats.isDirectory()) {
+      throw new Error(`Path "${targetPath}" is not a directory`);
+    }
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      console.log(`Directory "${targetPath}" doesn't exist, it will be created.`);
+    } else if (error.message && error.message.includes('not a directory')) {
+      throw error;
+    } else {
+      throw new Error(`Cannot access path "${targetPath}": ${error.message}`);
+    }
+  }
+
+  const { InitCommand } = await import('../core/init.js');
+  const initCommand = new InitCommand({
+    tools: options?.tools,
+    force: options?.force,
+    profile: options?.profile,
+  });
+  await initCommand.execute(targetPath);
+}
+
+async function runFullInstallCommand(
+  targetPath: string,
+  options?: { tools?: string; force?: boolean; profile?: string; frontend?: boolean }
+): Promise<void> {
+  await runInitCommand(targetPath, options);
+
+  const { SddInitCommand } = await import('../core/sdd/init.js');
+  const sddInitCommand = new SddInitCommand();
+  await sddInitCommand.execute(targetPath, {
+    frontendEnabled: options?.frontend ?? true,
+    render: true,
+  });
+}
+
 program
   .command('init [path]')
-  .description('Initialize OpenSpec in your project')
+  .description('Initialize OpenSDD in your project')
   .option('--tools <tools>', toolsOptionDescription)
   .option('--force', 'Auto-cleanup legacy files without prompting')
   .option('--profile <profile>', 'Override global config profile (core or custom)')
   .action(async (targetPath = '.', options?: { tools?: string; force?: boolean; profile?: string }) => {
     try {
-      // Validate that the path is a valid directory
-      const resolvedPath = path.resolve(targetPath);
-
-      try {
-        const stats = await fs.stat(resolvedPath);
-        if (!stats.isDirectory()) {
-          throw new Error(`Path "${targetPath}" is not a directory`);
-        }
-      } catch (error: any) {
-        if (error.code === 'ENOENT') {
-          // Directory doesn't exist, but we can create it
-          console.log(`Directory "${targetPath}" doesn't exist, it will be created.`);
-        } else if (error.message && error.message.includes('not a directory')) {
-          throw error;
-        } else {
-          throw new Error(`Cannot access path "${targetPath}": ${error.message}`);
-        }
-      }
-
-      const { InitCommand } = await import('../core/init.js');
-      const initCommand = new InitCommand({
-        tools: options?.tools,
-        force: options?.force,
-        profile: options?.profile,
-      });
-      await initCommand.execute(targetPath);
+      await runInitCommand(targetPath, options);
     } catch (error) {
-      console.log(); // Empty line for spacing
+      console.log();
       ora().fail(`Error: ${(error as Error).message}`);
       process.exit(1);
     }
   });
+
+program
+  .command('install [path]')
+  .description('Install OpenSDD completely in your project (base + SDD)')
+  .option('--tools <tools>', toolsOptionDescription)
+  .option('--force', 'Auto-cleanup legacy files without prompting')
+  .option('--profile <profile>', 'Override global config profile (core or custom)')
+  .option('--no-frontend', 'Disable frontend module in the SDD bootstrap')
+  .action(
+    async (
+      targetPath = '.',
+      options?: { tools?: string; force?: boolean; profile?: string; frontend?: boolean }
+    ) => {
+    try {
+      await runFullInstallCommand(targetPath, options);
+    } catch (error) {
+      console.log();
+      ora().fail(`Error: ${(error as Error).message}`);
+      process.exit(1);
+    }
+    }
+  );
 
 // Hidden alias: 'experimental' -> 'init' for backwards compatibility
 program

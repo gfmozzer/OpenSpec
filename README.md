@@ -85,20 +85,26 @@ AI:  Archived to openspec/changes/archive/2025-01-23-add-dark-mode/
 
 **Requires Node.js 20.19.0 or higher.**
 
-Install this fork locally:
+Install globally from GitHub:
 
 ```bash
-pnpm install
-pnpm run build
-npm install -g .
+npm install -g github:gfmozzer/OpenSpec
 ```
 
 Then navigate to your project directory and initialize:
 
 ```bash
 cd your-project
-opensdd init
+opensdd install
 ```
+
+This command now bootstraps the full stack in one step:
+- base runtime/config
+- `.sdd/`
+- canonical YAML state
+- templates
+- curated skills
+- root docs and agent guides
 
 Now tell your AI: `/opsx:propose <what-you-want-to-build>`
 
@@ -162,11 +168,10 @@ AI coding assistants are powerful but unpredictable when requirements live only 
 
 ## Updating OpenSpec
 
-**Upgrade the local installation**
+**Upgrade the global installation**
 
 ```bash
-pnpm run build
-npm install -g .
+npm install -g github:gfmozzer/OpenSpec
 ```
 
 **Refresh agent instructions**

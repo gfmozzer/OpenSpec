@@ -164,9 +164,25 @@ openspec/
 
 Você tem 2 formas de instalar.
 
-#### Opção A: instalar a sua cópia local deste fork
+#### Opção A: instalar globalmente do GitHub publico
 
-Use isso se você quer instalar exatamente esta versão do repositório:
+Use isso se voce quer instalar o OpenSDD na maquina de qualquer pessoa sem clonar manualmente o repositório:
+
+```bash
+npm install -g github:gfmozzer/OpenSpec
+```
+
+No Windows PowerShell, esse e o comando principal.
+
+Depois confira:
+
+```bash
+opensdd --version
+```
+
+#### Opção B: instalar a sua cópia local deste fork
+
+Use isso se voce esta desenvolvendo o fork localmente:
 
 ```bash
 cd /caminho/do/seu-fork
@@ -175,7 +191,7 @@ pnpm run build
 npm install -g .
 ```
 
-Alternativa para desenvolvimento local:
+Alternativa para desenvolvimento local com link:
 
 ```bash
 cd /caminho/do/seu-fork
@@ -184,7 +200,7 @@ pnpm run build
 npm link
 ```
 
-#### Opção B: instalar um pacote publicado com nome próprio
+#### Opção C: instalar um pacote publicado com nome próprio
 
 Use isso apenas se você publicar este fork no npm com nome próprio. Exemplo:
 
@@ -197,6 +213,7 @@ Importante:
 - enquanto isso nao acontecer, use a Opcao A.
 
 Regra pratica:
+- `npm install -g github:gfmozzer/OpenSpec` instala globalmente a versao publica do fork;
 - `npm install -g .` instala a sua copia local deste fork;
 - `npm link` serve para desenvolvimento local com seu fork.
 - `npm install -g opensdd@latest` so vale quando esse pacote existir publicado.
@@ -209,31 +226,45 @@ Depois de instalar o comando `opensdd`, va para o repositório onde voce quer us
 cd seu-projeto
 ```
 
-Agora inicialize a base do OpenSDD dentro desse repositório.
+Agora instale o OpenSDD completo dentro desse repositório.
 
 Se voce nao quer configurar nenhuma IDE/agente agora:
 
 ```bash
-opensdd init --tools none
+opensdd install --tools none
 ```
 
 Se voce ja quer configurar ferramentas na instalacao:
 
 ```bash
-opensdd init --tools codex,cursor
+opensdd install --tools codex,cursor
 ```
 
 Ou:
 
 ```bash
-opensdd init --tools all
+opensdd install --tools all
 ```
 
-Isso cria a base do OpenSDD dentro do seu repositório.
+Isso cria, em um passo:
+- a base de runtime do OpenSDD;
+- a pasta `.sdd/`;
+- as skills curadas;
+- os templates;
+- os YAMLs canônicos;
+- os guias `README.md`, `AGENTS.md`, `AGENT.md` e `.sdd/AGENT.md`.
+
+Se quiser desativar o modulo de frontend no bootstrap:
+
+```bash
+opensdd install --tools none --no-frontend
+```
 
 ### 5.4 Instalar o SDD dentro do repositório
 
-Depois do `opensdd init`, rode:
+Se voce usou `opensdd install`, esta etapa ja foi executada automaticamente.
+
+Ela corresponde internamente a:
 
 ```bash
 opensdd sdd init --frontend
@@ -258,12 +289,9 @@ Esse e o comando que efetivamente instala o "servico" SDD dentro do seu projeto.
 Se o projeto esta vazio ou acabou de nascer, o fluxo completo e:
 
 ```bash
-cd /caminho/do/seu-fork
-pnpm install
-pnpm run build
-npm install -g .
+npm install -g github:gfmozzer/OpenSpec
 cd seu-projeto
-opensdd init --tools none
+opensdd install --tools none
 opensdd sdd init --frontend
 opensdd sdd check --render
 opensdd sdd onboard system
@@ -306,12 +334,9 @@ Esse comando faz inspeção mais profunda e tenta preencher:
 Fluxo recomendado para projeto legado:
 
 ```bash
-cd /caminho/do/seu-fork
-pnpm install
-pnpm run build
-npm install -g .
+npm install -g github:gfmozzer/OpenSpec
 cd projeto-legado
-opensdd init --tools none
+opensdd install --tools none
 opensdd sdd init --frontend
 opensdd sdd init-context
 opensdd sdd check --render
@@ -331,7 +356,7 @@ Use isso logo após o `init`.
 Suponha que você criou um projeto NestJS e só instalou a base inicial. Faça:
 
 ```bash
-opensdd init --tools none
+opensdd install --tools none
 opensdd sdd init --frontend
 opensdd sdd init-context
 opensdd sdd check --render
@@ -609,7 +634,8 @@ Observacao:
 
 | Comando | Para que serve |
 | --- | --- |
-| `opensdd init` | Inicializa a base do OpenSDD |
+| `opensdd install` | Instala/inicializa a base do OpenSDD no projeto |
+| `opensdd init` | Alias tecnico para instalar/inicializar a base do OpenSDD |
 | `opensdd sdd init --frontend` | Inicializa a memória SDD e carrega skills curadas |
 | `opensdd sdd init-context` | Inspeciona projeto existente e completa contexto inicial |
 | `opensdd sdd check --render` | Valida e renderiza |
@@ -645,7 +671,8 @@ Observacao:
 ### 9.1 Marina instala e cria a base
 
 ```bash
-opensdd init --tools none
+npm install -g github:gfmozzer/OpenSpec
+opensdd install --tools none
 opensdd sdd init --frontend
 opensdd sdd init-context
 opensdd sdd check --render
