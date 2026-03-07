@@ -298,3 +298,7 @@ export async function loadStateSnapshot(
     frontendMap,
   };
 }
+
+export async function loadSkillCatalogState(paths: SddPaths): Promise<SkillCatalogState> {
+  return SkillCatalogStateSchema.parse(await readYaml(paths.stateFiles.skillCatalog));
+}

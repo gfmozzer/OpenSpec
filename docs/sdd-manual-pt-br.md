@@ -1,143 +1,143 @@
-# Manual de Utilizacao SDD (PT-BR)
+# Manual SDD (PT-BR) - Guia Rapido de Uso
 
-Este manual descreve como usar a camada SDD em portugues do Brasil dentro do OpenSpec.
+Este guia foi escrito para uso pratico. A ideia e: voce rodar poucos comandos e conseguir trabalhar sem duvida.
 
-## Objetivo
-- Manter memoria operacional em `.sdd/`.
-- Usar YAML como fonte canonica.
-- Gerar visoes Markdown para leitura humana.
-- Validar consistencia antes de evoluir o fluxo.
+## Em 1 minuto: o que e SDD aqui?
+- `openspec/changes/` = onde a implementacao da feature acontece.
+- `.sdd/state/*.yaml` = estado oficial (fonte da verdade).
+- `.sdd/core/*.md` e `.sdd/pendencias/*.md` = visoes geradas para leitura humana.
 
-## Pre-requisitos
-- Node.js `>= 20.19.0`
-- OpenSpec instalado
-- Repositorio inicializado com `openspec init` (recomendado)
+Regra principal:
+- Edite estado em YAML.
+- Rode `openspec sdd check --render` para validar e atualizar os Markdown.
 
-## Comandos disponiveis na V1
+---
 
-### `openspec sdd init [path]`
-Inicializa a estrutura SDD e os arquivos de estado base.
+## Passo a passo (primeiro uso)
 
-O que faz:
-1. Garante `openspec/config.yaml` com bloco `sdd`.
-2. Cria estrutura `.sdd/` (`core`, `discovery`, `pendencias`, `state`, `skills`, `templates`).
-3. Cria YAMLs iniciais em `.sdd/state/`.
-4. Gera views Markdown (a menos que `--no-render`).
-
-Opcoes:
-- `--frontend`: ativa modulo de frontend (`frontend-gaps` e `frontend-map`).
-- `--no-render`: nao gera views Markdown ao final.
-
-Exemplos:
+### 1) Inicializar
 ```bash
 openspec sdd init
-openspec sdd init . --frontend
-openspec sdd init /caminho/do/projeto --no-render
+```
+
+Se seu projeto tem frontend e voce quer rastrear gaps/rotas de UI:
+```bash
+openspec sdd init --frontend
 ```
 
 ---
 
-### `openspec sdd check [path]`
-Valida os arquivos de estado SDD e opcionalmente regenera as views.
-
-O que valida:
-1. Presenca dos arquivos obrigatorios em `.sdd/state/`.
-2. Estrutura dos YAMLs via schema.
-3. IDs e coerencia minima (`FEAT-*`, `TD-*`, referencias de frontend etc.).
-
-Opcoes:
-- `--render`: gera views Markdown apos validacao bem-sucedida.
-- `--json`: imprime relatorio em JSON.
-
-Exemplos:
+### 2) Validar e gerar visoes
 ```bash
-openspec sdd check
 openspec sdd check --render
+```
+
+Se quiser o relatorio cru em JSON:
+```bash
 openspec sdd check --json
 ```
 
-Comportamento de erro:
-- Se houver erro, o comando retorna falha e lista os problemas.
+---
 
-## Estrutura gerada na V1
-
-```text
-.sdd/
-├── config.yaml
-├── core/
-│   ├── arquitetura.md
-│   └── index.md
-├── discovery/
-│   ├── 1-insights/
-│   ├── 2-debates/
-│   ├── 3-radar/
-│   └── 4-discarded/
-├── pendencias/
-│   ├── backlog-features.md
-│   ├── tech-debt.md
-│   └── frontend-gaps.md          # quando frontend estiver ativo
-├── state/
-│   ├── discovery-index.yaml
-│   ├── backlog.yaml
-│   ├── tech-debt.yaml
-│   ├── finalize-queue.yaml
-│   ├── skill-catalog.yaml
-│   ├── frontend-gaps.yaml        # quando frontend estiver ativo
-│   └── frontend-map.yaml         # quando frontend estiver ativo
-├── skills/
-│   ├── curated/
-│   └── bundles/
-└── templates/
+### 3) Consultar curadoria de skills
+Listar bundles:
+```bash
+openspec sdd skills bundles
 ```
 
-## Regra de ouro da V1
-- Edite o estado em `.sdd/state/*.yaml`.
-- Use `openspec sdd check --render` para atualizar as views Markdown.
-- Nao trate os `.md` gerados como fonte canonica.
-
-## Configuracao SDD no `openspec/config.yaml`
-
-Exemplo:
-```yaml
-schema: spec-driven
-sdd:
-  enabled: true
-  memoryDir: .sdd
-  frontend:
-    enabled: false
-  views:
-    autoRender: true
+Sugerir skills para uma tarefa:
+```bash
+openspec sdd skills suggest --phase plan --domains backend,security --bundles architecture-backend,security-quality --max 5
 ```
 
-## Skill SDD em portugues (planejamento/arq)
-- Skill: `openspec-sdd`
-- Comando: `/opsx:sdd`
-- Uso esperado: planejamento e arquitetura em pt-BR.
+Mesma sugestao em JSON:
+```bash
+openspec sdd skills suggest --phase execute --domains frontend --max 3 --json
+```
 
-## Curadoria de skills (60 selecionadas)
-- Catalogo canonico: `.sdd/state/skill-catalog.yaml`
+---
+
+## Comandos disponiveis agora (V1)
+
+### `openspec sdd init [path]`
+Cria/atualiza a base `.sdd/` e o bloco `sdd` em `openspec/config.yaml`.
+
+Opcoes:
+- `--frontend`: ativa arquivos de frontend (`frontend-gaps` e `frontend-map`).
+- `--no-render`: nao gera visoes Markdown no final.
+
+### `openspec sdd check [path]`
+Valida os YAMLs de estado, IDs, referencias basicas e pode gerar visoes.
+
+Opcoes:
+- `--render`: gera/atualiza os Markdown.
+- `--json`: imprime relatorio de validacao em JSON.
+
+### `openspec sdd skills bundles [path]`
+Lista os bundles de skills cadastrados no catalogo.
+
+### `openspec sdd skills suggest [path]`
+Sugere skills por contexto.
+
+Opcoes:
+- `--phase <fase>`: `discover|plan|execute|verify|finalize`
+- `--domains <lista>`: lista separada por virgula
+- `--bundles <lista>`: lista separada por virgula
+- `--max <n>`: quantidade de sugestoes
+- `--json`: retorno estruturado
+
+---
+
+## Onde voce mexe no dia a dia
+
+### Estado oficial
+- `.sdd/state/discovery-index.yaml`
+- `.sdd/state/backlog.yaml`
+- `.sdd/state/tech-debt.yaml`
+- `.sdd/state/finalize-queue.yaml`
+- `.sdd/state/skill-catalog.yaml`
+- `.sdd/state/frontend-gaps.yaml` (se frontend ativo)
+- `.sdd/state/frontend-map.yaml` (se frontend ativo)
+
+### Visoes (geradas)
+- `.sdd/core/index.md`
+- `.sdd/core/frontend-map.md` (se frontend ativo)
+- `.sdd/pendencias/backlog-features.md`
+- `.sdd/pendencias/tech-debt.md`
+- `.sdd/pendencias/frontend-gaps.md` (se frontend ativo)
+
+---
+
+## Curadoria de 60 skills
+- Catalogo oficial: `.sdd/state/skill-catalog.yaml`
 - Guia humano da curadoria: `.sdd/skills/bundles/curadoria-pt-br.md`
-- Quantidade atual: 60 skills em 6 bundles
 
-## Comandos planejados (nao implementados ainda)
-Estes comandos fazem parte do roadmap, mas ainda nao estao disponiveis na V1:
+---
 
-1. `openspec sdd insight "<texto>"`
-2. `openspec sdd debate INS-###`
-3. `openspec sdd decide DEB-### --outcome radar|discard`
-4. `openspec sdd breakdown RAD-###`
-5. `openspec sdd start <RAD-###|FEAT-###|FGAP-###|texto livre>`
-6. `openspec sdd finalize [--ref <FEAT|RAD>|--all-ready]`
-7. `openspec sdd context <FEAT|RAD|FGAP|TD>`
-8. `openspec sdd skills sync [--bundle <id>|--all]`
+## Erros comuns (e correcao)
 
-## Fluxo recomendado hoje (V1)
+### "Arquivo de estado obrigatorio ausente"
+Rode novamente:
+```bash
+openspec sdd init
+```
+
+### "Schema de estado invalido"
+Revise o YAML citado no erro e rode:
+```bash
+openspec sdd check --render
+```
+
+### "Nao sei quais skills usar"
+Comece com:
+```bash
+openspec sdd skills suggest --phase plan --max 5
+```
+
+---
+
+## Roteiro minimo recomendado (operacional)
 1. `openspec sdd init`
-2. Ajustar os YAMLs iniciais conforme o projeto.
+2. Atualizar `.sdd/state/*.yaml` conforme a tarefa
 3. `openspec sdd check --render`
-4. Revisar as views em `.sdd/core/` e `.sdd/pendencias/`.
-
-## Solucao de problemas rapida
-- Erro de arquivo ausente: execute `openspec sdd init` novamente.
-- Erro de schema: revisar YAML citado no relatorio do `sdd check`.
-- Views desatualizadas: execute `openspec sdd check --render`.
+4. `openspec sdd skills suggest ...` para escolher skills da execucao
