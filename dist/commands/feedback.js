@@ -1,6 +1,7 @@
 import { execSync, execFileSync } from 'child_process';
 import { createRequire } from 'module';
 import os from 'os';
+import { CLI_ISSUES_URL, CLI_PRODUCT_NAME, CLI_REPOSITORY_SLUG } from '../core/branding.js';
 const require = createRequire(import.meta.url);
 /**
  * Check if gh CLI is installed and available in PATH
@@ -29,7 +30,7 @@ function isGhAuthenticated() {
     }
 }
 /**
- * Get OpenSpec version from package.json
+ * Get OpenSDD version from package.json
  */
 function getVersion() {
     try {
@@ -60,7 +61,7 @@ function generateMetadata() {
     const platform = getPlatform();
     const timestamp = getTimestamp();
     return `---
-Submitted via OpenSpec CLI
+Submitted via ${CLI_PRODUCT_NAME} CLI
 - Version: ${version}
 - Platform: ${platform}
 - Timestamp: ${timestamp}`;
@@ -87,7 +88,7 @@ function formatBody(bodyText) {
  * Generate a pre-filled GitHub issue URL for manual submission
  */
 function generateManualSubmissionUrl(title, body) {
-    const repo = 'Fission-AI/OpenSpec';
+    const repo = CLI_REPOSITORY_SLUG;
     const encodedTitle = encodeURIComponent(title);
     const encodedBody = encodeURIComponent(body);
     const encodedLabels = encodeURIComponent('feedback');
@@ -114,7 +115,7 @@ function submitViaGhCli(title, body) {
             'issue',
             'create',
             '--repo',
-            'Fission-AI/OpenSpec',
+            CLI_REPOSITORY_SLUG,
             '--title',
             title,
             '--body',
@@ -151,7 +152,7 @@ function handleFallback(title, body, reason) {
     displayFormattedFeedback(title, body);
     const manualUrl = generateManualSubmissionUrl(title, body);
     console.log('Please submit your feedback manually:');
-    console.log(manualUrl);
+    console.log(manualUrl || CLI_ISSUES_URL);
     if (reason === 'unauthenticated') {
         console.log('\nTo auto-submit in the future: gh auth login');
     }

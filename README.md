@@ -67,10 +67,10 @@ Requer:
 - Node.js `20.19.0` ou superior
 - `npm`
 
-Instalacao global a partir do repositorio publico:
+Instalacao global oficial via npm:
 
 ```bash
-npm install -g github:gfmozzer/OpenSpec
+npm install -g @gfmozzer/opensdd
 ```
 
 Depois confira:
@@ -309,6 +309,7 @@ Descoberta:
 Guia detalhado em portugues:
 
 - [Manual SDD PT-BR](docs/sdd-manual-pt-br.md)
+- [Release e Rollback](docs/release.md)
 
 Guia interno do sistema:
 
@@ -337,7 +338,14 @@ O comando global oficial deste fork e:
 opensdd
 ```
 
-O caminho de distribuicao suportado por este repositorio e instalacao global a partir do GitHub do fork ou por pacote empacotado.
+O caminho de distribuicao oficial deste repositorio e npm:
+
+```bash
+npm install -g @gfmozzer/opensdd
+```
+
+Fallback suportado:
+- instalacao por tarball (`npm pack` + `npm install -g ./gfmozzer-opensdd-<versao>.tgz`)
 
 ## Licenca
 

@@ -162,17 +162,13 @@ openspec/
 
 ### 5.2 Como instalar o comando `opensdd`
 
-Você tem 2 formas de instalar.
+Voce tem 2 formas de instalar.
 
-#### Opção A: instalar globalmente do GitHub publico
-
-Use isso se voce quer instalar o OpenSDD na maquina de qualquer pessoa sem clonar manualmente o repositório:
+#### Opcao A: instalar o pacote oficial publicado no npm (recomendado)
 
 ```bash
-npm install -g github:gfmozzer/OpenSpec
+npm install -g @gfmozzer/opensdd
 ```
-
-No Windows PowerShell, esse e o comando principal.
 
 Depois confira:
 
@@ -180,7 +176,7 @@ Depois confira:
 opensdd --version
 ```
 
-#### Opção B: instalar a sua cópia local deste fork
+#### Opcao B: instalar a sua copia local deste fork (desenvolvimento)
 
 Use isso se voce esta desenvolvendo o fork localmente:
 
@@ -200,23 +196,10 @@ pnpm run build
 npm link
 ```
 
-#### Opção C: instalar um pacote publicado com nome próprio
-
-Use isso apenas se você publicar este fork no npm com nome próprio. Exemplo:
-
-```bash
-npm install -g opensdd@latest
-```
-
-Importante:
-- esse comando so funciona depois que o seu pacote estiver publicado;
-- enquanto isso nao acontecer, use a Opcao A.
-
 Regra pratica:
-- `npm install -g github:gfmozzer/OpenSpec` instala globalmente a versao publica do fork;
+- `npm install -g @gfmozzer/opensdd` instala globalmente o pacote oficial;
 - `npm install -g .` instala a sua copia local deste fork;
 - `npm link` serve para desenvolvimento local com seu fork.
-- `npm install -g opensdd@latest` so vale quando esse pacote existir publicado.
 
 ### 5.3 Como instalar o OpenSDD dentro do repositório do seu projeto
 
@@ -289,7 +272,7 @@ Esse e o comando que efetivamente instala o "servico" SDD dentro do seu projeto.
 Se o projeto esta vazio ou acabou de nascer, o fluxo completo e:
 
 ```bash
-npm install -g github:gfmozzer/OpenSpec
+npm install -g @gfmozzer/opensdd
 cd seu-projeto
 opensdd install --tools none
 opensdd sdd init --frontend
@@ -334,7 +317,7 @@ Esse comando faz inspeção mais profunda e tenta preencher:
 Fluxo recomendado para projeto legado:
 
 ```bash
-npm install -g github:gfmozzer/OpenSpec
+npm install -g @gfmozzer/opensdd
 cd projeto-legado
 opensdd install --tools none
 opensdd sdd init --frontend
@@ -671,7 +654,7 @@ Observacao:
 ### 9.1 Marina instala e cria a base
 
 ```bash
-npm install -g github:gfmozzer/OpenSpec
+npm install -g @gfmozzer/opensdd
 opensdd install --tools none
 opensdd sdd init --frontend
 opensdd sdd init-context

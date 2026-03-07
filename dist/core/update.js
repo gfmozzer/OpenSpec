@@ -21,7 +21,7 @@ import { getProfileWorkflows, ALL_WORKFLOWS } from './profiles.js';
 import { getAvailableTools } from './available-tools.js';
 import { WORKFLOW_TO_SKILL_DIR, getCommandConfiguredTools, getConfiguredToolsForProfileSync, getToolsNeedingProfileSync, } from './profile-sync-drift.js';
 import { scanInstalledWorkflows as scanInstalledWorkflowsShared, migrateIfNeeded as migrateIfNeededShared, } from './migration.js';
-import { CLI_NAME } from './branding.js';
+import { CLI_NAME, CLI_REPOSITORY_URL } from './branding.js';
 const require = createRequire(import.meta.url);
 const { version: OPENSPEC_VERSION } = require('../../package.json');
 /**
@@ -195,7 +195,7 @@ export class UpdateCommand {
             console.log('  /opsx:continue  Create the next artifact');
             console.log('  /opsx:apply     Implement tasks');
             console.log();
-            console.log(`Learn more: ${chalk.cyan('https://github.com/Fission-AI/OpenSpec')}`);
+            console.log(`Learn more: ${chalk.cyan(CLI_REPOSITORY_URL)}`);
         }
         const configuredAndNewTools = [...new Set([...configuredTools, ...newlyConfiguredTools])];
         // 13. Detect new tool directories not currently configured

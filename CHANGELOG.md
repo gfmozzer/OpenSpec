@@ -1,4 +1,4 @@
-# @fission-ai/openspec
+# @gfmozzer/opensdd
 
 ## 1.2.0
 

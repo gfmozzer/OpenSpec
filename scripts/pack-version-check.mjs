@@ -6,9 +6,9 @@
 //   consistently supported and returns the tarball metadata we need. The
 //   project uses pnpm for install/publish, but this guard only needs to pack
 //   locally and verify the installed CLI output.
-// - `npm pack` triggers the package's `prepare` script (build), and
-//   `changeset publish` triggers `prepublishOnly` (also builds here). This
-//   means an explicit build is not strictly necessary for the guard.
+// - `changeset publish` triggers `prepublishOnly` (build in this project).
+// - We still run this guard against the packed artifact to ensure the
+//   distributed tarball exposes the correct CLI binary and version.
 
 import { execFileSync } from 'child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
@@ -53,12 +53,12 @@ function main() {
   let tgzPath;
 
   try {
-    log(`Packing @fission-ai/openspec@${expected}...`);
+    log(`Packing @gfmozzer/opensdd@${expected}...`);
     const filename = npmPack();
     tgzPath = path.resolve(filename);
     log(`Created: ${tgzPath}`);
 
-    work = mkdtempSync(path.join(tmpdir(), 'openspec-pack-check-'));
+    work = mkdtempSync(path.join(tmpdir(), 'opensdd-pack-check-'));
     log(`Temp dir: ${work}`);
 
     // Make a tiny project
@@ -80,7 +80,7 @@ function main() {
     run('npm', ['install', tgzPath, '--silent', '--no-audit', '--no-fund'], { cwd: work, env });
 
     // Run the installed CLI via Node to avoid bin resolution/platform issues
-    const binRel = path.join('node_modules', '@fission-ai', 'openspec', 'bin', 'openspec.js');
+    const binRel = path.join('node_modules', '@gfmozzer', 'opensdd', 'bin', 'opensdd.js');
     const actual = run(process.execPath, [binRel, '--version'], { cwd: work }).trim();
 
     if (actual !== expected) {

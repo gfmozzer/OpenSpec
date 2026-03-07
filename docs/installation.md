@@ -2,78 +2,74 @@
 
 ## Prerequisites
 
-- **Node.js 20.19.0 or higher** — Check your version: `node --version`
+- **Node.js 20.19.0 or higher** - Check your version: `node --version`
 
-## Package Managers
-
-### npm
+## Official install (npm)
 
 ```bash
-npm install -g @fission-ai/openspec@latest
+npm install -g @gfmozzer/opensdd
 ```
 
-### pnpm
+## Verify installation
 
 ```bash
-pnpm add -g @fission-ai/openspec@latest
+opensdd --version
 ```
 
-### yarn
+## Initialize in a new project
 
 ```bash
-yarn global add @fission-ai/openspec@latest
+cd your-project
+opensdd install --tools none
 ```
 
-### bun
+Optional full tool setup:
 
 ```bash
-bun add -g @fission-ai/openspec@latest
+opensdd install --tools all
+```
+
+## Existing project bootstrap
+
+```bash
+opensdd sdd init-context
+opensdd sdd check --render
+opensdd sdd onboard system
+```
+
+## Fallback install from tarball
+
+Use this fallback if npm registry install is unavailable:
+
+```bash
+pnpm run build
+npm pack
+npm install -g ./gfmozzer-opensdd-<version>.tgz
+```
+
+## Troubleshooting (Windows)
+
+If `opensdd --version` fails after a global install, clean stale global links and reinstall:
+
+```powershell
+npm uninstall -g @gfmozzer/opensdd
+Remove-Item "$env:APPDATA\\npm\\opensdd*" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:APPDATA\\npm\\node_modules\\@gfmozzer\\opensdd" -Recurse -Force -ErrorAction SilentlyContinue
+npm cache clean --force
+npm install -g @gfmozzer/opensdd
+opensdd --version
 ```
 
 ## Nix
 
-Run OpenSpec directly without installation:
+Run directly:
 
 ```bash
-nix run github:Fission-AI/OpenSpec -- init
+nix run github:gfmozzer/OpenSpec -- --version
 ```
 
-Or install to your profile:
+Install to profile:
 
 ```bash
-nix profile install github:Fission-AI/OpenSpec
+nix profile install github:gfmozzer/OpenSpec
 ```
-
-Or add to your development environment in `flake.nix`:
-
-```nix
-{
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    openspec.url = "github:Fission-AI/OpenSpec";
-  };
-
-  outputs = { nixpkgs, openspec, ... }: {
-    devShells.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
-      buildInputs = [ openspec.packages.x86_64-linux.default ];
-    };
-  };
-}
-```
-
-## Verify Installation
-
-```bash
-openspec --version
-```
-
-## Next Steps
-
-After installing, initialize OpenSpec in your project:
-
-```bash
-cd your-project
-openspec init
-```
-
-See [Getting Started](getting-started.md) for a full walkthrough.
