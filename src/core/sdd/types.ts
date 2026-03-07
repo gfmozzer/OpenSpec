@@ -19,6 +19,14 @@ export const OriginTypeSchema = z.enum([
 ]);
 
 export const ScaleSchema = z.enum(['QUICK', 'STANDARD', 'LARGE']);
+export const ExecutionKindSchema = z.enum([
+  'feature',
+  'infra',
+  'migration',
+  'frontend_coverage',
+  'documentation',
+]);
+export const PlanningModeSchema = z.enum(['local_plan', 'direct_tasks']);
 
 export const DiscoveryTypeSchema = z.enum(['INS', 'DEB', 'RAD']);
 export const DiscoveryStatusSchema = z.enum([
@@ -101,6 +109,14 @@ export const BacklogItemSchema = z.object({
   blocked_by: StringArraySchema,
   touches: StringArraySchema,
   lock_domains: StringArraySchema,
+  parallel_group: NullableStringSchema,
+  execution_kind: ExecutionKindSchema.default('feature'),
+  planning_mode: PlanningModeSchema.default('local_plan'),
+  acceptance_refs: StringArraySchema,
+  produces: StringArraySchema,
+  consumes: StringArraySchema,
+  priority_score: z.number().default(0),
+  dependency_count: z.number().int().nonnegative().default(0),
   agent_role: NullableStringSchema,
   recommended_skills: StringArraySchema,
   change_name: NullableStringSchema,
@@ -111,6 +127,7 @@ export const BacklogItemSchema = z.object({
   last_sync_at: NullableStringSchema,
   archived_at: NullableStringSchema,
   done_at: NullableStringSchema,
+  unblocked_at: NullableStringSchema,
 });
 
 export const TechDebtRecordSchema = z.object({
@@ -131,6 +148,13 @@ export const FinalizeQueueItemSchema = z.object({
   completed_at: NullableStringSchema,
 });
 
+export const UnblockEventSchema = z.object({
+  feature_id: z.string().regex(ID_PATTERNS.feature, 'Invalid FEAT id format'),
+  unblocked_by: z.string().regex(ID_PATTERNS.feature, 'Invalid FEAT id format'),
+  created_at: NullableStringSchema,
+  status: z.enum(['NEW', 'SEEN']).default('NEW'),
+});
+
 export const SkillCatalogEntrySchema = z.object({
   id: z.string().min(1),
   source_repo: NullableStringSchema,
@@ -148,6 +172,51 @@ export const SkillBundleSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   skill_ids: StringArraySchema,
+});
+
+export const ArchitectureNodeSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  kind: z.string().min(1),
+  description: NullableStringSchema,
+  repo_paths: StringArraySchema,
+  depends_on: StringArraySchema,
+});
+
+export const ServiceRecordSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  responsibility: NullableStringSchema,
+  owner_refs: StringArraySchema,
+  repo_paths: StringArraySchema,
+  contracts: StringArraySchema,
+  external_dependencies: StringArraySchema,
+});
+
+export const TechStackRecordSchema = z.object({
+  layer: z.string().min(1),
+  technology: z.string().min(1),
+  version: NullableStringSchema,
+  purpose: NullableStringSchema,
+  constraints: StringArraySchema,
+});
+
+export const FrontendDecisionRecordSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  status: z.enum(['PROPOSED', 'APPROVED', 'DISCARDED', 'SUPERSEDED']).default('PROPOSED'),
+  decision: NullableStringSchema,
+  rationale: NullableStringSchema,
+  related_refs: StringArraySchema,
+  route_refs: StringArraySchema,
+  adr_refs: StringArraySchema,
+});
+
+export const RepoMapRecordSchema = z.object({
+  path: z.string().min(1),
+  kind: z.string().min(1),
+  service_ref: NullableStringSchema,
+  notes: NullableStringSchema,
 });
 
 export const FrontendGapRecordSchema = z.object({
@@ -210,6 +279,11 @@ export const FinalizeQueueStateSchema = z.object({
   items: z.array(FinalizeQueueItemSchema).default([]),
 });
 
+export const UnblockEventsStateSchema = z.object({
+  version: z.literal(1),
+  events: z.array(UnblockEventSchema).default([]),
+});
+
 export const SkillCatalogStateSchema = z.object({
   version: z.literal(1),
   skills: z.array(SkillCatalogEntrySchema).default([]),
@@ -226,20 +300,65 @@ export const FrontendMapStateSchema = z.object({
   routes: z.array(FrontendRouteRecordSchema).default([]),
 });
 
+export const ArchitectureStateSchema = z.object({
+  version: z.literal(1),
+  nodes: z.array(ArchitectureNodeSchema).default([]),
+});
+
+export const ServiceCatalogStateSchema = z.object({
+  version: z.literal(1),
+  services: z.array(ServiceRecordSchema).default([]),
+});
+
+export const TechStackStateSchema = z.object({
+  version: z.literal(1),
+  items: z.array(TechStackRecordSchema).default([]),
+});
+
+export const IntegrationContractsStateSchema = z.object({
+  version: z.literal(1),
+  contracts: z.array(z.string()).default([]),
+});
+
+export const FrontendDecisionsStateSchema = z.object({
+  version: z.literal(1),
+  items: z.array(FrontendDecisionRecordSchema).default([]),
+});
+
+export const RepoMapStateSchema = z.object({
+  version: z.literal(1),
+  items: z.array(RepoMapRecordSchema).default([]),
+});
+
 export type OriginType = z.infer<typeof OriginTypeSchema>;
 export type Scale = z.infer<typeof ScaleSchema>;
+export type ExecutionKind = z.infer<typeof ExecutionKindSchema>;
+export type PlanningMode = z.infer<typeof PlanningModeSchema>;
 export type DiscoveryRecord = z.infer<typeof DiscoveryRecordSchema>;
 export type BacklogItem = z.infer<typeof BacklogItemSchema>;
 export type TechDebtRecord = z.infer<typeof TechDebtRecordSchema>;
 export type FinalizeQueueItem = z.infer<typeof FinalizeQueueItemSchema>;
+export type UnblockEvent = z.infer<typeof UnblockEventSchema>;
 export type SkillCatalogEntry = z.infer<typeof SkillCatalogEntrySchema>;
 export type SkillBundle = z.infer<typeof SkillBundleSchema>;
+export type ArchitectureNode = z.infer<typeof ArchitectureNodeSchema>;
+export type ServiceRecord = z.infer<typeof ServiceRecordSchema>;
+export type TechStackRecord = z.infer<typeof TechStackRecordSchema>;
+export type FrontendDecisionRecord = z.infer<typeof FrontendDecisionRecordSchema>;
+export type RepoMapRecord = z.infer<typeof RepoMapRecordSchema>;
 export type FrontendGapRecord = z.infer<typeof FrontendGapRecordSchema>;
 export type FrontendRouteRecord = z.infer<typeof FrontendRouteRecordSchema>;
 export type DiscoveryIndexState = z.infer<typeof DiscoveryIndexStateSchema>;
 export type BacklogState = z.infer<typeof BacklogStateSchema>;
 export type TechDebtState = z.infer<typeof TechDebtStateSchema>;
 export type FinalizeQueueState = z.infer<typeof FinalizeQueueStateSchema>;
+export type UnblockEventsState = z.infer<typeof UnblockEventsStateSchema>;
 export type SkillCatalogState = z.infer<typeof SkillCatalogStateSchema>;
 export type FrontendGapsState = z.infer<typeof FrontendGapsStateSchema>;
 export type FrontendMapState = z.infer<typeof FrontendMapStateSchema>;
+export type ArchitectureState = z.infer<typeof ArchitectureStateSchema>;
+export type ServiceCatalogState = z.infer<typeof ServiceCatalogStateSchema>;
+export type TechStackState = z.infer<typeof TechStackStateSchema>;
+export type IntegrationContractsState = z.infer<typeof IntegrationContractsStateSchema>;
+export type FrontendDecisionsState = z.infer<typeof FrontendDecisionsStateSchema>;
+export type RepoMapState = z.infer<typeof RepoMapStateSchema>;

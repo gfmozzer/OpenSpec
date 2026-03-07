@@ -23,10 +23,21 @@ describe('SddCheckCommand', () => {
   });
 
   it('passes validation for a fresh initialized structure', async () => {
-    const report = await new SddCheckCommand().execute(testDir, { render: false });
+    const report = await new SddCheckCommand().execute(testDir, { render: true });
     expect(report.valid).toBe(true);
     expect(report.errors).toHaveLength(0);
     expect(report.summary.backlog).toBe(0);
+    expect(report.summary.documentation_sync).toBe(true);
+    expect(report.summary.core_views_stale).toBe(false);
+  });
+
+  it('warns when root agent documentation blocks are missing', async () => {
+    await fs.writeFile(path.join(testDir, 'AGENTS.md'), '# AGENTS\n', 'utf-8');
+    const report = await new SddCheckCommand().execute(testDir, { render: false });
+    expect(report.summary.documentation_sync).toBe(false);
+    expect(report.warnings.some((warning) => warning.includes('AGENTS.md::SDD:ROOT-AGENTS'))).toBe(
+      true
+    );
   });
 
   it('fails when required state file is missing', async () => {

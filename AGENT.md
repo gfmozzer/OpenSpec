@@ -1,6 +1,6 @@
-# OpenSpec Agent Guide (AGENTS.md)
+# OpenSpec Agent Guide (AGENT.md)
 
-This file follows the [AGENTS.md open format](https://agents.md/) and is the canonical instruction file for coding agents in this repository.
+This file mirrors `AGENTS.md` for tools that still require the singular filename.
 
 ## Scope
 

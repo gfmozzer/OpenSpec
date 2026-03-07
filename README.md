@@ -107,6 +107,26 @@ If you want the expanded workflow (`/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/
 >
 > Also works with pnpm, yarn, bun, and nix. [See installation options](docs/installation.md).
 
+<!-- SDD:ONBOARDING:START -->
+## Onboarding SDD
+
+Ordem de leitura para qualquer agente novo:
+1. `README.md` (este bloco)
+2. `.sdd/agente.md`
+3. `.sdd/core/index.md`
+4. `.sdd/core/arquitetura.md`
+5. `.sdd/core/servicos.md`
+6. `.sdd/core/spec-tecnologica.md`
+7. `.sdd/core/repo-map.md`
+8. `.sdd/core/frontend-decisions.md` (quando frontend estiver ativado)
+
+Comandos essenciais:
+- `openspec sdd onboard system`
+- `openspec sdd next`
+- `openspec sdd context FEAT-###`
+- `openspec sdd finalize --ref FEAT-###`
+<!-- SDD:ONBOARDING:END -->
+
 ## Docs
 
 → **[Getting Started](docs/getting-started.md)**: first steps<br>

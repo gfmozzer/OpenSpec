@@ -1,0 +1,21 @@
+flowchart TD
+  A[insight/debate/radar commands] --> B[.sdd/state/discovery-index.yaml]
+  B --> C[.sdd/discovery/1-insights]
+  B --> D[.sdd/discovery/2-debates]
+  B --> E[.sdd/discovery/3-radar]
+  B --> F[.sdd/discovery/4-discarded]
+
+  G[breakdown/start commands] --> H[.sdd/state/backlog.yaml]
+  H --> I[openspec/changes/<change-name>]
+  I --> J[openspec/changes/archive]
+  J --> K[.sdd/state/finalize-queue.yaml]
+  K --> L[finalize command]
+  L --> M[.sdd/core + .sdd/pendencias]
+
+  N[fgap add/done] --> O[.sdd/state/frontend-gaps.yaml]
+  N --> P[.sdd/state/frontend-map.yaml]
+  O --> M
+  P --> M
+
+  Q[skills suggest/sync] --> R[.sdd/state/skill-catalog.yaml]
+  R --> S[.<tool>/skills]

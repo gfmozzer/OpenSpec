@@ -9,6 +9,7 @@ import {
 } from './types.js';
 import { loadProjectSddConfig, loadStateSnapshot, resolveSddPaths } from './state.js';
 import { renderViews } from './views.js';
+import { validateSddGuideDocs } from './docs-sync.js';
 
 export interface SddCheckOptions {
   render?: boolean;
@@ -26,6 +27,28 @@ export interface SddCheckReport {
     frontendEnabled: boolean;
     frontendGaps: number;
     frontendRoutes: number;
+    progress_global: {
+      done: number;
+      total: number;
+      percent: number;
+    };
+    progress_by_radar: Array<{
+      radar_id: string;
+      done: number;
+      total: number;
+      percent: number;
+    }>;
+    ready_for_parallel: number;
+    blocked: number;
+    lock_conflicts: number;
+    documentation_sync: boolean;
+    core_views_stale: boolean;
+    missing_architecture_fields: string[];
+    graph: {
+      readyForParallel: number;
+      blocked: number;
+      lockConflicts: number;
+    };
   };
 }
 
@@ -58,13 +81,136 @@ function validateDiscoveryRecords(records: DiscoveryRecord[], errors: string[]):
 }
 
 function validateBacklog(items: BacklogItem[], warnings: string[]): void {
+  const ids = new Set(items.map((item) => item.id));
+  const lockOwners = new Map<string, string[]>();
+
   for (const item of items) {
     if (item.origin_type !== 'direct' && !item.origin_ref) {
       warnings.push(
         `Item de backlog ${item.id} tem origin_type="${item.origin_type}" mas origin_ref vazio`
       );
     }
+
+    for (const dep of item.blocked_by) {
+      if (!ids.has(dep)) {
+        warnings.push(`Item de backlog ${item.id} bloqueado por referencia inexistente: ${dep}`);
+      }
+    }
+
+    for (const lock of item.lock_domains) {
+      const owners = lockOwners.get(lock) || [];
+      owners.push(item.id);
+      lockOwners.set(lock, owners);
+    }
   }
+
+  for (const [lock, owners] of lockOwners.entries()) {
+    if (owners.length > 1) {
+      warnings.push(`Lock domain "${lock}" compartilhado por: ${owners.join(', ')}`);
+    }
+  }
+}
+
+function computeGraphSummary(items: BacklogItem[]): {
+  readyForParallel: number;
+  blocked: number;
+  lockConflicts: number;
+} {
+  const byId = new Map(items.map((item) => [item.id, item]));
+  const runnable = items.filter((item) => {
+    if (item.status === 'DONE' || item.status === 'ARCHIVED') return false;
+    if (item.status === 'BLOCKED') return false;
+    const unresolvedDeps = item.blocked_by.filter((depId) => {
+      const dep = byId.get(depId);
+      return !dep || dep.status !== 'DONE';
+    });
+    return unresolvedDeps.length === 0;
+  });
+
+  const lockOwners = new Map<string, string[]>();
+  let blocked = 0;
+  let readyForParallel = 0;
+
+  for (const item of items) {
+    if (item.status === 'DONE' || item.status === 'ARCHIVED') continue;
+    const unresolvedDeps = item.blocked_by.filter((depId) => {
+      const dep = byId.get(depId);
+      return !dep || dep.status !== 'DONE';
+    });
+    const isBlocked = item.status === 'BLOCKED' || unresolvedDeps.length > 0;
+    if (isBlocked) blocked++;
+  }
+
+  for (const item of runnable) {
+    for (const lock of item.lock_domains) {
+      const owners = lockOwners.get(lock) || [];
+      owners.push(item.id);
+      lockOwners.set(lock, owners);
+    }
+  }
+
+  const conflictingIds = new Set<string>();
+  for (const owners of lockOwners.values()) {
+    if (owners.length > 1) {
+      for (const id of owners) conflictingIds.add(id);
+    }
+  }
+
+  for (const item of runnable) {
+    const hasConflict = conflictingIds.has(item.id);
+    if (item.status === 'READY' && !hasConflict) {
+      readyForParallel++;
+    }
+  }
+
+  return {
+    readyForParallel,
+    blocked,
+    lockConflicts: conflictingIds.size,
+  };
+}
+
+function roundPercent(done: number, total: number): number {
+  if (total <= 0) return 0;
+  return Math.round((done / total) * 100);
+}
+
+function computeProgress(
+  items: BacklogItem[]
+): {
+  progressGlobal: { done: number; total: number; percent: number };
+  progressByRadar: Array<{ radar_id: string; done: number; total: number; percent: number }>;
+} {
+  const activeItems = items.filter((item) => item.status !== 'ARCHIVED');
+  const total = activeItems.length;
+  const done = activeItems.filter((item) => item.status === 'DONE').length;
+
+  const byRadar = new Map<string, { done: number; total: number }>();
+  for (const item of activeItems) {
+    if (item.origin_type !== 'radar' || !item.origin_ref) continue;
+    const current = byRadar.get(item.origin_ref) || { done: 0, total: 0 };
+    current.total += 1;
+    if (item.status === 'DONE') current.done += 1;
+    byRadar.set(item.origin_ref, current);
+  }
+
+  const progressByRadar = Array.from(byRadar.entries())
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([radar_id, values]) => ({
+      radar_id,
+      done: values.done,
+      total: values.total,
+      percent: roundPercent(values.done, values.total),
+    }));
+
+  return {
+    progressGlobal: {
+      done,
+      total,
+      percent: roundPercent(done, total),
+    },
+    progressByRadar,
+  };
 }
 
 function validateTechDebt(items: TechDebtRecord[], errors: string[]): void {
@@ -117,6 +263,7 @@ export class SddCheckCommand {
       paths.stateFiles.techDebt,
       paths.stateFiles.finalizeQueue,
       paths.stateFiles.skillCatalog,
+      paths.stateFiles.unblockEvents,
     ];
     for (const filePath of requiredFiles) {
       if (!existsSync(filePath)) {
@@ -130,6 +277,23 @@ export class SddCheckCommand {
       if (!existsSync(paths.stateFiles.frontendMap)) {
         errors.push(`Arquivo de estado de frontend ausente: ${path.relative(projectRoot, paths.stateFiles.frontendMap)}`);
       }
+    }
+    const canonicalFiles = [
+      paths.stateFiles.architecture,
+      paths.stateFiles.serviceCatalog,
+      paths.stateFiles.techStack,
+      paths.stateFiles.integrationContracts,
+      paths.stateFiles.repoMap,
+    ];
+    for (const filePath of canonicalFiles) {
+      if (!existsSync(filePath)) {
+        errors.push(`Arquivo canônico ausente: ${path.relative(projectRoot, filePath)}`);
+      }
+    }
+    if (config.frontend.enabled && !existsSync(paths.stateFiles.frontendDecisions)) {
+      errors.push(
+        `Arquivo canônico de frontend ausente: ${path.relative(projectRoot, paths.stateFiles.frontendDecisions)}`
+      );
     }
 
     if (errors.length > 0) {
@@ -145,6 +309,19 @@ export class SddCheckCommand {
           frontendEnabled: config.frontend.enabled,
           frontendGaps: 0,
           frontendRoutes: 0,
+          progress_global: { done: 0, total: 0, percent: 0 },
+          progress_by_radar: [],
+          ready_for_parallel: 0,
+          blocked: 0,
+          lock_conflicts: 0,
+          documentation_sync: false,
+          core_views_stale: true,
+          missing_architecture_fields: [],
+          graph: {
+            readyForParallel: 0,
+            blocked: 0,
+            lockConflicts: 0,
+          },
         },
       };
     }
@@ -165,6 +342,19 @@ export class SddCheckCommand {
           frontendEnabled: config.frontend.enabled,
           frontendGaps: 0,
           frontendRoutes: 0,
+          progress_global: { done: 0, total: 0, percent: 0 },
+          progress_by_radar: [],
+          ready_for_parallel: 0,
+          blocked: 0,
+          lock_conflicts: 0,
+          documentation_sync: false,
+          core_views_stale: true,
+          missing_architecture_fields: [],
+          graph: {
+            readyForParallel: 0,
+            blocked: 0,
+            lockConflicts: 0,
+          },
         },
       };
     }
@@ -182,10 +372,49 @@ export class SddCheckCommand {
       validateFrontendReferences(snapshot.frontendGaps.items, snapshot.backlog.items, errors, warnings);
     }
 
+    const missingArchitectureFields: string[] = [];
+    if (snapshot.architecture.nodes.length === 0) {
+      missingArchitectureFields.push('architecture.nodes vazio');
+    }
+    if (snapshot.serviceCatalog.services.length === 0) {
+      missingArchitectureFields.push('service-catalog.services vazio');
+    }
+    if (snapshot.techStack.items.length === 0) {
+      missingArchitectureFields.push('tech-stack.items vazio');
+    }
+    if (snapshot.integrationContracts.contracts.length === 0) {
+      missingArchitectureFields.push('integration-contracts.contracts vazio');
+    }
+    if (snapshot.repoMap.items.length === 0) {
+      missingArchitectureFields.push('repo-map.items vazio');
+    }
+    if (config.frontend.enabled && (snapshot.frontendDecisions?.items.length ?? 0) === 0) {
+      missingArchitectureFields.push('frontend-decisions.items vazio');
+    }
+
     const shouldRender = options.render ?? config.views.autoRender;
     if (shouldRender && errors.length === 0) {
       await renderViews(paths, config, snapshot);
     }
+    const coreFiles = [
+      path.join(paths.coreDir, 'index.md'),
+      path.join(paths.coreDir, 'servicos.md'),
+      path.join(paths.coreDir, 'spec-tecnologica.md'),
+      path.join(paths.coreDir, 'repo-map.md'),
+    ];
+    if (config.frontend.enabled) {
+      coreFiles.push(path.join(paths.coreDir, 'frontend-decisions.md'));
+    }
+    const coreViewsStale = coreFiles.some((file) => !existsSync(file));
+    const docsValidation = await validateSddGuideDocs(projectRoot, paths);
+    if (!docsValidation.documentationSync) {
+      warnings.push(
+        `Blocos de onboarding nao sincronizados: ${docsValidation.missingBlocks.join(', ')}`
+      );
+    }
+
+    const graph = computeGraphSummary(snapshot.backlog.items);
+    const progress = computeProgress(snapshot.backlog.items);
 
     return {
       valid: errors.length === 0,
@@ -199,6 +428,15 @@ export class SddCheckCommand {
         frontendEnabled: config.frontend.enabled,
         frontendGaps: snapshot.frontendGaps?.items.length ?? 0,
         frontendRoutes: snapshot.frontendMap?.routes.length ?? 0,
+        progress_global: progress.progressGlobal,
+        progress_by_radar: progress.progressByRadar,
+        ready_for_parallel: graph.readyForParallel,
+        blocked: graph.blocked,
+        lock_conflicts: graph.lockConflicts,
+        documentation_sync: docsValidation.documentationSync,
+        core_views_stale: coreViewsStale,
+        missing_architecture_fields: missingArchitectureFields,
+        graph,
       },
     };
   }

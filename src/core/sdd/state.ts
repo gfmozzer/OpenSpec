@@ -2,20 +2,34 @@ import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import {
+  ArchitectureStateSchema,
   BacklogStateSchema,
   DiscoveryIndexStateSchema,
   FinalizeQueueStateSchema,
+  IntegrationContractsStateSchema,
+  FrontendDecisionsStateSchema,
+  UnblockEventsStateSchema,
   FrontendGapsStateSchema,
   FrontendMapStateSchema,
+  RepoMapStateSchema,
   SkillCatalogStateSchema,
+  ServiceCatalogStateSchema,
+  TechStackStateSchema,
   TechDebtStateSchema,
+  type ArchitectureState,
   type BacklogState,
   type DiscoveryIndexState,
   type FinalizeQueueState,
+  type FrontendDecisionsState,
   type FrontendGapsState,
   type FrontendMapState,
+  type IntegrationContractsState,
+  type RepoMapState,
   type SkillCatalogState,
+  type ServiceCatalogState,
+  type TechStackState,
   type TechDebtState,
+  type UnblockEventsState,
 } from './types.js';
 
 export interface SddRuntimeConfig {
@@ -45,8 +59,15 @@ export interface SddPaths {
     techDebt: string;
     finalizeQueue: string;
     skillCatalog: string;
+    unblockEvents: string;
     frontendGaps: string;
     frontendMap: string;
+    architecture: string;
+    serviceCatalog: string;
+    techStack: string;
+    integrationContracts: string;
+    frontendDecisions: string;
+    repoMap: string;
   };
 }
 
@@ -56,8 +77,15 @@ export interface SddStateSnapshot {
   techDebt: TechDebtState;
   finalizeQueue: FinalizeQueueState;
   skillCatalog: SkillCatalogState;
+  unblockEvents: UnblockEventsState;
   frontendGaps?: FrontendGapsState;
   frontendMap?: FrontendMapState;
+  architecture: ArchitectureState;
+  serviceCatalog: ServiceCatalogState;
+  techStack: TechStackState;
+  integrationContracts: IntegrationContractsState;
+  frontendDecisions?: FrontendDecisionsState;
+  repoMap: RepoMapState;
 }
 
 const DEFAULT_SDD_CONFIG: SddRuntimeConfig = {
@@ -196,8 +224,15 @@ export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): 
       techDebt: path.join(stateDir, 'tech-debt.yaml'),
       finalizeQueue: path.join(stateDir, 'finalize-queue.yaml'),
       skillCatalog: path.join(stateDir, 'skill-catalog.yaml'),
+      unblockEvents: path.join(stateDir, 'unblock-events.yaml'),
       frontendGaps: path.join(stateDir, 'frontend-gaps.yaml'),
       frontendMap: path.join(stateDir, 'frontend-map.yaml'),
+      architecture: path.join(stateDir, 'architecture.yaml'),
+      serviceCatalog: path.join(stateDir, 'service-catalog.yaml'),
+      techStack: path.join(stateDir, 'tech-stack.yaml'),
+      integrationContracts: path.join(stateDir, 'integration-contracts.yaml'),
+      frontendDecisions: path.join(stateDir, 'frontend-decisions.yaml'),
+      repoMap: path.join(stateDir, 'repo-map.yaml'),
     },
   };
 }
@@ -209,6 +244,7 @@ export async function ensureBaseStructure(paths: SddPaths): Promise<void> {
     ensureDir(paths.discoveryDir),
     ensureDir(paths.pendenciasDir),
     ensureDir(paths.stateDir),
+    ensureDir(path.join(paths.memoryRoot, 'active')),
     ensureDir(paths.skillsDir),
     ensureDir(path.join(paths.skillsDir, 'curated')),
     ensureDir(path.join(paths.skillsDir, 'bundles')),
@@ -254,10 +290,17 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
   await writeYamlIfMissing(paths.stateFiles.techDebt, { version: 1, items: [] });
   await writeYamlIfMissing(paths.stateFiles.finalizeQueue, { version: 1, items: [] });
   await writeYamlIfMissing(paths.stateFiles.skillCatalog, { version: 1, skills: [], bundles: [] });
+  await writeYamlIfMissing(paths.stateFiles.unblockEvents, { version: 1, events: [] });
+  await writeYamlIfMissing(paths.stateFiles.architecture, { version: 1, nodes: [] });
+  await writeYamlIfMissing(paths.stateFiles.serviceCatalog, { version: 1, services: [] });
+  await writeYamlIfMissing(paths.stateFiles.techStack, { version: 1, items: [] });
+  await writeYamlIfMissing(paths.stateFiles.integrationContracts, { version: 1, contracts: [] });
+  await writeYamlIfMissing(paths.stateFiles.repoMap, { version: 1, items: [] });
 
   if (config.frontend.enabled) {
     await writeYamlIfMissing(paths.stateFiles.frontendGaps, { version: 1, items: [] });
     await writeYamlIfMissing(paths.stateFiles.frontendMap, { version: 1, routes: [] });
+    await writeYamlIfMissing(paths.stateFiles.frontendDecisions, { version: 1, items: [] });
   }
 
   await writeFileIfMissing(
@@ -271,6 +314,10 @@ async function readYaml(filePath: string): Promise<unknown> {
   return parseYaml(content);
 }
 
+async function writeYaml(filePath: string, value: unknown): Promise<void> {
+  await fs.writeFile(filePath, stringifyYaml(value), 'utf-8');
+}
+
 export async function loadStateSnapshot(
   paths: SddPaths,
   config: SddRuntimeConfig
@@ -280,12 +327,24 @@ export async function loadStateSnapshot(
   const techDebt = TechDebtStateSchema.parse(await readYaml(paths.stateFiles.techDebt));
   const finalizeQueue = FinalizeQueueStateSchema.parse(await readYaml(paths.stateFiles.finalizeQueue));
   const skillCatalog = SkillCatalogStateSchema.parse(await readYaml(paths.stateFiles.skillCatalog));
+  const unblockEvents = UnblockEventsStateSchema.parse(await readYaml(paths.stateFiles.unblockEvents));
+  const architecture = ArchitectureStateSchema.parse(await readYaml(paths.stateFiles.architecture));
+  const serviceCatalog = ServiceCatalogStateSchema.parse(await readYaml(paths.stateFiles.serviceCatalog));
+  const techStack = TechStackStateSchema.parse(await readYaml(paths.stateFiles.techStack));
+  const integrationContracts = IntegrationContractsStateSchema.parse(
+    await readYaml(paths.stateFiles.integrationContracts)
+  );
+  const repoMap = RepoMapStateSchema.parse(await readYaml(paths.stateFiles.repoMap));
 
   let frontendGaps: FrontendGapsState | undefined;
   let frontendMap: FrontendMapState | undefined;
+  let frontendDecisions: FrontendDecisionsState | undefined;
   if (config.frontend.enabled) {
     frontendGaps = FrontendGapsStateSchema.parse(await readYaml(paths.stateFiles.frontendGaps));
     frontendMap = FrontendMapStateSchema.parse(await readYaml(paths.stateFiles.frontendMap));
+    frontendDecisions = FrontendDecisionsStateSchema.parse(
+      await readYaml(paths.stateFiles.frontendDecisions)
+    );
   }
 
   return {
@@ -294,11 +353,117 @@ export async function loadStateSnapshot(
     techDebt,
     finalizeQueue,
     skillCatalog,
+    unblockEvents,
     frontendGaps,
     frontendMap,
+    architecture,
+    serviceCatalog,
+    techStack,
+    integrationContracts,
+    frontendDecisions,
+    repoMap,
   };
 }
 
 export async function loadSkillCatalogState(paths: SddPaths): Promise<SkillCatalogState> {
   return SkillCatalogStateSchema.parse(await readYaml(paths.stateFiles.skillCatalog));
+}
+
+export type SddCounterType = 'INS' | 'DEB' | 'RAD' | 'FEAT' | 'FGAP' | 'TD';
+
+function formatCounterId(prefix: SddCounterType, value: number): string {
+  return `${prefix}-${String(value).padStart(3, '0')}`;
+}
+
+export function nowIso(): string {
+  return new Date().toISOString();
+}
+
+export async function saveDiscoveryIndexState(
+  paths: SddPaths,
+  state: DiscoveryIndexState
+): Promise<void> {
+  await writeYaml(paths.stateFiles.discoveryIndex, state);
+}
+
+export async function saveBacklogState(paths: SddPaths, state: BacklogState): Promise<void> {
+  await writeYaml(paths.stateFiles.backlog, state);
+}
+
+export async function saveTechDebtState(paths: SddPaths, state: TechDebtState): Promise<void> {
+  await writeYaml(paths.stateFiles.techDebt, state);
+}
+
+export async function saveFinalizeQueueState(
+  paths: SddPaths,
+  state: FinalizeQueueState
+): Promise<void> {
+  await writeYaml(paths.stateFiles.finalizeQueue, state);
+}
+
+export async function saveSkillCatalogState(
+  paths: SddPaths,
+  state: SkillCatalogState
+): Promise<void> {
+  await writeYaml(paths.stateFiles.skillCatalog, state);
+}
+
+export async function saveUnblockEventsState(
+  paths: SddPaths,
+  state: UnblockEventsState
+): Promise<void> {
+  await writeYaml(paths.stateFiles.unblockEvents, state);
+}
+
+export async function saveFrontendGapsState(
+  paths: SddPaths,
+  state: FrontendGapsState
+): Promise<void> {
+  await writeYaml(paths.stateFiles.frontendGaps, state);
+}
+
+export async function saveFrontendMapState(paths: SddPaths, state: FrontendMapState): Promise<void> {
+  await writeYaml(paths.stateFiles.frontendMap, state);
+}
+
+export async function saveArchitectureState(paths: SddPaths, state: ArchitectureState): Promise<void> {
+  await writeYaml(paths.stateFiles.architecture, state);
+}
+
+export async function saveServiceCatalogState(
+  paths: SddPaths,
+  state: ServiceCatalogState
+): Promise<void> {
+  await writeYaml(paths.stateFiles.serviceCatalog, state);
+}
+
+export async function saveTechStackState(paths: SddPaths, state: TechStackState): Promise<void> {
+  await writeYaml(paths.stateFiles.techStack, state);
+}
+
+export async function saveIntegrationContractsState(
+  paths: SddPaths,
+  state: IntegrationContractsState
+): Promise<void> {
+  await writeYaml(paths.stateFiles.integrationContracts, state);
+}
+
+export async function saveFrontendDecisionsState(
+  paths: SddPaths,
+  state: FrontendDecisionsState
+): Promise<void> {
+  await writeYaml(paths.stateFiles.frontendDecisions, state);
+}
+
+export async function saveRepoMapState(paths: SddPaths, state: RepoMapState): Promise<void> {
+  await writeYaml(paths.stateFiles.repoMap, state);
+}
+
+export async function allocateEntityId(paths: SddPaths, type: SddCounterType): Promise<string> {
+  const discoveryIndex = DiscoveryIndexStateSchema.parse(await readYaml(paths.stateFiles.discoveryIndex));
+  const current = discoveryIndex.counters[type] ?? 0;
+  const next = current + 1;
+  discoveryIndex.counters[type] = next;
+  await saveDiscoveryIndexState(paths, discoveryIndex);
+  return formatCounterId(type, next);
 }

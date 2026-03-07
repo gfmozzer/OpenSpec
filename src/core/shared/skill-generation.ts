@@ -33,6 +33,15 @@ import {
 } from '../templates/skill-templates.js';
 import type { CommandContent } from '../command-generation/index.js';
 
+const PT_BR_GUARDRAIL = '**Idioma obrigatorio:** responda em portugues do Brasil (pt-BR), salvo solicitacao explicita em outro idioma.';
+
+function ensurePtBrGuardrail(content: string): string {
+  if (content.toLowerCase().includes('idioma obrigatorio')) {
+    return content;
+  }
+  return `${PT_BR_GUARDRAIL}\n\n${content}`;
+}
+
 /**
  * Skill template with directory name and workflow ID mapping.
  */
@@ -117,7 +126,7 @@ export function getCommandContents(workflowFilter?: readonly string[]): CommandC
     description: template.description,
     category: template.category,
     tags: template.tags,
-    body: template.content,
+    body: ensurePtBrGuardrail(template.content),
   }));
 }
 
@@ -133,9 +142,10 @@ export function generateSkillContent(
   generatedByVersion: string,
   transformInstructions?: (instructions: string) => string
 ): string {
-  const instructions = transformInstructions
+  const transformedInstructions = transformInstructions
     ? transformInstructions(template.instructions)
     : template.instructions;
+  const instructions = ensurePtBrGuardrail(transformedInstructions);
 
   return `---
 name: ${template.name}
