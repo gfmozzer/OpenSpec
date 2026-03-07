@@ -1,119 +1,347 @@
-<p align="center">
-  <a href="https://github.com/Fission-AI/OpenSpec">
-    <picture>
-      <source srcset="assets/openspec_bg.png">
-      <img src="assets/openspec_bg.png" alt="OpenSpec logo">
-    </picture>
-  </a>
-</p>
+# OpenSDD
 
-<p align="center">
-  <a href="https://github.com/Fission-AI/OpenSpec/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Fission-AI/OpenSpec/actions/workflows/ci.yml/badge.svg" /></a>
-  <a href="https://www.npmjs.com/package/opensdd"><img alt="npm version" src="https://img.shields.io/npm/v/opensdd?style=flat-square" /></a>
-  <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" /></a>
-  <a href="https://discord.gg/YctCnvvshC"><img alt="Discord" src="https://img.shields.io/discord/1411657095639601154?style=flat-square&logo=discord&logoColor=white&label=Discord&suffix=%20online" /></a>
-</p>
+OpenSDD e uma evolucao do OpenSpec focada em memoria operacional, planejamento rastreavel e handoff entre agentes.
 
-<details>
-<summary><strong>The most loved spec framework.</strong></summary>
+O objetivo nao e apenas criar specs. O objetivo e permitir que um projeto grande continue compreensivel ao longo do tempo, mesmo quando:
+- novas ideias aparecem no meio da implementacao;
+- existem varios agentes trabalhando em paralelo;
+- o frontend fica defasado em relacao ao backend;
+- um agente novo entra no repositorio sem contexto previo;
+- o sistema ja existe e precisa ser absorvido sem reler todo o codigo.
 
-[![Stars](https://img.shields.io/github/stars/Fission-AI/OpenSpec?style=flat-square&label=Stars)](https://github.com/Fission-AI/OpenSpec/stargazers)
-[![Downloads](https://img.shields.io/npm/dm/opensdd?style=flat-square&label=Downloads/mo)](https://www.npmjs.com/package/opensdd)
-[![Contributors](https://img.shields.io/github/contributors/Fission-AI/OpenSpec?style=flat-square&label=Contributors)](https://github.com/Fission-AI/OpenSpec/graphs/contributors)
+## O que o OpenSDD faz
 
-</details>
-<p></p>
-Our philosophy:
+O OpenSDD organiza o desenvolvimento em 4 camadas:
 
-```text
-→ fluid not rigid
-→ iterative not waterfall
-→ easy not complex
-→ built for brownfield not just greenfield
-→ scalable from personal projects to enterprises
-```
+1. Descoberta
+- `INSIGHT`: ideia bruta
+- `DEBATE`: discussao estruturada
+- `RADAR`: ideia aprovada para futuro planejamento
+- `DISCARDED`: ideia rejeitada com motivo registrado
 
-> [!TIP]
-> **New workflow now available!** We've rebuilt OpenSpec with a new artifact-guided workflow.
->
-> Run `/opsx:propose "your idea"` to get started. → [Learn more here](docs/opsx.md)
+2. Planejamento
+- `RAD` pode ser quebrado em `FEATs`
+- `FEAT` vira unidade executavel
+- o backlog registra dependencias, bloqueios e paralelizacao
 
-<p align="center">
-  Follow <a href="https://x.com/0xTab">@0xTab on X</a> for updates · Join the <a href="https://discord.gg/YctCnvvshC">OpenSpec Discord</a> for help and questions.
-</p>
+3. Execucao
+- cada `FEAT` ganha um workspace proprio em `.sdd/active/FEAT-###/`
+- esse workspace tem `spec`, `plan`, `tasks` e `changelog`
 
-### Teams
+4. Memoria operacional
+- `.sdd/state/*.yaml` e a fonte canonica
+- `.sdd/core/*.md` sao views operacionais geradas a partir do estado
+- `README.md`, `AGENTS.md`, `AGENT.md` e `.sdd/AGENT.md` orientam humanos e agentes
 
-Using OpenSpec in a team? [Email here](mailto:teams@opensdd.dev) for access to our Slack channel.
+## O que fica instalado no projeto
 
-<!-- TODO: Add GIF demo of /opsx:propose → /opsx:archive workflow -->
+Depois do bootstrap, o projeto passa a ter:
 
-## See it in action
+- `README.md`
+- `AGENTS.md`
+- `AGENT.md`
+- `.sdd/`
+- `.sdd/state/`
+- `.sdd/core/`
+- `.sdd/discovery/`
+- `.sdd/pendencias/`
+- `.sdd/active/`
+- `.sdd/templates/`
+- `.sdd/skills/curated/`
+- `.sdd/deposito/`
+- `openspec/changes/`
 
-```text
-You: /opsx:propose add-dark-mode
-AI:  Created openspec/changes/add-dark-mode/
-     ✓ proposal.md — why we're doing this, what's changing
-     ✓ specs/       — requirements and scenarios
-     ✓ design.md    — technical approach
-     ✓ tasks.md     — implementation checklist
-     Ready for implementation!
+Dentro de `.sdd/` ficam:
 
-You: /opsx:apply
-AI:  Implementing tasks...
-     ✓ 1.1 Add theme context provider
-     ✓ 1.2 Create toggle component
-     ✓ 2.1 Add CSS variables
-     ✓ 2.2 Wire up localStorage
-     All tasks complete!
+- memoria operacional do projeto
+- backlog executavel
+- debates e radar
+- gaps e decisoes de frontend
+- skills curadas
+- documentacao viva do sistema
 
-You: /opsx:archive
-AI:  Archived to openspec/changes/archive/2025-01-23-add-dark-mode/
-     Specs updated. Ready for the next feature.
-```
+## Instalacao global
 
-<details>
-<summary><strong>OpenSpec Dashboard</strong></summary>
+Requer:
 
-<p align="center">
-  <img src="assets/openspec_dashboard.png" alt="OpenSpec dashboard preview" width="90%">
-</p>
+- Node.js `20.19.0` ou superior
+- `npm`
 
-</details>
-
-## Quick Start
-
-**Requires Node.js 20.19.0 or higher.**
-
-Install globally from GitHub:
+Instalacao global a partir do repositorio publico:
 
 ```bash
 npm install -g github:gfmozzer/OpenSpec
 ```
 
-Then navigate to your project directory and initialize:
+Depois confira:
 
 ```bash
-cd your-project
-opensdd install
+opensdd --version
 ```
 
-This command now bootstraps the full stack in one step:
-- base runtime/config
+Se voce estiver desenvolvendo este fork localmente:
+
+```bash
+pnpm install
+pnpm run build
+npm install -g .
+```
+
+## Como iniciar em um projeto novo
+
+Entre no repositorio onde voce quer usar o sistema e rode:
+
+```bash
+opensdd install --tools none
+```
+
+Se quiser integrar ferramentas suportadas no bootstrap:
+
+```bash
+opensdd install --tools all
+```
+
+Ou somente algumas:
+
+```bash
+opensdd install --tools codex,cursor,claude
+```
+
+Esse comando instala de uma vez:
+
+- a base do runtime
+- `openspec/config.yaml`
 - `.sdd/`
-- canonical YAML state
+- skills curadas
 - templates
-- curated skills
-- root docs and agent guides
+- estados YAML canonicos
+- documentos iniciais do projeto
 
-Now tell your AI: `/opsx:propose <what-you-want-to-build>`
+Se voce nao quiser habilitar frontend no bootstrap:
 
-If you want the expanded workflow (`/opsx:new`, `/opsx:continue`, `/opsx:ff`, `/opsx:verify`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`), select it with `opensdd config profile` and apply with `opensdd update`.
+```bash
+opensdd install --tools none --no-frontend
+```
 
-> [!NOTE]
-> Not sure if your tool is supported? [View the full list](docs/supported-tools.md) – we support 20+ tools and growing.
->
-> Also works with pnpm, yarn, bun, and nix. [See installation options](docs/installation.md).
+## Como absorver um projeto que ja existe
+
+Se o projeto ja esta em andamento, o primeiro passo depois do `install` e inicializar o contexto:
+
+```bash
+opensdd sdd init-context
+opensdd sdd check --render
+opensdd sdd onboard system
+```
+
+O `init-context` serve para:
+
+- inspecionar a base existente
+- preencher contexto inicial de arquitetura, stack, servicos e mapa do repositorio
+- gerar a memoria inicial do sistema
+- preparar onboarding para agentes novos
+
+Em projetos grandes, esse bootstrap inicial nao substitui consolidacao progressiva. Ele cria uma base inicial para que o processo passe a evoluir de forma rastreavel.
+
+## Como usar no dia a dia
+
+Fluxo principal:
+
+1. Ver o sistema como um todo
+
+```bash
+opensdd sdd onboard system
+```
+
+2. Ver o que pode comecar agora
+
+```bash
+opensdd sdd next
+```
+
+3. Iniciar uma feature
+
+```bash
+opensdd sdd start FEAT-001
+```
+
+4. Ler o contexto da feature
+
+```bash
+opensdd sdd context FEAT-001
+```
+
+5. Implementar
+
+6. Consolidar memoria ao final
+
+```bash
+opensdd sdd finalize --ref FEAT-001
+```
+
+Regra operacional central:
+
+uma feature so esta realmente concluida quando a documentacao afetada foi atualizada antes do `finalize`.
+
+Isso inclui, quando houver impacto:
+
+- `README.md`
+- `AGENTS.md`
+- `AGENT.md`
+- `.sdd/README.md`
+- `.sdd/AGENT.md`
+- `.sdd/core/*.md`
+- gaps e decisoes de frontend
+
+## Como lidar com ideias novas durante a implementacao
+
+Quando surgir uma ideia no meio do desenvolvimento:
+
+```bash
+opensdd sdd insight "descricao da ideia"
+opensdd sdd debate INS-001
+opensdd sdd decide DEB-001 --outcome radar
+opensdd sdd breakdown RAD-001 --mode graph --incremental
+```
+
+Esse fluxo serve para nao enfiar no backlog algo que ainda nao foi pensado.
+
+## Como lidar com PRD, wireframe, HTML e material bruto
+
+O OpenSDD separa descoberta de ingestao de documentos consolidados.
+
+Se voce ja possui:
+
+- PRD
+- RFC
+- historias do usuario
+- wireframes
+- imagens
+- html mockado
+- referencias visuais
+
+esses materiais devem ir para:
+
+```text
+.sdd/deposito/
+```
+
+Estrutura:
+
+```text
+.sdd/deposito/
+├── prds/
+├── rfcs/
+├── historias/
+├── wireframes/
+├── html-mocks/
+├── referencias-visuais/
+├── entrevistas/
+├── anexos/
+└── legado/
+```
+
+Depois disso, o sistema usa o indice de fontes e as skills curadas para transformar esse material em:
+
+- contexto canonico
+- radar
+- features
+- gaps e decisoes de frontend
+- insights apenas quando houver ambiguidade real
+
+## Skills incluidas no bootstrap
+
+O bootstrap do SDD instala curadoria local em:
+
+```text
+.sdd/skills/curated/
+```
+
+Entre elas:
+
+- `repo-context-bootstrap`
+- `source-intake-sdd`
+- `business-extractor-sdd`
+- `frontend-extractor-sdd`
+- `planning-normalizer-sdd`
+
+Tambem sao instaladas skills curadas de apoio para execucao e planejamento.
+
+## Arquivos importantes para onboarding
+
+Um agente novo deve seguir esta ordem:
+
+1. `README.md`
+2. `.sdd/AGENT.md`
+3. `.sdd/core/index.md`
+4. `.sdd/core/arquitetura.md`
+5. `.sdd/core/servicos.md`
+6. `.sdd/core/spec-tecnologica.md`
+7. `.sdd/core/repo-map.md`
+8. `.sdd/core/fontes.md`
+9. `.sdd/core/frontend-decisions.md`
+
+## Comandos principais
+
+Bootstrap:
+
+- `opensdd install --tools none`
+- `opensdd install --tools all`
+- `opensdd sdd init-context`
+- `opensdd sdd check --render`
+
+Onboarding e operacao:
+
+- `opensdd sdd onboard system`
+- `opensdd sdd next`
+- `opensdd sdd start FEAT-###`
+- `opensdd sdd context FEAT-###`
+- `opensdd sdd finalize --ref FEAT-###`
+
+Descoberta:
+
+- `opensdd sdd insight "..."`
+- `opensdd sdd debate INS-###`
+- `opensdd sdd decide DEB-### --outcome radar|discard`
+- `opensdd sdd breakdown RAD-### --mode graph --incremental`
+
+## Documentacao
+
+Guia detalhado em portugues:
+
+- [Manual SDD PT-BR](docs/sdd-manual-pt-br.md)
+
+Guia interno do sistema:
+
+- [.sdd/README.md](.sdd/README.md)
+- [.sdd/AGENT.md](.sdd/AGENT.md)
+
+## Desenvolvimento local
+
+```bash
+pnpm install
+pnpm run build
+pnpm test
+```
+
+Loop local do CLI:
+
+```bash
+pnpm run dev:cli
+```
+
+## Estado atual da distribuicao
+
+O comando global oficial deste fork e:
+
+```bash
+opensdd
+```
+
+O caminho de distribuicao suportado por este repositorio e instalacao global a partir do GitHub do fork ou por pacote empacotado.
+
+## Licenca
+
+MIT
 
 <!-- SDD:ONBOARDING:START -->
 ## Onboarding SDD
@@ -135,99 +363,3 @@ Comandos essenciais:
 - `opensdd sdd context FEAT-###`
 - `opensdd sdd finalize --ref FEAT-###`
 <!-- SDD:ONBOARDING:END -->
-
-## Docs
-
-→ **[Getting Started](docs/getting-started.md)**: first steps<br>
-→ **[Workflows](docs/workflows.md)**: combos and patterns<br>
-→ **[Commands](docs/commands.md)**: slash commands & skills<br>
-→ **[CLI](docs/cli.md)**: terminal reference<br>
-→ **[Manual SDD PT-BR](docs/sdd-manual-pt-br.md)**: guia em portugues do Brasil para o fluxo SDD<br>
-→ **[Supported Tools](docs/supported-tools.md)**: tool integrations & install paths<br>
-→ **[Concepts](docs/concepts.md)**: how it all fits<br>
-→ **[Multi-Language](docs/multi-language.md)**: multi-language support<br>
-→ **[Customization](docs/customization.md)**: make it yours
-
-
-## Why OpenSpec?
-
-AI coding assistants are powerful but unpredictable when requirements live only in chat history. OpenSpec adds a lightweight spec layer so you agree on what to build before any code is written.
-
-- **Agree before you build** — human and AI align on specs before code gets written
-- **Stay organized** — each change gets its own folder with proposal, specs, design, and tasks
-- **Work fluidly** — update any artifact anytime, no rigid phase gates
-- **Use your tools** — works with 20+ AI assistants via slash commands
-
-### How we compare
-
-**vs. [Spec Kit](https://github.com/github/spec-kit)** (GitHub) — Thorough but heavyweight. Rigid phase gates, lots of Markdown, Python setup. OpenSpec is lighter and lets you iterate freely.
-
-**vs. [Kiro](https://kiro.dev)** (AWS) — Powerful but you're locked into their IDE and limited to Claude models. OpenSpec works with the tools you already use.
-
-**vs. nothing** — AI coding without specs means vague prompts and unpredictable results. OpenSpec brings predictability without the ceremony.
-
-## Updating OpenSpec
-
-**Upgrade the global installation**
-
-```bash
-npm install -g github:gfmozzer/OpenSpec
-```
-
-**Refresh agent instructions**
-
-Run this inside each project to regenerate AI guidance and ensure the latest slash commands are active:
-
-```bash
-opensdd update
-```
-
-## Usage Notes
-
-**Model selection**: OpenSpec works best with high-reasoning models. We recommend Opus 4.5 and GPT 5.2 for both planning and implementation.
-
-**Context hygiene**: OpenSpec benefits from a clean context window. Clear your context before starting implementation and maintain good context hygiene throughout your session.
-
-## Contributing
-
-**Small fixes** — Bug fixes, typo corrections, and minor improvements can be submitted directly as PRs.
-
-**Larger changes** — For new features, significant refactors, or architectural changes, please submit an OpenSpec change proposal first so we can align on intent and goals before implementation begins.
-
-When writing proposals, keep the OpenSpec philosophy in mind: we serve a wide variety of users across different coding agents, models, and use cases. Changes should work well for everyone.
-
-**AI-generated code is welcome** — as long as it's been tested and verified. PRs containing AI-generated code should mention the coding agent and model used (e.g., "Generated with Claude Code using claude-opus-4-5-20251101").
-
-### Development
-
-- Install dependencies: `pnpm install`
-- Build: `pnpm run build`
-- Test: `pnpm test`
-- Develop CLI locally: `pnpm run dev` or `pnpm run dev:cli`
-- Conventional commits (one-line): `type(scope): subject`
-
-## Other
-
-<details>
-<summary><strong>Telemetry</strong></summary>
-
-OpenSpec collects anonymous usage stats.
-
-We collect only command names and version to understand usage patterns. No arguments, paths, content, or PII. Automatically disabled in CI.
-
-**Opt-out:** `export OPENSPEC_TELEMETRY=0` or `export DO_NOT_TRACK=1`
-
-</details>
-
-<details>
-<summary><strong>Maintainers & Advisors</strong></summary>
-
-See [MAINTAINERS.md](MAINTAINERS.md) for the list of core maintainers and advisors who help guide the project.
-
-</details>
-
-
-
-## License
-
-MIT
