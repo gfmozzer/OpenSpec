@@ -16,7 +16,7 @@ import { PALETTE } from './styles/palette.js';
 import { isInteractive } from '../utils/interactive.js';
 import { serializeConfig } from './config-prompts.js';
 import { generateCommands, CommandAdapterRegistry, } from './command-generation/index.js';
-import { CLI_NAME } from './branding.js';
+import { CLI_ISSUES_URL, CLI_NAME, CLI_PRODUCT_NAME, CLI_REPOSITORY_URL } from './branding.js';
 import { detectLegacyArtifacts, cleanupLegacyArtifacts, formatCleanupSummary, formatDetectionSummary, } from './legacy-cleanup.js';
 import { getToolsWithSkillsDir, getToolStates, getSkillTemplates, getCommandContents, generateSkillContent, } from './shared/index.js';
 import { getGlobalConfig } from './global-config.js';
@@ -333,7 +333,7 @@ export class InitCommand {
             }
             return;
         }
-        const spinner = this.startSpinner('Creating OpenSpec structure...');
+        const spinner = this.startSpinner(`Creating ${CLI_PRODUCT_NAME} structure...`);
         const directories = [
             openspecPath,
             path.join(openspecPath, 'specs'),
@@ -345,7 +345,7 @@ export class InitCommand {
         }
         spinner.stopAndPersist({
             symbol: PALETTE.white('▌'),
-            text: PALETTE.white('OpenSpec structure created'),
+            text: PALETTE.white(`${CLI_PRODUCT_NAME} structure created`),
         });
     }
     // ═══════════════════════════════════════════════════════════
@@ -460,7 +460,7 @@ export class InitCommand {
     // ═══════════════════════════════════════════════════════════
     displaySuccessMessage(projectPath, tools, results, configStatus) {
         console.log();
-        console.log(chalk.bold('OpenSpec Setup Complete'));
+        console.log(chalk.bold(`${CLI_PRODUCT_NAME} Setup Complete`));
         console.log();
         // Show created vs refreshed tools
         if (results.createdTools.length > 0) {
@@ -535,8 +535,8 @@ export class InitCommand {
         }
         // Links
         console.log();
-        console.log(`Learn more: ${chalk.cyan('https://github.com/Fission-AI/OpenSpec')}`);
-        console.log(`Feedback:   ${chalk.cyan('https://github.com/Fission-AI/OpenSpec/issues')}`);
+        console.log(`Learn more: ${chalk.cyan(CLI_REPOSITORY_URL)}`);
+        console.log(`Feedback:   ${chalk.cyan(CLI_ISSUES_URL)}`);
         // Restart instruction if any tools were configured
         if (results.createdTools.length > 0 || results.refreshedTools.length > 0) {
             console.log();
