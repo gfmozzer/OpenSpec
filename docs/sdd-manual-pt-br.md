@@ -276,7 +276,7 @@ Isso cria:
 - os guias `README.md`, `AGENTS.md`, `AGENT.md` e `.sdd/AGENT.md`;
 - as views em `.sdd/core/` e `.sdd/pendencias/`.
 - o catalogo curado de 64 skills em `.sdd/state/skill-catalog.yaml`;
-- as skills curadas locais em `.sdd/skills/curated/`.
+- as skills locais em `.sdd/skills/curated/` (layout legacy) ou `.sdd/habilidades/skills/` (layout pt-BR).
 - os templates em `.sdd/templates/`.
 - a pasta `.sdd/deposito/` para documentos brutos.
 - o índice `.sdd/state/source-index.yaml` para rastrear essas fontes.
@@ -702,6 +702,8 @@ Observacao:
 | `opensdd sdd fgap add ...` | Registra gap de frontend |
 | `opensdd sdd fgap done ...` | Marca gap resolvido |
 | `opensdd sdd skills bundles` | Lista bundles |
+| `opensdd sdd skills usar --ids ...` | Gera prompt pronto para invocar skills no agente |
+| `opensdd sdd skills invocar --ids ...` | Alias em portugues para `opensdd sdd skills usar` |
 | `opensdd sdd skills suggest ...` | Sugere skills |
 | `opensdd sdd skills sync --all` | Sincroniza skills curadas |
 

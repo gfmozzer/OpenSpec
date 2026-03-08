@@ -85,6 +85,8 @@ export interface SddPaths {
   skillsDir: string;
   skillsCuratedDir: string;
   skillsBundlesDir: string;
+  skillsCuratedFolderName: string;
+  skillsBundlesFolderName: string;
   templatesDir: string;
   promptsDir: string;
   depositoDir: string;
@@ -142,11 +144,21 @@ const LEGACY_LAYOUT_FOLDERS = {
 const PT_BR_LAYOUT_FOLDERS = {
   discovery: 'descoberta',
   planning: 'planejamento',
-  skills: 'skills',
+  skills: 'habilidades',
   templates: 'modelos',
   deposito: 'deposito',
   active: 'execucao',
 } as const;
+
+function skillSubfoldersForLayout(layout: 'legacy' | 'pt-BR'): {
+  curated: string;
+  bundles: string;
+} {
+  if (layout === 'pt-BR') {
+    return { curated: 'skills', bundles: 'pacotes' };
+  }
+  return { curated: 'curated', bundles: 'bundles' };
+}
 
 function defaultFoldersForLayout(layout: 'legacy' | 'pt-BR'): SddRuntimeConfig['folders'] {
   return layout === 'pt-BR'
@@ -338,8 +350,9 @@ export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): 
   const discoveryDir = path.join(memoryRoot, config.folders.discovery);
   const pendenciasDir = path.join(memoryRoot, config.folders.planning);
   const skillsDir = path.join(memoryRoot, config.folders.skills);
-  const skillsCuratedDir = path.join(skillsDir, 'curated');
-  const skillsBundlesDir = path.join(skillsDir, 'bundles');
+  const skillSubfolders = skillSubfoldersForLayout(config.layout);
+  const skillsCuratedDir = path.join(skillsDir, skillSubfolders.curated);
+  const skillsBundlesDir = path.join(skillsDir, skillSubfolders.bundles);
   const templatesDir = path.join(memoryRoot, config.folders.templates);
   const promptsDir = path.join(memoryRoot, 'prompts');
   const depositoDir = path.join(memoryRoot, config.folders.deposito);
@@ -360,6 +373,8 @@ export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): 
     skillsDir,
     skillsCuratedDir,
     skillsBundlesDir,
+    skillsCuratedFolderName: skillSubfolders.curated,
+    skillsBundlesFolderName: skillSubfolders.bundles,
     templatesDir,
     promptsDir,
     depositoDir,

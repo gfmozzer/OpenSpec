@@ -117,6 +117,9 @@ describe('SddInitCommand', () => {
     expect(await exists(path.join(testDir, '.sdd', 'descoberta'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'planejamento'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'execucao'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'habilidades'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'habilidades', 'skills'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'habilidades', 'pacotes'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'modelos'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'descoberta', '1-insights'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'planejamento', 'backlog-features.md'))).toBe(false);
@@ -131,6 +134,7 @@ describe('SddInitCommand', () => {
     expect(projectConfig.sdd.layout).toBe('pt-BR');
     expect(projectConfig.sdd.folders.discovery).toBe('descoberta');
     expect(projectConfig.sdd.folders.planning).toBe('planejamento');
+    expect(projectConfig.sdd.folders.skills).toBe('habilidades');
     expect(projectConfig.sdd.folders.active).toBe('execucao');
     expect(projectConfig.sdd.folders.templates).toBe('modelos');
   });

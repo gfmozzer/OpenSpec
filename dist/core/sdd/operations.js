@@ -2106,6 +2106,97 @@ description: ${entry.description || entry.title}
 ${entry.description || 'Aplicar esta skill como apoio especializado durante o planejamento e execucao.'}
 `;
 }
+async function resolveSkillFileRef(paths, skillId) {
+    const candidates = [
+        path.join(paths.skillsCuratedDir, skillId, 'SKILL.md'),
+        path.join(paths.skillsCuratedDir, `sdd-curated-${skillId}`, 'SKILL.md'),
+        path.join(paths.skillsDir, 'curated', skillId, 'SKILL.md'),
+        path.join(paths.skillsDir, 'curated', `sdd-curated-${skillId}`, 'SKILL.md'),
+    ];
+    for (const candidate of candidates) {
+        if (await pathExists(candidate)) {
+            return relProjectPath(paths, candidate);
+        }
+    }
+    return relProjectPath(paths, path.join(paths.skillsCuratedDir, skillId, 'SKILL.md'));
+}
+function buildSkillInvocationPrompt(input) {
+    const headerObjective = input.objective?.trim()
+        ? `Objetivo: ${input.objective.trim()}`
+        : 'Objetivo: executar a tarefa usando as skills selecionadas.';
+    const refLine = input.ref ? `Contexto de referencia: ${input.ref}` : '';
+    const skillsLines = input.skills
+        .map((skill, index) => `${index + 1}. ${skill.id} (${skill.path})${skill.reason ? ` - ${skill.reason}` : ''}`)
+        .join('\n');
+    return `Use as skills abaixo nesta ordem e execute a tarefa com rastreabilidade:
+
+${headerObjective}
+${refLine}
+
+Skills obrigatorias:
+${skillsLines}
+
+Regras:
+1. Cite as skills que esta aplicando no inicio da resposta.
+2. Siga a ordem definida acima.
+3. Se faltar contexto, consulte primeiro o estado canônico em .sdd/state/*.yaml.
+4. Finalize com proximos comandos OpenSDD recomendados.`;
+}
+export class SddSkillsInvokeCommand {
+    async execute(projectRoot, options) {
+        const { paths } = await getRuntime(projectRoot);
+        const catalog = await loadSkillCatalogState(paths);
+        const explicitIds = (options?.ids || []).map((id) => id.trim()).filter(Boolean);
+        const selectedEntries = [];
+        if (explicitIds.length > 0) {
+            const byId = new Map(catalog.skills.map((skill) => [skill.id, skill]));
+            for (const id of explicitIds) {
+                const skill = byId.get(id);
+                if (!skill) {
+                    throw new Error(`Skill nao encontrada no catalogo: ${id}`);
+                }
+                selectedEntries.push({ skill, reason: 'selecionada explicitamente' });
+            }
+        }
+        else {
+            const ranked = suggestSkills(catalog, {
+                phase: options?.phase,
+                domains: options?.domains,
+                bundles: options?.bundles,
+                max: options?.max ?? 5,
+            });
+            selectedEntries.push(...ranked.map((entry) => ({
+                skill: entry.skill,
+                reason: entry.reasons.join('; ') || 'sugerida por contexto',
+            })));
+        }
+        if (selectedEntries.length === 0) {
+            throw new Error('Nenhuma skill selecionada. Informe --ids ou ajuste filtros de sugestao.');
+        }
+        const selectedSkills = [];
+        for (const entry of selectedEntries) {
+            selectedSkills.push({
+                id: entry.skill.id,
+                title: entry.skill.title,
+                bundles: entry.skill.bundle_ids,
+                path: await resolveSkillFileRef(paths, entry.skill.id),
+                reason: entry.reason,
+            });
+        }
+        return {
+            selected_skills: selectedSkills,
+            prompt: buildSkillInvocationPrompt({
+                objective: options?.objective,
+                ref: options?.ref,
+                skills: selectedSkills.map((skill) => ({
+                    id: skill.id,
+                    path: skill.path,
+                    reason: skill.reason,
+                })),
+            }),
+        };
+    }
+}
 export class SddSkillsSyncCommand {
     async execute(projectRoot, options) {
         const { paths } = await getRuntime(projectRoot);

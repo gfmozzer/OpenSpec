@@ -30,6 +30,8 @@ export interface SddPaths {
     skillsDir: string;
     skillsCuratedDir: string;
     skillsBundlesDir: string;
+    skillsCuratedFolderName: string;
+    skillsBundlesFolderName: string;
     templatesDir: string;
     promptsDir: string;
     depositoDir: string;

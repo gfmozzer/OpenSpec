@@ -381,6 +381,26 @@ export declare class SddNextCommand {
         }>;
     }>;
 }
+export declare class SddSkillsInvokeCommand {
+    execute(projectRoot: string, options?: {
+        ids?: string[];
+        phase?: string;
+        domains?: string[];
+        bundles?: string[];
+        max?: number;
+        objective?: string;
+        ref?: string;
+    }): Promise<{
+        selected_skills: Array<{
+            id: string;
+            title: string;
+            bundles: string[];
+            path: string;
+            reason: string;
+        }>;
+        prompt: string;
+    }>;
+}
 export declare class SddSkillsSyncCommand {
     execute(projectRoot: string, options?: {
         bundles?: string[];

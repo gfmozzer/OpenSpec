@@ -3,7 +3,7 @@ import { SddInitCommand, SddInitContextCommand } from '../core/sdd/init.js';
 import { SddCheckCommand } from '../core/sdd/check.js';
 import { loadProjectSddConfig, loadSkillCatalogState, resolveSddPaths } from '../core/sdd/state.js';
 import { listBundles, suggestSkills } from '../core/sdd/skills.js';
-import { SddBreakdownCommand, SddContextCommand, SddDebateCommand, SddDecideCommand, SddFinalizeCommand, SddFrontendGapCommand, SddIngestDepositoCommand, SddApproveCommand, SddInsightCommand, SddNextCommand, SddOnboardCommand, SddSkillsSyncCommand, SddStartCommand, } from '../core/sdd/operations.js';
+import { SddBreakdownCommand, SddContextCommand, SddDebateCommand, SddDecideCommand, SddFinalizeCommand, SddFrontendGapCommand, SddIngestDepositoCommand, SddApproveCommand, SddInsightCommand, SddNextCommand, SddOnboardCommand, SddSkillsInvokeCommand, SddSkillsSyncCommand, SddStartCommand, } from '../core/sdd/operations.js';
 function parseCsvOption(value) {
     if (!value)
         return [];
@@ -541,7 +541,7 @@ export function registerSddCommand(program) {
         });
         const config = await loadProjectSddConfig(targetPath);
         const paths = resolveSddPaths(targetPath, config);
-        const localSkillsPath = `${paths.memoryRoot.replace(/\\/g, '/')}/${config.folders.skills}/curated`;
+        const localSkillsPath = `${paths.memoryRoot.replace(/\\/g, '/')}/${config.folders.skills}/${paths.skillsCuratedFolderName}`;
         console.log(chalk.green(`Skills sincronizadas: ${result.synced}`));
         console.log(`Skills locais (${localSkillsPath}): ${result.local_synced}`);
         console.log(`Ferramentas atualizadas: ${result.tools.length > 0 ? result.tools.join(', ') : 'nenhuma'}`);
@@ -586,6 +586,41 @@ export function registerSddCommand(program) {
             const reasons = entry.reasons.length > 0 ? ` | criterios: ${entry.reasons.join('; ')}` : '';
             console.log(`- ${entry.skill.id} (${entry.score})${reasons}`);
         }
+    });
+    skillsCmd
+        .command('usar [path]')
+        .description('Monta um prompt pronto para invocar skills no agente')
+        .alias('invocar')
+        .option('--ids <list>', 'IDs de skills separados por virgula')
+        .option('--phase <phase>', 'Fase para sugestao: discover|plan|execute|verify|finalize')
+        .option('--domains <list>', 'Dominios separados por virgula')
+        .option('--bundles <list>', 'Bundles separados por virgula')
+        .option('--max <n>', 'Quantidade maxima quando usar sugestao (padrao: 5)')
+        .option('--objetivo <texto>', 'Objetivo em linguagem natural para o prompt')
+        .option('--ref <id>', 'Referencia de contexto (ex: FEAT-001, RAD-001)')
+        .option('--json', 'Retorna payload em JSON')
+        .action(async (targetPath = '.', options) => {
+        const command = new SddSkillsInvokeCommand();
+        const result = await command.execute(targetPath, {
+            ids: parseCsvOption(options?.ids),
+            phase: options?.phase,
+            domains: parseCsvOption(options?.domains),
+            bundles: parseCsvOption(options?.bundles),
+            max: options?.max ? Number(options.max) : undefined,
+            objective: options?.objetivo,
+            ref: options?.ref,
+        });
+        if (options?.json) {
+            console.log(JSON.stringify(result, null, 2));
+            return;
+        }
+        console.log(chalk.green(`Skills selecionadas: ${result.selected_skills.length}`));
+        for (const skill of result.selected_skills) {
+            console.log(`- ${skill.id} (${skill.title})`);
+            console.log(`  path: ${skill.path}`);
+        }
+        console.log('\nPrompt pronto para usar no agente:\n');
+        console.log(result.prompt);
     });
     const gapCmd = sddCmd.command('fgap').description('Operacoes de gaps de frontend');
     gapCmd.alias('lacunas-frontend');

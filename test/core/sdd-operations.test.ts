@@ -17,6 +17,7 @@ import {
   SddNextCommand,
   SddOnboardCommand,
   SddApproveCommand,
+  SddSkillsInvokeCommand,
   SddSkillsSyncCommand,
   SddStartCommand,
 } from '../../src/core/sdd/operations.js';
@@ -639,5 +640,19 @@ describe('sdd operations', () => {
       expect(result.active_path).toContain('.sdd/active/');
       expect(result.generated_docs.length).toBeGreaterThan(0);
     }
+  });
+
+  it('builds a ready-to-use invocation prompt for selected skills', async () => {
+    const result = await new SddSkillsInvokeCommand().execute(testDir, {
+      ids: ['source-intake-sdd', 'planning-normalizer-sdd'],
+      objective: 'Transformar documentos brutos em backlog executavel',
+      ref: 'RAD-001',
+    });
+
+    expect(result.selected_skills).toHaveLength(2);
+    expect(result.selected_skills[0].path).toContain('.sdd/skills');
+    expect(result.prompt).toContain('Use as skills abaixo nesta ordem');
+    expect(result.prompt).toContain('Transformar documentos brutos em backlog executavel');
+    expect(result.prompt).toContain('RAD-001');
   });
 });

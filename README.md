@@ -47,7 +47,7 @@ Depois do bootstrap, o projeto passa a ter:
 - `.sdd/pendencias/`
 - `.sdd/active/`
 - `.sdd/templates/`
-- `.sdd/skills/curated/`
+- `.sdd/skills/curated/` (layout legacy) ou `.sdd/habilidades/skills/` (layout pt-BR)
 - `.sdd/deposito/`
 - `.sdd/prompts/`
 - `openspec/changes/`
@@ -279,7 +279,8 @@ Depois disso, o sistema usa o indice de fontes e as skills curadas para transfor
 O bootstrap do SDD instala curadoria local em:
 
 ```text
-.sdd/skills/curated/
+.sdd/skills/curated/ (layout legacy)
+.sdd/habilidades/skills/ (layout pt-BR)
 ```
 
 Entre elas:
