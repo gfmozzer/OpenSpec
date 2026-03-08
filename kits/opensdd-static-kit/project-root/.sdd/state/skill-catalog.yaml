@@ -1,0 +1,837 @@
+version: 1
+skills:
+  - id: source-intake-sdd
+    source_repo: local://opensdd/sdd
+    source_path: .sdd/skills/curated/source-intake-sdd/SKILL.md
+    title: Source Intake Sdd
+    description: Skill nativa do SDD para source intake.
+    phases: &a1
+      - discover
+      - plan
+    domains: &a2
+      - intake
+      - planning
+      - frontend
+    tools: &a3
+      - codex
+      - cursor
+      - claude
+      - gemini
+    bundle_ids:
+      - source-intake
+    priority: 10
+  - id: business-extractor-sdd
+    source_repo: local://opensdd/sdd
+    source_path: .sdd/skills/curated/business-extractor-sdd/SKILL.md
+    title: Business Extractor Sdd
+    description: Skill nativa do SDD para source intake.
+    phases: *a1
+    domains: *a2
+    tools: *a3
+    bundle_ids:
+      - source-intake
+    priority: 9
+  - id: frontend-extractor-sdd
+    source_repo: local://opensdd/sdd
+    source_path: .sdd/skills/curated/frontend-extractor-sdd/SKILL.md
+    title: Frontend Extractor Sdd
+    description: Skill nativa do SDD para source intake.
+    phases: *a1
+    domains: *a2
+    tools: *a3
+    bundle_ids:
+      - source-intake
+    priority: 8
+  - id: planning-normalizer-sdd
+    source_repo: local://opensdd/sdd
+    source_path: .sdd/skills/curated/planning-normalizer-sdd/SKILL.md
+    title: Planning Normalizer Sdd
+    description: Skill nativa do SDD para source intake.
+    phases: *a1
+    domains: *a2
+    tools: *a3
+    bundle_ids:
+      - source-intake
+    priority: 7
+  - id: concise-planning
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/concise-planning/SKILL.md
+    title: Concise Planning
+    description: Skill curada para essentials core no fluxo SDD.
+    phases: &a4
+      - discover
+      - plan
+      - execute
+      - verify
+      - finalize
+    domains: &a5
+      - general
+      - process
+    tools: *a3
+    bundle_ids:
+      - essentials-core
+    priority: 10
+  - id: brainstorming
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/brainstorming/SKILL.md
+    title: Brainstorming
+    description: Skill curada para essentials core no fluxo SDD.
+    phases: *a4
+    domains: *a5
+    tools: *a3
+    bundle_ids:
+      - essentials-core
+    priority: 9
+  - id: lint-and-validate
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/lint-and-validate/SKILL.md
+    title: Lint And Validate
+    description: Skill curada para essentials core no fluxo SDD.
+    phases: *a4
+    domains: *a5
+    tools: *a3
+    bundle_ids:
+      - essentials-core
+    priority: 8
+  - id: systematic-debugging
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/systematic-debugging/SKILL.md
+    title: Systematic Debugging
+    description: Skill curada para essentials core no fluxo SDD.
+    phases: *a4
+    domains: *a5
+    tools: *a3
+    bundle_ids:
+      - essentials-core
+    priority: 7
+  - id: test-driven-development
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/test-driven-development/SKILL.md
+    title: Test Driven Development
+    description: Skill curada para essentials core no fluxo SDD.
+    phases: *a4
+    domains: *a5
+    tools: *a3
+    bundle_ids:
+      - essentials-core
+    priority: 6
+  - id: doc-coauthoring
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/doc-coauthoring/SKILL.md
+    title: Doc Coauthoring
+    description: Skill curada para essentials core no fluxo SDD.
+    phases: *a4
+    domains: *a5
+    tools: *a3
+    bundle_ids:
+      - essentials-core
+    priority: 6
+  - id: create-pr
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/create-pr/SKILL.md
+    title: Create Pr
+    description: Skill curada para essentials core no fluxo SDD.
+    phases: *a4
+    domains: *a5
+    tools: *a3
+    bundle_ids:
+      - essentials-core
+    priority: 6
+  - id: git-pushing
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/git-pushing/SKILL.md
+    title: Git Pushing
+    description: Skill curada para essentials core no fluxo SDD.
+    phases: *a4
+    domains: *a5
+    tools: *a3
+    bundle_ids:
+      - essentials-core
+    priority: 6
+  - id: kaizen
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/kaizen/SKILL.md
+    title: Kaizen
+    description: Skill curada para essentials core no fluxo SDD.
+    phases: *a4
+    domains: *a5
+    tools: *a3
+    bundle_ids:
+      - essentials-core
+    priority: 6
+  - id: code-review-checklist
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/code-review-checklist/SKILL.md
+    title: Code Review Checklist
+    description: Skill curada para essentials core no fluxo SDD.
+    phases: *a4
+    domains: *a5
+    tools: *a3
+    bundle_ids:
+      - essentials-core
+    priority: 6
+  - id: architecture
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/architecture/SKILL.md
+    title: Architecture
+    description: Skill curada para architecture backend no fluxo SDD.
+    phases: &a6
+      - discover
+      - plan
+      - execute
+      - verify
+    domains: &a7
+      - architecture
+      - backend
+    tools: *a3
+    bundle_ids:
+      - architecture-backend
+    priority: 10
+  - id: senior-architect
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/senior-architect/SKILL.md
+    title: Senior Architect
+    description: Skill curada para architecture backend no fluxo SDD.
+    phases: *a6
+    domains: *a7
+    tools: *a3
+    bundle_ids:
+      - architecture-backend
+    priority: 9
+  - id: architecture-patterns
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/architecture-patterns/SKILL.md
+    title: Architecture Patterns
+    description: Skill curada para architecture backend no fluxo SDD.
+    phases: *a6
+    domains: *a7
+    tools: *a3
+    bundle_ids:
+      - architecture-backend
+    priority: 8
+  - id: microservices-patterns
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/microservices-patterns/SKILL.md
+    title: Microservices Patterns
+    description: Skill curada para architecture backend no fluxo SDD.
+    phases: *a6
+    domains: *a7
+    tools: *a3
+    bundle_ids:
+      - architecture-backend
+    priority: 7
+  - id: domain-driven-design
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/domain-driven-design/SKILL.md
+    title: Domain Driven Design
+    description: Skill curada para architecture backend no fluxo SDD.
+    phases: *a6
+    domains: *a7
+    tools: *a3
+    bundle_ids:
+      - architecture-backend
+    priority: 6
+  - id: ddd-context-mapping
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/ddd-context-mapping/SKILL.md
+    title: Ddd Context Mapping
+    description: Skill curada para architecture backend no fluxo SDD.
+    phases: *a6
+    domains: *a7
+    tools: *a3
+    bundle_ids:
+      - architecture-backend
+    priority: 6
+  - id: ddd-tactical-patterns
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/ddd-tactical-patterns/SKILL.md
+    title: Ddd Tactical Patterns
+    description: Skill curada para architecture backend no fluxo SDD.
+    phases: *a6
+    domains: *a7
+    tools: *a3
+    bundle_ids:
+      - architecture-backend
+    priority: 6
+  - id: api-design-principles
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/api-design-principles/SKILL.md
+    title: Api Design Principles
+    description: Skill curada para architecture backend no fluxo SDD.
+    phases: *a6
+    domains: *a7
+    tools: *a3
+    bundle_ids:
+      - architecture-backend
+    priority: 6
+  - id: database-design
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/database-design/SKILL.md
+    title: Database Design
+    description: Skill curada para architecture backend no fluxo SDD.
+    phases: *a6
+    domains: *a7
+    tools: *a3
+    bundle_ids:
+      - architecture-backend
+    priority: 6
+  - id: typescript-expert
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/typescript-expert/SKILL.md
+    title: Typescript Expert
+    description: Skill curada para architecture backend no fluxo SDD.
+    phases: *a6
+    domains: *a7
+    tools: *a3
+    bundle_ids:
+      - architecture-backend
+    priority: 6
+  - id: frontend-design
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/frontend-design/SKILL.md
+    title: Frontend Design
+    description: Skill curada para frontend product no fluxo SDD.
+    phases: &a8
+      - plan
+      - execute
+      - verify
+    domains: &a9
+      - frontend
+      - product
+    tools: *a3
+    bundle_ids:
+      - frontend-product
+    priority: 10
+  - id: react-best-practices
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/react-best-practices/SKILL.md
+    title: React Best Practices
+    description: Skill curada para frontend product no fluxo SDD.
+    phases: *a8
+    domains: *a9
+    tools: *a3
+    bundle_ids:
+      - frontend-product
+    priority: 9
+  - id: react-patterns
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/react-patterns/SKILL.md
+    title: React Patterns
+    description: Skill curada para frontend product no fluxo SDD.
+    phases: *a8
+    domains: *a9
+    tools: *a3
+    bundle_ids:
+      - frontend-product
+    priority: 8
+  - id: nextjs-best-practices
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/nextjs-best-practices/SKILL.md
+    title: Nextjs Best Practices
+    description: Skill curada para frontend product no fluxo SDD.
+    phases: *a8
+    domains: *a9
+    tools: *a3
+    bundle_ids:
+      - frontend-product
+    priority: 7
+  - id: nextjs-app-router-patterns
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/nextjs-app-router-patterns/SKILL.md
+    title: Nextjs App Router Patterns
+    description: Skill curada para frontend product no fluxo SDD.
+    phases: *a8
+    domains: *a9
+    tools: *a3
+    bundle_ids:
+      - frontend-product
+    priority: 6
+  - id: tailwind-patterns
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/tailwind-patterns/SKILL.md
+    title: Tailwind Patterns
+    description: Skill curada para frontend product no fluxo SDD.
+    phases: *a8
+    domains: *a9
+    tools: *a3
+    bundle_ids:
+      - frontend-product
+    priority: 6
+  - id: ui-ux-pro-max
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/ui-ux-pro-max/SKILL.md
+    title: Ui Ux Pro Max
+    description: Skill curada para frontend product no fluxo SDD.
+    phases: *a8
+    domains: *a9
+    tools: *a3
+    bundle_ids:
+      - frontend-product
+    priority: 6
+  - id: mobile-design
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/mobile-design/SKILL.md
+    title: Mobile Design
+    description: Skill curada para frontend product no fluxo SDD.
+    phases: *a8
+    domains: *a9
+    tools: *a3
+    bundle_ids:
+      - frontend-product
+    priority: 6
+  - id: form-cro
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/form-cro/SKILL.md
+    title: Form Cro
+    description: Skill curada para frontend product no fluxo SDD.
+    phases: *a8
+    domains: *a9
+    tools: *a3
+    bundle_ids:
+      - frontend-product
+    priority: 6
+  - id: frontend-developer
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/frontend-developer/SKILL.md
+    title: Frontend Developer
+    description: Skill curada para frontend product no fluxo SDD.
+    phases: *a8
+    domains: *a9
+    tools: *a3
+    bundle_ids:
+      - frontend-product
+    priority: 6
+  - id: security-auditor
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/security-auditor/SKILL.md
+    title: Security Auditor
+    description: Skill curada para security quality no fluxo SDD.
+    phases: &a10
+      - plan
+      - execute
+      - verify
+    domains: &a11
+      - security
+      - quality
+    tools: *a3
+    bundle_ids:
+      - security-quality
+    priority: 10
+  - id: api-security-best-practices
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/api-security-best-practices/SKILL.md
+    title: Api Security Best Practices
+    description: Skill curada para security quality no fluxo SDD.
+    phases: *a10
+    domains: *a11
+    tools: *a3
+    bundle_ids:
+      - security-quality
+    priority: 9
+  - id: backend-security-coder
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/backend-security-coder/SKILL.md
+    title: Backend Security Coder
+    description: Skill curada para security quality no fluxo SDD.
+    phases: *a10
+    domains: *a11
+    tools: *a3
+    bundle_ids:
+      - security-quality
+    priority: 8
+  - id: frontend-security-coder
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/frontend-security-coder/SKILL.md
+    title: Frontend Security Coder
+    description: Skill curada para security quality no fluxo SDD.
+    phases: *a10
+    domains: *a11
+    tools: *a3
+    bundle_ids:
+      - security-quality
+    priority: 7
+  - id: cc-skill-security-review
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/cc-skill-security-review/SKILL.md
+    title: Cc Skill Security Review
+    description: Skill curada para security quality no fluxo SDD.
+    phases: *a10
+    domains: *a11
+    tools: *a3
+    bundle_ids:
+      - security-quality
+    priority: 6
+  - id: top-web-vulnerabilities
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/top-web-vulnerabilities/SKILL.md
+    title: Top Web Vulnerabilities
+    description: Skill curada para security quality no fluxo SDD.
+    phases: *a10
+    domains: *a11
+    tools: *a3
+    bundle_ids:
+      - security-quality
+    priority: 6
+  - id: vulnerability-scanner
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/vulnerability-scanner/SKILL.md
+    title: Vulnerability Scanner
+    description: Skill curada para security quality no fluxo SDD.
+    phases: *a10
+    domains: *a11
+    tools: *a3
+    bundle_ids:
+      - security-quality
+    priority: 6
+  - id: ethical-hacking-methodology
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/ethical-hacking-methodology/SKILL.md
+    title: Ethical Hacking Methodology
+    description: Skill curada para security quality no fluxo SDD.
+    phases: *a10
+    domains: *a11
+    tools: *a3
+    bundle_ids:
+      - security-quality
+    priority: 6
+  - id: cloud-penetration-testing
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/cloud-penetration-testing/SKILL.md
+    title: Cloud Penetration Testing
+    description: Skill curada para security quality no fluxo SDD.
+    phases: *a10
+    domains: *a11
+    tools: *a3
+    bundle_ids:
+      - security-quality
+    priority: 6
+  - id: pci-compliance
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/pci-compliance/SKILL.md
+    title: Pci Compliance
+    description: Skill curada para security quality no fluxo SDD.
+    phases: *a10
+    domains: *a11
+    tools: *a3
+    bundle_ids:
+      - security-quality
+    priority: 6
+  - id: prompt-engineering
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/prompt-engineering/SKILL.md
+    title: Prompt Engineering
+    description: Skill curada para ai agentic no fluxo SDD.
+    phases: &a12
+      - discover
+      - plan
+      - execute
+      - verify
+      - finalize
+    domains: &a13
+      - ai
+      - agent
+    tools: *a3
+    bundle_ids:
+      - ai-agentic
+    priority: 10
+  - id: context-window-management
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/context-window-management/SKILL.md
+    title: Context Window Management
+    description: Skill curada para ai agentic no fluxo SDD.
+    phases: *a12
+    domains: *a13
+    tools: *a3
+    bundle_ids:
+      - ai-agentic
+    priority: 9
+  - id: ai-agents-architect
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/ai-agents-architect/SKILL.md
+    title: Ai Agents Architect
+    description: Skill curada para ai agentic no fluxo SDD.
+    phases: *a12
+    domains: *a13
+    tools: *a3
+    bundle_ids:
+      - ai-agentic
+    priority: 8
+  - id: agent-evaluation
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/agent-evaluation/SKILL.md
+    title: Agent Evaluation
+    description: Skill curada para ai agentic no fluxo SDD.
+    phases: *a12
+    domains: *a13
+    tools: *a3
+    bundle_ids:
+      - ai-agentic
+    priority: 7
+  - id: mcp-builder
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/mcp-builder/SKILL.md
+    title: Mcp Builder
+    description: Skill curada para ai agentic no fluxo SDD.
+    phases: *a12
+    domains: *a13
+    tools: *a3
+    bundle_ids:
+      - ai-agentic
+    priority: 6
+  - id: rag-engineer
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/rag-engineer/SKILL.md
+    title: Rag Engineer
+    description: Skill curada para ai agentic no fluxo SDD.
+    phases: *a12
+    domains: *a13
+    tools: *a3
+    bundle_ids:
+      - ai-agentic
+    priority: 6
+  - id: rag-implementation
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/rag-implementation/SKILL.md
+    title: Rag Implementation
+    description: Skill curada para ai agentic no fluxo SDD.
+    phases: *a12
+    domains: *a13
+    tools: *a3
+    bundle_ids:
+      - ai-agentic
+    priority: 6
+  - id: prompt-caching
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/prompt-caching/SKILL.md
+    title: Prompt Caching
+    description: Skill curada para ai agentic no fluxo SDD.
+    phases: *a12
+    domains: *a13
+    tools: *a3
+    bundle_ids:
+      - ai-agentic
+    priority: 6
+  - id: langgraph
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/langgraph/SKILL.md
+    title: Langgraph
+    description: Skill curada para ai agentic no fluxo SDD.
+    phases: *a12
+    domains: *a13
+    tools: *a3
+    bundle_ids:
+      - ai-agentic
+    priority: 6
+  - id: langfuse
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/langfuse/SKILL.md
+    title: Langfuse
+    description: Skill curada para ai agentic no fluxo SDD.
+    phases: *a12
+    domains: *a13
+    tools: *a3
+    bundle_ids:
+      - ai-agentic
+    priority: 6
+  - id: docker-expert
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/docker-expert/SKILL.md
+    title: Docker Expert
+    description: Skill curada para devops integration no fluxo SDD.
+    phases: &a14
+      - plan
+      - execute
+      - verify
+      - finalize
+    domains: &a15
+      - devops
+      - integration
+    tools: *a3
+    bundle_ids:
+      - devops-integration
+    priority: 10
+  - id: aws-serverless
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/aws-serverless/SKILL.md
+    title: Aws Serverless
+    description: Skill curada para devops integration no fluxo SDD.
+    phases: *a14
+    domains: *a15
+    tools: *a3
+    bundle_ids:
+      - devops-integration
+    priority: 9
+  - id: kubernetes-architect
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/kubernetes-architect/SKILL.md
+    title: Kubernetes Architect
+    description: Skill curada para devops integration no fluxo SDD.
+    phases: *a14
+    domains: *a15
+    tools: *a3
+    bundle_ids:
+      - devops-integration
+    priority: 8
+  - id: terraform-specialist
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/terraform-specialist/SKILL.md
+    title: Terraform Specialist
+    description: Skill curada para devops integration no fluxo SDD.
+    phases: *a14
+    domains: *a15
+    tools: *a3
+    bundle_ids:
+      - devops-integration
+    priority: 7
+  - id: environment-setup-guide
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/environment-setup-guide/SKILL.md
+    title: Environment Setup Guide
+    description: Skill curada para devops integration no fluxo SDD.
+    phases: *a14
+    domains: *a15
+    tools: *a3
+    bundle_ids:
+      - devops-integration
+    priority: 6
+  - id: deployment-procedures
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/deployment-procedures/SKILL.md
+    title: Deployment Procedures
+    description: Skill curada para devops integration no fluxo SDD.
+    phases: *a14
+    domains: *a15
+    tools: *a3
+    bundle_ids:
+      - devops-integration
+    priority: 6
+  - id: observability-engineer
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/observability-engineer/SKILL.md
+    title: Observability Engineer
+    description: Skill curada para devops integration no fluxo SDD.
+    phases: *a14
+    domains: *a15
+    tools: *a3
+    bundle_ids:
+      - devops-integration
+    priority: 6
+  - id: distributed-tracing
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/distributed-tracing/SKILL.md
+    title: Distributed Tracing
+    description: Skill curada para devops integration no fluxo SDD.
+    phases: *a14
+    domains: *a15
+    tools: *a3
+    bundle_ids:
+      - devops-integration
+    priority: 6
+  - id: performance-engineer
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/performance-engineer/SKILL.md
+    title: Performance Engineer
+    description: Skill curada para devops integration no fluxo SDD.
+    phases: *a14
+    domains: *a15
+    tools: *a3
+    bundle_ids:
+      - devops-integration
+    priority: 6
+  - id: incident-responder
+    source_repo: https://github.com/sickn33/antigravity-awesome-skills
+    source_path: skills/incident-responder/SKILL.md
+    title: Incident Responder
+    description: Skill curada para devops integration no fluxo SDD.
+    phases: *a14
+    domains: *a15
+    tools: *a3
+    bundle_ids:
+      - devops-integration
+    priority: 6
+bundles:
+  - id: source-intake
+    title: Source Intake
+    skill_ids:
+      - source-intake-sdd
+      - business-extractor-sdd
+      - frontend-extractor-sdd
+      - planning-normalizer-sdd
+  - id: essentials-core
+    title: Essentials Core
+    skill_ids:
+      - concise-planning
+      - brainstorming
+      - lint-and-validate
+      - systematic-debugging
+      - test-driven-development
+      - doc-coauthoring
+      - create-pr
+      - git-pushing
+      - kaizen
+      - code-review-checklist
+  - id: architecture-backend
+    title: Architecture Backend
+    skill_ids:
+      - architecture
+      - senior-architect
+      - architecture-patterns
+      - microservices-patterns
+      - domain-driven-design
+      - ddd-context-mapping
+      - ddd-tactical-patterns
+      - api-design-principles
+      - database-design
+      - typescript-expert
+  - id: frontend-product
+    title: Frontend Product
+    skill_ids:
+      - frontend-design
+      - react-best-practices
+      - react-patterns
+      - nextjs-best-practices
+      - nextjs-app-router-patterns
+      - tailwind-patterns
+      - ui-ux-pro-max
+      - mobile-design
+      - form-cro
+      - frontend-developer
+  - id: security-quality
+    title: Security Quality
+    skill_ids:
+      - security-auditor
+      - api-security-best-practices
+      - backend-security-coder
+      - frontend-security-coder
+      - cc-skill-security-review
+      - top-web-vulnerabilities
+      - vulnerability-scanner
+      - ethical-hacking-methodology
+      - cloud-penetration-testing
+      - pci-compliance
+  - id: ai-agentic
+    title: AI Agentic
+    skill_ids:
+      - prompt-engineering
+      - context-window-management
+      - ai-agents-architect
+      - agent-evaluation
+      - mcp-builder
+      - rag-engineer
+      - rag-implementation
+      - prompt-caching
+      - langgraph
+      - langfuse
+  - id: devops-integration
+    title: DevOps Integration
+    skill_ids:
+      - docker-expert
+      - aws-serverless
+      - kubernetes-architect
+      - terraform-specialist
+      - environment-setup-guide
+      - deployment-procedures
+      - observability-engineer
+      - distributed-tracing
+      - performance-engineer
+      - incident-responder

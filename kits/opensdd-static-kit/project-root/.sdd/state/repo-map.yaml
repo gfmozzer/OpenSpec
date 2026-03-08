@@ -1,0 +1,6 @@
+version: 1
+items:
+  - path: openspec
+    kind: openspec
+    service_ref: ""
+    notes: Runtime do OpenSpec

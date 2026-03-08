@@ -12,21 +12,46 @@ function parseCsvOption(value) {
         .map((item) => item.trim())
         .filter((item) => item.length > 0);
 }
+function parseLangOption(value) {
+    if (!value)
+        return undefined;
+    if (value === 'pt-BR' || value === 'en-US')
+        return value;
+    throw new Error('Valor invalido em --lang. Use pt-BR ou en-US.');
+}
+function parseLayoutOption(value) {
+    if (!value)
+        return undefined;
+    if (value === 'legacy' || value === 'pt-BR')
+        return value;
+    throw new Error('Valor invalido em --layout. Use legacy ou pt-BR.');
+}
 export function registerSddCommand(program) {
     const sddCmd = program.command('sdd').description('Operacoes de memoria SDD');
     sddCmd
         .command('init [path]')
         .description('Inicializa a estrutura .sdd e os arquivos de estado base')
+        .alias('iniciar')
         .option('--frontend', 'Ativa arquivos de estado de frontend e views geradas')
+        .option('--lang <lang>', 'Idioma do SDD: pt-BR|en-US')
+        .option('--layout <layout>', 'Layout de pastas: legacy|pt-BR')
         .option('--no-render', 'Nao gera views Markdown apos a inicializacao')
         .action(async (targetPath = '.', options) => {
         const command = new SddInitCommand();
         const result = await command.execute(targetPath, {
             frontendEnabled: options?.frontend,
+            language: parseLangOption(options?.lang),
+            layout: parseLayoutOption(options?.layout),
             render: options?.render,
         });
         console.log(chalk.green('SDD inicializado com sucesso.'));
         console.log(`Diretorio de memoria: ${result.memoryDir}`);
+        if (options?.lang) {
+            console.log(`Idioma: ${options.lang}`);
+        }
+        if (options?.layout) {
+            console.log(`Layout: ${options.layout}`);
+        }
         console.log(`Modulo de frontend: ${result.frontendEnabled ? 'ativado' : 'desativado'}`);
         console.log(`Views geradas: ${result.rendered ? 'sim' : 'nao'}`);
         console.log(`Skills curadas carregadas: ${result.skillsSeeded}`);
@@ -36,6 +61,7 @@ export function registerSddCommand(program) {
     sddCmd
         .command('init-context [path]')
         .description('Inspeciona repositorio existente e preenche contexto inicial canônico')
+        .alias('iniciar-contexto')
         .option('--mode <mode>', 'Modo de escrita: merge|replace (padrao: merge)')
         .option('--no-deep', 'Desativa inspecao profunda de estrutura de repositorio')
         .option('--no-render', 'Nao gera views apos bootstrap de contexto')
@@ -66,7 +92,8 @@ export function registerSddCommand(program) {
     });
     sddCmd
         .command('insight <texto>')
-        .description('Registra um insight em .sdd/discovery/1-insights')
+        .description('Registra um insight no funil de descoberta do SDD')
+        .alias('ideia')
         .option('--title <title>', 'Titulo curto do insight')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (texto, options) => {
@@ -82,6 +109,7 @@ export function registerSddCommand(program) {
     sddCmd
         .command('debate <insightId>')
         .description('Abre um debate a partir de um insight')
+        .alias('debater')
         .option('--title <title>', 'Titulo do debate')
         .option('--agent <name>', 'Nome do agente que iniciou o debate')
         .option('--no-render', 'Nao gera views apos atualizar estado')
@@ -99,6 +127,7 @@ export function registerSddCommand(program) {
     sddCmd
         .command('decide <debateId>')
         .description('Decide o resultado de um debate: radar ou descarte')
+        .alias('decidir')
         .requiredOption('--outcome <result>', 'Resultado: radar|discard')
         .option('--title <title>', 'Titulo do radar (quando outcome=radar)')
         .option('--rationale <text>', 'Racional da decisao')
@@ -126,6 +155,7 @@ export function registerSddCommand(program) {
     sddCmd
         .command('breakdown <radarId>')
         .description('Quebra um item RAD em uma ou mais features FEAT')
+        .alias('quebrar')
         .option('--titles <list>', 'Titulos separados por virgula para gerar varias FEAT')
         .option('--scale <scale>', 'Escala QUICK|STANDARD|LARGE')
         .option('--mode <mode>', 'Modo de quebra: graph|flat (padrao: graph)')
@@ -162,6 +192,7 @@ export function registerSddCommand(program) {
     sddCmd
         .command('start <refOrText>')
         .description('Inicia execucao de FEAT/RAD/FGAP/TD ou cria FEAT direta')
+        .alias('iniciar-execucao')
         .option('--scale <scale>', 'Escala QUICK|STANDARD|LARGE')
         .option('--schema <schema>', 'Schema para criar change em openspec/changes')
         .option('--force', 'Bypass de bloqueios e conflitos de lock')
@@ -190,6 +221,7 @@ export function registerSddCommand(program) {
     sddCmd
         .command('finalize')
         .description('Consolida memoria e marca FEAT como DONE')
+        .alias('consolidar')
         .option('--ref <featId>', 'Finaliza feature especifica (ex: FEAT-001)')
         .option('--all-ready', 'Finaliza todas as features prontas na fila')
         .option('--no-adr', 'Nao gera ADR automatico nesta execucao')
@@ -225,6 +257,7 @@ export function registerSddCommand(program) {
     sddCmd
         .command('context <ref>')
         .description('Gera contexto objetivo para FEAT/RAD/FGAP/TD')
+        .alias('contexto')
         .option('--json', 'Saida em JSON')
         .action(async (ref, options) => {
         const command = new SddContextCommand();
@@ -256,6 +289,7 @@ export function registerSddCommand(program) {
     sddCmd
         .command('onboard [target]')
         .description('Gera onboarding estruturado para system, RAD-### ou FEAT-###')
+        .alias('integrar')
         .option('--json', 'Saida em JSON')
         .option('--compact', 'Retorna payload resumido')
         .action(async (target = 'system', options) => {
@@ -278,6 +312,7 @@ export function registerSddCommand(program) {
     sddCmd
         .command('next [path]')
         .description('Mostra FEATs prontas para iniciar em paralelo')
+        .alias('proximo')
         .option('--rank <mode>', 'Ranking: impact|criticality|fifo (padrao: impact)')
         .option('--limit <n>', 'Limite de itens prontos (padrao: 10)')
         .option('--json', 'Saida em JSON')
@@ -315,6 +350,7 @@ export function registerSddCommand(program) {
     sddCmd
         .command('check [path]')
         .description('Valida arquivos de estado .sdd e opcionalmente gera views')
+        .alias('checar')
         .option('--render', 'Gera views Markdown apos validacao bem-sucedida')
         .option('--json', 'Retorna relatorio em JSON')
         .action(async (targetPath = '.', options) => {
@@ -371,9 +407,11 @@ export function registerSddCommand(program) {
     const skillsCmd = sddCmd
         .command('skills')
         .description('Operacoes de curadoria e sugestao de skills');
+    skillsCmd.alias('habilidades');
     skillsCmd
         .command('bundles [path]')
         .description('Lista os bundles disponiveis no catalogo de skills')
+        .alias('pacotes')
         .option('--json', 'Retorna resultado em JSON')
         .action(async (targetPath = '.', options) => {
         const config = await loadProjectSddConfig(targetPath);
@@ -392,6 +430,7 @@ export function registerSddCommand(program) {
     skillsCmd
         .command('sync [path]')
         .description('Sincroniza skills curadas do catalogo para ferramentas configuradas')
+        .alias('sincronizar')
         .option('--bundle <id>', 'Filtra por bundle especifico (pode repetir via CSV com virgula)')
         .option('--all', 'Sincroniza todas as skills do catalogo')
         .option('--tools <list>', 'Ferramentas alvo separadas por virgula (ex: codex,cursor,claude)')
@@ -404,13 +443,17 @@ export function registerSddCommand(program) {
             all: options?.all,
             tools,
         });
+        const config = await loadProjectSddConfig(targetPath);
+        const paths = resolveSddPaths(targetPath, config);
+        const localSkillsPath = `${paths.memoryRoot.replace(/\\/g, '/')}/${config.folders.skills}/curated`;
         console.log(chalk.green(`Skills sincronizadas: ${result.synced}`));
-        console.log(`Skills locais (.sdd/skills/curated): ${result.local_synced}`);
+        console.log(`Skills locais (${localSkillsPath}): ${result.local_synced}`);
         console.log(`Ferramentas atualizadas: ${result.tools.length > 0 ? result.tools.join(', ') : 'nenhuma'}`);
     });
     skillsCmd
         .command('suggest [path]')
         .description('Sugere skills por contexto (fase, dominio e bundle)')
+        .alias('sugerir')
         .option('--phase <phase>', 'Fase da tarefa: discover|plan|execute|verify|finalize')
         .option('--domains <list>', 'Dominios separados por virgula (ex: backend,security,api)')
         .option('--bundles <list>', 'Bundles separados por virgula')
@@ -449,9 +492,11 @@ export function registerSddCommand(program) {
         }
     });
     const gapCmd = sddCmd.command('fgap').description('Operacoes de gaps de frontend');
+    gapCmd.alias('lacunas-frontend');
     gapCmd
         .command('add <title>')
         .description('Abre um novo FGAP')
+        .alias('abrir')
         .option('--origin <featId>', 'Feature de origem (FEAT-###)')
         .option('--routes <list>', 'Rotas separadas por virgula')
         .option('--menu <list>', 'Alvos de menu separados por virgula')
@@ -469,6 +514,7 @@ export function registerSddCommand(program) {
     gapCmd
         .command('done <gapId>')
         .description('Marca um FGAP como resolvido')
+        .alias('resolver')
         .option('--feature <featId>', 'Feature que resolveu o gap')
         .option('--files <list>', 'Arquivos implementados separados por virgula')
         .option('--routes <list>', 'Rotas atualizadas separadas por virgula')

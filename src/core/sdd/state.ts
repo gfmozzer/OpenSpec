@@ -50,6 +50,16 @@ import {
 export interface SddRuntimeConfig {
   enabled: boolean;
   memoryDir: string;
+  language: 'pt-BR' | 'en-US';
+  layout: 'legacy' | 'pt-BR';
+  folders: {
+    discovery: string;
+    planning: string;
+    skills: string;
+    templates: string;
+    deposito: string;
+    active: string;
+  };
   frontend: {
     enabled: boolean;
   };
@@ -67,8 +77,15 @@ export interface SddPaths {
   pendenciasDir: string;
   stateDir: string;
   skillsDir: string;
+  skillsCuratedDir: string;
+  skillsBundlesDir: string;
   templatesDir: string;
   depositoDir: string;
+  activeDir: string;
+  discoveryInsightsDir: string;
+  discoveryDebatesDir: string;
+  discoveryRadarDir: string;
+  discoveryDiscardedDir: string;
   stateFiles: {
     discoveryIndex: string;
     backlog: string;
@@ -106,9 +123,36 @@ export interface SddStateSnapshot {
   sourceIndex: SourceIndexState;
 }
 
+const LEGACY_LAYOUT_FOLDERS = {
+  discovery: 'discovery',
+  planning: 'pendencias',
+  skills: 'skills',
+  templates: 'templates',
+  deposito: 'deposito',
+  active: 'active',
+} as const;
+
+const PT_BR_LAYOUT_FOLDERS = {
+  discovery: 'descoberta',
+  planning: 'planejamento',
+  skills: 'skills',
+  templates: 'modelos',
+  deposito: 'deposito',
+  active: 'execucao',
+} as const;
+
+function defaultFoldersForLayout(layout: 'legacy' | 'pt-BR'): SddRuntimeConfig['folders'] {
+  return layout === 'pt-BR'
+    ? { ...PT_BR_LAYOUT_FOLDERS }
+    : { ...LEGACY_LAYOUT_FOLDERS };
+}
+
 const DEFAULT_SDD_CONFIG: SddRuntimeConfig = {
   enabled: true,
   memoryDir: '.sdd',
+  language: 'pt-BR',
+  layout: 'legacy',
+  folders: defaultFoldersForLayout('legacy'),
   frontend: { enabled: false },
   views: { autoRender: true },
 };
@@ -124,11 +168,29 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function mergeRuntimeConfig(raw: unknown): SddRuntimeConfig {
   if (!isRecord(raw)) {
-    return { ...DEFAULT_SDD_CONFIG, frontend: { enabled: false }, views: { autoRender: true } };
+    return {
+      ...DEFAULT_SDD_CONFIG,
+      folders: { ...DEFAULT_SDD_CONFIG.folders },
+      frontend: { enabled: false },
+      views: { autoRender: true },
+    };
   }
 
   const frontend = isRecord(raw.frontend) ? raw.frontend : {};
   const views = isRecord(raw.views) ? raw.views : {};
+  const language = raw.language === 'en-US' ? 'en-US' : 'pt-BR';
+  const layout = raw.layout === 'pt-BR' ? 'pt-BR' : 'legacy';
+  const folderDefaults = defaultFoldersForLayout(layout);
+  const rawFolders = isRecord(raw.folders) ? raw.folders : {};
+  // compatibilidade retroativa para nome legado "pendencias"
+  const legacyPlanning =
+    typeof rawFolders.pendencias === 'string' && rawFolders.pendencias.trim().length > 0
+      ? rawFolders.pendencias.trim()
+      : '';
+  const planningFolder =
+    typeof rawFolders.planning === 'string' && rawFolders.planning.trim().length > 0
+      ? rawFolders.planning.trim()
+      : legacyPlanning || folderDefaults.planning;
 
   return {
     enabled: typeof raw.enabled === 'boolean' ? raw.enabled : DEFAULT_SDD_CONFIG.enabled,
@@ -136,6 +198,31 @@ function mergeRuntimeConfig(raw: unknown): SddRuntimeConfig {
       typeof raw.memoryDir === 'string' && raw.memoryDir.trim().length > 0
         ? raw.memoryDir.trim()
         : DEFAULT_SDD_CONFIG.memoryDir,
+    language,
+    layout,
+    folders: {
+      discovery:
+        typeof rawFolders.discovery === 'string' && rawFolders.discovery.trim().length > 0
+          ? rawFolders.discovery.trim()
+          : folderDefaults.discovery,
+      planning: planningFolder,
+      skills:
+        typeof rawFolders.skills === 'string' && rawFolders.skills.trim().length > 0
+          ? rawFolders.skills.trim()
+          : folderDefaults.skills,
+      templates:
+        typeof rawFolders.templates === 'string' && rawFolders.templates.trim().length > 0
+          ? rawFolders.templates.trim()
+          : folderDefaults.templates,
+      deposito:
+        typeof rawFolders.deposito === 'string' && rawFolders.deposito.trim().length > 0
+          ? rawFolders.deposito.trim()
+          : folderDefaults.deposito,
+      active:
+        typeof rawFolders.active === 'string' && rawFolders.active.trim().length > 0
+          ? rawFolders.active.trim()
+          : folderDefaults.active,
+    },
     frontend: {
       enabled:
         typeof frontend.enabled === 'boolean'
@@ -175,7 +262,12 @@ export async function loadProjectSddConfig(projectRoot: string): Promise<SddRunt
       : null;
 
   if (!configPath) {
-    return { ...DEFAULT_SDD_CONFIG, frontend: { enabled: false }, views: { autoRender: true } };
+    return {
+      ...DEFAULT_SDD_CONFIG,
+      folders: { ...DEFAULT_SDD_CONFIG.folders },
+      frontend: { enabled: false },
+      views: { autoRender: true },
+    };
   }
 
   const rawContent = await fs.readFile(configPath, 'utf-8');
@@ -186,7 +278,11 @@ export async function loadProjectSddConfig(projectRoot: string): Promise<SddRunt
 
 export async function upsertProjectSddConfig(
   projectRoot: string,
-  overrides?: { frontendEnabled?: boolean }
+  overrides?: {
+    frontendEnabled?: boolean;
+    language?: 'pt-BR' | 'en-US';
+    layout?: 'legacy' | 'pt-BR';
+  }
 ): Promise<SddRuntimeConfig> {
   const openspecDir = path.join(projectRoot, 'openspec');
   await ensureDir(openspecDir);
@@ -216,6 +312,13 @@ export async function upsertProjectSddConfig(
   if (overrides?.frontendEnabled !== undefined) {
     mergedSdd.frontend.enabled = overrides.frontendEnabled;
   }
+  if (overrides?.language) {
+    mergedSdd.language = overrides.language;
+  }
+  if (overrides?.layout) {
+    mergedSdd.layout = overrides.layout;
+    mergedSdd.folders = defaultFoldersForLayout(overrides.layout);
+  }
   rootConfig.sdd = mergedSdd;
 
   await fs.writeFile(configPath, stringifyYaml(rootConfig), 'utf-8');
@@ -225,18 +328,37 @@ export async function upsertProjectSddConfig(
 export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): SddPaths {
   const memoryRoot = path.resolve(projectRoot, config.memoryDir);
   const stateDir = path.join(memoryRoot, 'state');
+  const discoveryDir = path.join(memoryRoot, config.folders.discovery);
+  const pendenciasDir = path.join(memoryRoot, config.folders.planning);
+  const skillsDir = path.join(memoryRoot, config.folders.skills);
+  const skillsCuratedDir = path.join(skillsDir, 'curated');
+  const skillsBundlesDir = path.join(skillsDir, 'bundles');
+  const templatesDir = path.join(memoryRoot, config.folders.templates);
+  const depositoDir = path.join(memoryRoot, config.folders.deposito);
+  const activeDir = path.join(memoryRoot, config.folders.active);
+  const discoveryInsightsDir = path.join(discoveryDir, '1-insights');
+  const discoveryDebatesDir = path.join(discoveryDir, '2-debates');
+  const discoveryRadarDir = path.join(discoveryDir, '3-radar');
+  const discoveryDiscardedDir = path.join(discoveryDir, '4-discarded');
 
   return {
     projectRoot,
     memoryRoot,
     configFile: path.join(memoryRoot, 'config.yaml'),
     coreDir: path.join(memoryRoot, 'core'),
-    discoveryDir: path.join(memoryRoot, 'discovery'),
-    pendenciasDir: path.join(memoryRoot, 'pendencias'),
+    discoveryDir,
+    pendenciasDir,
     stateDir,
-    skillsDir: path.join(memoryRoot, 'skills'),
-    templatesDir: path.join(memoryRoot, 'templates'),
-    depositoDir: path.join(memoryRoot, 'deposito'),
+    skillsDir,
+    skillsCuratedDir,
+    skillsBundlesDir,
+    templatesDir,
+    depositoDir,
+    activeDir,
+    discoveryInsightsDir,
+    discoveryDebatesDir,
+    discoveryRadarDir,
+    discoveryDiscardedDir,
     stateFiles: {
       discoveryIndex: path.join(stateDir, 'discovery-index.yaml'),
       backlog: path.join(stateDir, 'backlog.yaml'),
@@ -264,15 +386,15 @@ export async function ensureBaseStructure(paths: SddPaths): Promise<void> {
     ensureDir(paths.discoveryDir),
     ensureDir(paths.pendenciasDir),
     ensureDir(paths.stateDir),
-    ensureDir(path.join(paths.memoryRoot, 'active')),
+    ensureDir(paths.activeDir),
     ensureDir(paths.skillsDir),
-    ensureDir(path.join(paths.skillsDir, 'curated')),
-    ensureDir(path.join(paths.skillsDir, 'bundles')),
+    ensureDir(paths.skillsCuratedDir),
+    ensureDir(paths.skillsBundlesDir),
     ensureDir(paths.templatesDir),
-    ensureDir(path.join(paths.discoveryDir, '1-insights')),
-    ensureDir(path.join(paths.discoveryDir, '2-debates')),
-    ensureDir(path.join(paths.discoveryDir, '3-radar')),
-    ensureDir(path.join(paths.discoveryDir, '4-discarded')),
+    ensureDir(paths.discoveryInsightsDir),
+    ensureDir(paths.discoveryDebatesDir),
+    ensureDir(paths.discoveryRadarDir),
+    ensureDir(paths.discoveryDiscardedDir),
     ensureDir(path.join(paths.coreDir, 'dados')),
     ensureDir(path.join(paths.coreDir, 'integracoes')),
     ensureDir(path.join(paths.coreDir, 'adrs')),
@@ -367,6 +489,9 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
   await writeYamlIfMissing(paths.configFile, {
     version: 1,
     generatedBy: `${CLI_NAME} sdd init`,
+    language: config.language,
+    layout: config.layout,
+    folders: config.folders,
     frontend: { enabled: config.frontend.enabled },
     views: { autoRender: config.views.autoRender },
   });
@@ -398,13 +523,23 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
     path.join(paths.coreDir, 'arquitetura.md'),
     '# Arquitetura\n\nDocumento arquitetural de alto nivel do projeto.\n'
   );
-  await writeFileIfMissing(path.join(paths.memoryRoot, 'README.md'), buildSddInternalReadme());
   await writeFileIfMissing(
-    path.join(paths.skillsDir, 'bundles', 'curadoria-pt-br.md'),
+    path.join(paths.memoryRoot, 'README.md'),
+    buildSddInternalReadme(path.basename(paths.memoryRoot), {
+      discovery: config.folders.discovery,
+      planning: config.folders.planning,
+      skills: config.folders.skills,
+      templates: config.folders.templates,
+      active: config.folders.active,
+      deposito: config.folders.deposito,
+    })
+  );
+  await writeFileIfMissing(
+    path.join(paths.skillsBundlesDir, 'curadoria-pt-br.md'),
     buildCuratedBundlesMarkdown()
   );
   for (const [skillId, content] of Object.entries(BUILT_IN_SDD_SKILLS)) {
-    await writeFileIfMissing(path.join(paths.skillsDir, 'curated', skillId, 'SKILL.md'), content);
+    await writeFileIfMissing(path.join(paths.skillsCuratedDir, skillId, 'SKILL.md'), content);
   }
   await writeFileIfMissing(
     path.join(paths.depositoDir, 'README.md'),

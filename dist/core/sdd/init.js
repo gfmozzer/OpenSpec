@@ -7,6 +7,8 @@ export class SddInitCommand {
     async execute(projectRoot, options = {}) {
         const config = await upsertProjectSddConfig(projectRoot, {
             frontendEnabled: options.frontendEnabled,
+            language: options.language,
+            layout: options.layout,
         });
         const paths = resolveSddPaths(projectRoot, config);
         await ensureBaseStructure(paths);
@@ -21,7 +23,7 @@ export class SddInitCommand {
             const state = await loadStateSnapshot(paths, config);
             await renderViews(paths, config, state);
         }
-        await syncSddGuideDocs(projectRoot, paths);
+        await syncSddGuideDocs(projectRoot, paths, config);
         return {
             projectRoot,
             memoryDir: paths.memoryRoot,
@@ -49,7 +51,7 @@ export class SddInitContextCommand {
             const state = await loadStateSnapshot(paths, config);
             await renderViews(paths, config, state);
         }
-        await syncSddGuideDocs(projectRoot, paths);
+        await syncSddGuideDocs(projectRoot, paths, config);
         return {
             projectRoot,
             memoryDir: paths.memoryRoot,

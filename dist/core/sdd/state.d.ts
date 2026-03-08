@@ -2,6 +2,16 @@ import { type ArchitectureState, type BacklogState, type DiscoveryIndexState, ty
 export interface SddRuntimeConfig {
     enabled: boolean;
     memoryDir: string;
+    language: 'pt-BR' | 'en-US';
+    layout: 'legacy' | 'pt-BR';
+    folders: {
+        discovery: string;
+        planning: string;
+        skills: string;
+        templates: string;
+        deposito: string;
+        active: string;
+    };
     frontend: {
         enabled: boolean;
     };
@@ -18,8 +28,15 @@ export interface SddPaths {
     pendenciasDir: string;
     stateDir: string;
     skillsDir: string;
+    skillsCuratedDir: string;
+    skillsBundlesDir: string;
     templatesDir: string;
     depositoDir: string;
+    activeDir: string;
+    discoveryInsightsDir: string;
+    discoveryDebatesDir: string;
+    discoveryRadarDir: string;
+    discoveryDiscardedDir: string;
     stateFiles: {
         discoveryIndex: string;
         backlog: string;
@@ -58,6 +75,8 @@ export interface SddStateSnapshot {
 export declare function loadProjectSddConfig(projectRoot: string): Promise<SddRuntimeConfig>;
 export declare function upsertProjectSddConfig(projectRoot: string, overrides?: {
     frontendEnabled?: boolean;
+    language?: 'pt-BR' | 'en-US';
+    layout?: 'legacy' | 'pt-BR';
 }): Promise<SddRuntimeConfig>;
 export declare function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): SddPaths;
 export declare function ensureBaseStructure(paths: SddPaths): Promise<void>;

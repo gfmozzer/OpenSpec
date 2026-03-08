@@ -1,0 +1,7 @@
+version: 1
+items:
+  - layer: runtime
+    technology: nodejs
+    version: ""
+    purpose: Runtime principal do projeto
+    constraints: []

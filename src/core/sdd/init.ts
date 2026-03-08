@@ -14,6 +14,8 @@ import { SddSkillsSyncCommand } from './operations.js';
 
 export interface SddInitOptions {
   frontendEnabled?: boolean;
+  language?: 'pt-BR' | 'en-US';
+  layout?: 'legacy' | 'pt-BR';
   render?: boolean;
 }
 
@@ -45,6 +47,8 @@ export class SddInitCommand {
   async execute(projectRoot: string, options: SddInitOptions = {}): Promise<SddInitResult> {
     const config: SddRuntimeConfig = await upsertProjectSddConfig(projectRoot, {
       frontendEnabled: options.frontendEnabled,
+      language: options.language,
+      layout: options.layout,
     });
     const paths = resolveSddPaths(projectRoot, config);
 
@@ -61,7 +65,7 @@ export class SddInitCommand {
       const state = await loadStateSnapshot(paths, config);
       await renderViews(paths, config, state);
     }
-    await syncSddGuideDocs(projectRoot, paths);
+    await syncSddGuideDocs(projectRoot, paths, config);
 
     return {
       projectRoot,
@@ -94,7 +98,7 @@ export class SddInitContextCommand {
       const state = await loadStateSnapshot(paths, config);
       await renderViews(paths, config, state);
     }
-    await syncSddGuideDocs(projectRoot, paths);
+    await syncSddGuideDocs(projectRoot, paths, config);
 
     return {
       projectRoot,

@@ -217,6 +217,12 @@ Se voce nao quer configurar nenhuma IDE/agente agora:
 opensdd install --tools none
 ```
 
+Para usar nomenclatura de pastas em portugues desde o inicio:
+
+```bash
+opensdd install --tools none --lang pt-BR --layout pt-BR
+```
+
 Se voce ja quer configurar ferramentas na instalacao:
 
 ```bash
@@ -241,6 +247,12 @@ Se quiser desativar o modulo de frontend no bootstrap:
 
 ```bash
 opensdd install --tools none --no-frontend
+```
+
+Atalho equivalente em portugues:
+
+```bash
+opensdd instalar --tools none --lang pt-BR --layout pt-BR
 ```
 
 ### 5.4 Instalar o SDD dentro do repositório
@@ -618,22 +630,35 @@ Observacao:
 | Comando | Para que serve |
 | --- | --- |
 | `opensdd install` | Instala/inicializa a base do OpenSDD no projeto |
+| `opensdd instalar` | Alias em portugues para `opensdd install` |
 | `opensdd init` | Alias tecnico para instalar/inicializar a base do OpenSDD |
 | `opensdd sdd init --frontend` | Inicializa a memória SDD e carrega skills curadas |
+| `opensdd sdd iniciar` | Alias em portugues para `opensdd sdd init` |
 | `opensdd sdd init-context` | Inspeciona projeto existente e completa contexto inicial |
+| `opensdd sdd iniciar-contexto` | Alias em portugues para `opensdd sdd init-context` |
 | `opensdd sdd check --render` | Valida e renderiza |
+| `opensdd sdd checar --render` | Alias em portugues para `opensdd sdd check --render` |
 | `opensdd sdd insight "<texto>"` | Cria um insight |
+| `opensdd sdd ideia "<texto>"` | Alias em portugues para `opensdd sdd insight` |
 | `opensdd sdd debate INS-###` | Abre debate |
+| `opensdd sdd debater INS-###` | Alias em portugues para `opensdd sdd debate` |
 | `opensdd sdd decide DEB-### --outcome radar` | Aprova debate |
 | `opensdd sdd decide DEB-### --outcome discard` | Reprova debate |
+| `opensdd sdd decidir DEB-### --outcome ...` | Alias em portugues para `opensdd sdd decide` |
 | `opensdd sdd breakdown RAD-### --mode graph` | Planeja um RAD em FEATs |
+| `opensdd sdd quebrar RAD-### --mode graph` | Alias em portugues para `opensdd sdd breakdown` |
 | `opensdd sdd start FEAT-###` | Inicia execução |
 | `opensdd sdd start "texto livre"` | Cria FEAT direta e já inicia |
+| `opensdd sdd iniciar-execucao FEAT-###` | Alias em portugues para `opensdd sdd start` |
 | `opensdd sdd next` | Diz o que começar agora |
+| `opensdd sdd proximo` | Alias em portugues para `opensdd sdd next` |
 | `opensdd sdd context FEAT-###` | Gera contexto da FEAT |
+| `opensdd sdd contexto FEAT-###` | Alias em portugues para `opensdd sdd context` |
 | `opensdd sdd onboard system` | Gera onboarding global |
+| `opensdd sdd integrar system` | Alias em portugues para `opensdd sdd onboard` |
 | `opensdd archive <change-name>` | Arquiva a mudança técnica |
 | `opensdd sdd finalize --ref FEAT-###` | Consolida memória e conclui FEAT |
+| `opensdd sdd consolidar --ref FEAT-###` | Alias em portugues para `opensdd sdd finalize` |
 | `opensdd sdd fgap add ...` | Registra gap de frontend |
 | `opensdd sdd fgap done ...` | Marca gap resolvido |
 | `opensdd sdd skills bundles` | Lista bundles |

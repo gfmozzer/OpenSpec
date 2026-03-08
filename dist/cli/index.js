@@ -66,6 +66,20 @@ program.hook('postAction', async () => {
 });
 const availableToolIds = AI_TOOLS.filter((tool) => tool.skillsDir).map((tool) => tool.value);
 const toolsOptionDescription = `Configure AI tools non-interactively. Use "all", "none", or a comma-separated list of: ${availableToolIds.join(', ')}`;
+function normalizeSddLang(value) {
+    if (!value)
+        return undefined;
+    if (value === 'pt-BR' || value === 'en-US')
+        return value;
+    throw new Error(`Invalid value for --lang: "${value}". Use pt-BR or en-US.`);
+}
+function normalizeSddLayout(value) {
+    if (!value)
+        return undefined;
+    if (value === 'legacy' || value === 'pt-BR')
+        return value;
+    throw new Error(`Invalid value for --layout: "${value}". Use legacy or pt-BR.`);
+}
 async function runInitCommand(targetPath, options) {
     // Validate that the path is a valid directory
     const resolvedPath = path.resolve(targetPath);
@@ -100,12 +114,15 @@ async function runFullInstallCommand(targetPath, options) {
     const sddInitCommand = new SddInitCommand();
     await sddInitCommand.execute(targetPath, {
         frontendEnabled: options?.frontend ?? true,
+        language: normalizeSddLang(options?.lang),
+        layout: normalizeSddLayout(options?.layout),
         render: true,
     });
 }
 program
     .command('init [path]')
     .description('Initialize OpenSDD in your project')
+    .alias('iniciar')
     .option('--tools <tools>', toolsOptionDescription)
     .option('--force', 'Auto-cleanup legacy files without prompting')
     .option('--profile <profile>', 'Override global config profile (core or custom)')
@@ -122,9 +139,12 @@ program
 program
     .command('install [path]')
     .description('Install OpenSDD completely in your project (base + SDD)')
+    .alias('instalar')
     .option('--tools <tools>', toolsOptionDescription)
     .option('--force', 'Auto-cleanup legacy files without prompting')
     .option('--profile <profile>', 'Override global config profile (core or custom)')
+    .option('--lang <lang>', 'SDD language: pt-BR|en-US')
+    .option('--layout <layout>', 'SDD folder layout: legacy|pt-BR')
     .option('--no-frontend', 'Disable frontend module in the SDD bootstrap')
     .action(async (targetPath = '.', options) => {
     try {

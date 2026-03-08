@@ -104,6 +104,31 @@ describe('SddInitCommand', () => {
     expect(await exists(path.join(testDir, '.sdd', 'pendencias', 'frontend-gaps.md'))).toBe(true);
   });
 
+  it('supports PT-BR folder layout for intuitive naming', async () => {
+    const command = new SddInitCommand();
+    await command.execute(testDir, { layout: 'pt-BR', frontendEnabled: true, render: false });
+
+    expect(await exists(path.join(testDir, '.sdd', 'descoberta'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'planejamento'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'execucao'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'modelos'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'descoberta', '1-insights'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'planejamento', 'backlog-features.md'))).toBe(false);
+
+    const report = await new SddInitContextCommand().execute(testDir, { render: true });
+    expect(report.rendered).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'planejamento', 'backlog-features.md'))).toBe(true);
+
+    const projectConfig = parseYaml(
+      await fs.readFile(path.join(testDir, 'openspec', 'config.yaml'), 'utf-8')
+    ) as Record<string, any>;
+    expect(projectConfig.sdd.layout).toBe('pt-BR');
+    expect(projectConfig.sdd.folders.discovery).toBe('descoberta');
+    expect(projectConfig.sdd.folders.planning).toBe('planejamento');
+    expect(projectConfig.sdd.folders.active).toBe('execucao');
+    expect(projectConfig.sdd.folders.templates).toBe('modelos');
+  });
+
   it('is idempotent and does not overwrite existing state files', async () => {
     const command = new SddInitCommand();
     await command.execute(testDir);

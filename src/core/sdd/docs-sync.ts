@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
-import type { SddPaths } from './state.js';
+import type { SddPaths, SddRuntimeConfig } from './state.js';
 import { buildSddInternalReadme } from './default-bootstrap-files.js';
 import { CLI_NAME } from '../branding.js';
 
@@ -40,7 +40,7 @@ function upsertMarkedBlock(
   return { content: next, changed: true, hasMarkers: false };
 }
 
-function buildReadmeBlock(memoryDir: string): string {
+function buildReadmeBlock(memoryDir: string, config?: SddRuntimeConfig): string {
   return `## Onboarding SDD
 
 Ordem de leitura para qualquer agente novo:
@@ -61,7 +61,10 @@ Comandos essenciais:
 - \`${CLI_NAME} sdd finalize --ref FEAT-###\``;
 }
 
-function buildAgentGuideBlock(memoryDir: string): string {
+function buildAgentGuideBlock(memoryDir: string, config?: SddRuntimeConfig): string {
+  const planningDir = config?.folders.planning || 'pendencias';
+  const activeDir = config?.folders.active || 'active';
+  const depositoDir = config?.folders.deposito || 'deposito';
   return `# Guia Operacional SDD
 
 Trilha oficial:
@@ -73,9 +76,9 @@ Trilha oficial:
 
 Fontes canônicas:
 - Estados: \`${memoryDir}/state/*.yaml\`
-- Views: \`${memoryDir}/core/*.md\` e \`${memoryDir}/pendencias/*.md\`
-- Workspace ativo por feature: \`${memoryDir}/active/FEAT-###/\`
-- Deposito bruto: \`${memoryDir}/deposito/\` (PRDs, RFCs, wireframes e referencias)`;
+- Views: \`${memoryDir}/core/*.md\` e \`${memoryDir}/${planningDir}/*.md\`
+- Workspace ativo por feature: \`${memoryDir}/${activeDir}/FEAT-###/\`
+- Deposito bruto: \`${memoryDir}/${depositoDir}/\` (PRDs, RFCs, wireframes e referencias)`;
 }
 
 function buildRootAgentsBlock(memoryDir: string): string {
@@ -100,7 +103,8 @@ Canonical state lives in \`${memoryDir}/state/*.yaml\`. Markdown files are opera
 
 export async function syncSddGuideDocs(
   projectRoot: string,
-  paths: SddPaths
+  paths: SddPaths,
+  config?: SddRuntimeConfig
 ): Promise<{
   updatedInternalReadme: boolean;
   updatedReadme: boolean;
@@ -138,13 +142,13 @@ export async function syncSddGuideDocs(
     readmeRaw,
     README_SDD_BLOCK_START,
     README_SDD_BLOCK_END,
-    buildReadmeBlock(memoryDirName)
+    buildReadmeBlock(memoryDirName, config)
   );
   const agentUpdate = upsertMarkedBlock(
     agentRaw,
     AGENT_SDD_BLOCK_START,
     AGENT_SDD_BLOCK_END,
-    buildAgentGuideBlock(memoryDirName)
+    buildAgentGuideBlock(memoryDirName, config)
   );
   const agentsUpdate = upsertMarkedBlock(
     agentsRaw,
@@ -158,7 +162,14 @@ export async function syncSddGuideDocs(
     ROOT_AGENTS_SDD_BLOCK_END,
     buildRootAgentsBlock(memoryDirName)
   );
-  const internalReadmeContent = buildSddInternalReadme(memoryDirName);
+  const internalReadmeContent = buildSddInternalReadme(memoryDirName, {
+    discovery: config?.folders.discovery,
+    planning: config?.folders.planning,
+    skills: config?.folders.skills,
+    templates: config?.folders.templates,
+    active: config?.folders.active,
+    deposito: config?.folders.deposito,
+  });
 
   const currentInternalReadme = (await fileExists(internalReadmePath))
     ? await fs.readFile(internalReadmePath, 'utf-8')
@@ -194,13 +205,15 @@ export async function syncSddGuideDocs(
 
 export async function validateSddGuideDocs(
   projectRoot: string,
-  paths: SddPaths
+  paths: SddPaths,
+  config?: SddRuntimeConfig
 ): Promise<{
   documentationSync: boolean;
   missingBlocks: string[];
 }> {
   const readmePath = path.join(projectRoot, 'README.md');
   const internalReadmePath = path.join(paths.memoryRoot, 'README.md');
+  const memoryDirName = path.relative(projectRoot, paths.memoryRoot) || '.sdd';
   const agentPath = path.join(paths.memoryRoot, 'AGENT.md');
   const legacyAgentPath = path.join(paths.memoryRoot, 'agente.md');
   const agentsPath = path.join(projectRoot, 'AGENTS.md');
@@ -224,11 +237,21 @@ export async function validateSddGuideDocs(
   if (!readmeRaw.includes(README_SDD_BLOCK_START) || !readmeRaw.includes(README_SDD_BLOCK_END)) {
     missingBlocks.push('README.md::SDD:ONBOARDING');
   }
-  if (internalReadmeRaw !== buildSddInternalReadme(path.relative(projectRoot, paths.memoryRoot) || '.sdd')) {
-    missingBlocks.push('.sdd/README.md::SDD:INTERNAL');
+  if (
+    internalReadmeRaw !==
+    buildSddInternalReadme(path.relative(projectRoot, paths.memoryRoot) || '.sdd', {
+      discovery: config?.folders.discovery,
+      planning: config?.folders.planning,
+      skills: config?.folders.skills,
+      templates: config?.folders.templates,
+      active: config?.folders.active,
+      deposito: config?.folders.deposito,
+    })
+  ) {
+      missingBlocks.push(`${memoryDirName}/README.md::SDD:INTERNAL`);
   }
   if (!agentRaw.includes(AGENT_SDD_BLOCK_START) || !agentRaw.includes(AGENT_SDD_BLOCK_END)) {
-    missingBlocks.push('.sdd/AGENT.md::SDD:GUIA');
+    missingBlocks.push(`${memoryDirName}/AGENT.md::SDD:GUIA`);
   }
   if (
     !agentsRaw.includes(ROOT_AGENTS_SDD_BLOCK_START) ||

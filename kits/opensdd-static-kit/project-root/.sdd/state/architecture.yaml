@@ -1,0 +1,8 @@
+version: 1
+nodes:
+  - id: arch-tmp-xkldzr2hmb
+    name: tmp.xKLDzR2HmB
+    kind: service
+    description: Servico inicial detectado no bootstrap de contexto
+    repo_paths: []
+    depends_on: []

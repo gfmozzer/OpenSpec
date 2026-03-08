@@ -1,6 +1,8 @@
 import { type BootstrapContextReport } from './bootstrap.js';
 export interface SddInitOptions {
     frontendEnabled?: boolean;
+    language?: 'pt-BR' | 'en-US';
+    layout?: 'legacy' | 'pt-BR';
     render?: boolean;
 }
 export interface SddInitResult {

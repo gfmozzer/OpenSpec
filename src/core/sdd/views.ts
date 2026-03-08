@@ -11,12 +11,17 @@ function formatDate(iso?: string): string {
   return date.toISOString().slice(0, 10);
 }
 
-function renderCoreIndex(state: SddStateSnapshot, config: SddRuntimeConfig): string {
+function renderCoreIndex(
+  state: SddStateSnapshot,
+  config: SddRuntimeConfig,
+  memoryDirLabel: string
+): string {
   const frontendEnabled = config.frontend.enabled ? 'ativado' : 'desativado';
+  const planningDir = config.folders.planning;
 
   return `# Indice Core SDD
 
-Este documento e gerado automaticamente a partir dos arquivos em \`.sdd/state/\`.
+Este documento e gerado automaticamente a partir dos arquivos em \`${memoryDirLabel}/state/\`.
 
 ## Resumo
 - Registros de discovery: ${state.discoveryIndex.records.length}
@@ -28,18 +33,18 @@ Este documento e gerado automaticamente a partir dos arquivos em \`.sdd/state/\`
 - Modulo de frontend: ${frontendEnabled}
 
 ## Referencias
-- \`.sdd/core/arquitetura.md\`
-- \`.sdd/core/servicos.md\`
-- \`.sdd/core/spec-tecnologica.md\`
-- \`.sdd/core/repo-map.md\`
-- \`.sdd/core/fontes.md\`
-- \`.sdd/core/integracoes.md\`
-- \`.sdd/pendencias/backlog-features.md\`
-- \`.sdd/pendencias/backlog-graph.md\`
-- \`.sdd/pendencias/progress.md\`
-- \`.sdd/pendencias/unblocked.md\`
-- \`.sdd/pendencias/tech-debt.md\`
-${config.frontend.enabled ? '- `.sdd/core/frontend-map.md`\n- `.sdd/core/frontend-decisions.md`\n- `.sdd/pendencias/frontend-gaps.md`' : ''}
+- \`${memoryDirLabel}/core/arquitetura.md\`
+- \`${memoryDirLabel}/core/servicos.md\`
+- \`${memoryDirLabel}/core/spec-tecnologica.md\`
+- \`${memoryDirLabel}/core/repo-map.md\`
+- \`${memoryDirLabel}/core/fontes.md\`
+- \`${memoryDirLabel}/core/integracoes.md\`
+- \`${memoryDirLabel}/${planningDir}/backlog-features.md\`
+- \`${memoryDirLabel}/${planningDir}/backlog-graph.md\`
+- \`${memoryDirLabel}/${planningDir}/progress.md\`
+- \`${memoryDirLabel}/${planningDir}/unblocked.md\`
+- \`${memoryDirLabel}/${planningDir}/tech-debt.md\`
+${config.frontend.enabled ? `- \`${memoryDirLabel}/core/frontend-map.md\`\n- \`${memoryDirLabel}/core/frontend-decisions.md\`\n- \`${memoryDirLabel}/${planningDir}/frontend-gaps.md\`` : ''}
 `;
 }
 
@@ -408,8 +413,13 @@ export async function renderViews(
   config: SddRuntimeConfig,
   state: SddStateSnapshot
 ): Promise<void> {
+  const memoryDirLabel = path.basename(paths.memoryRoot);
   const writes: Array<Promise<void>> = [
-    fs.writeFile(path.join(paths.coreDir, 'index.md'), renderCoreIndex(state, config), 'utf-8'),
+    fs.writeFile(
+      path.join(paths.coreDir, 'index.md'),
+      renderCoreIndex(state, config, memoryDirLabel),
+      'utf-8'
+    ),
     fs.writeFile(path.join(paths.coreDir, 'arquitetura.md'), renderArchitecture(state), 'utf-8'),
     fs.writeFile(path.join(paths.coreDir, 'servicos.md'), renderServices(state), 'utf-8'),
     fs.writeFile(path.join(paths.coreDir, 'spec-tecnologica.md'), renderTechStack(state), 'utf-8'),

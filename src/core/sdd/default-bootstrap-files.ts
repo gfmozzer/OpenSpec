@@ -1,6 +1,24 @@
 import { CLI_NAME } from '../branding.js';
 
-export function buildSddInternalReadme(memoryDir = '.sdd'): string {
+export interface SddReadmeFolders {
+  discovery?: string;
+  planning?: string;
+  skills?: string;
+  templates?: string;
+  active?: string;
+  deposito?: string;
+}
+
+export function buildSddInternalReadme(
+  memoryDir = '.sdd',
+  folders: SddReadmeFolders = {}
+): string {
+  const discovery = folders.discovery || 'discovery';
+  const planning = folders.planning || 'pendencias';
+  const skills = folders.skills || 'skills';
+  const templates = folders.templates || 'templates';
+  const active = folders.active || 'active';
+  const deposito = folders.deposito || 'deposito';
   return `# SDD README
 
 Este diretorio guarda a memoria operacional do projeto.
@@ -25,13 +43,13 @@ Este diretorio guarda a memoria operacional do projeto.
 
 ## Pastas principais
 - \`core/\`: visao macro atual do sistema.
-- \`discovery/\`: insights, debates, radar e descartes.
-- \`pendencias/\`: backlog, progresso, gaps e fila de finalize.
+- \`${discovery}/\`: insights, debates, radar e descartes.
+- \`${planning}/\`: backlog, progresso, gaps e fila de finalize.
 - \`state/\`: fonte canonica em YAML.
-- \`skills/\`: curadoria local e bundles.
-- \`templates/\`: modelos base de spec, plano, tasks e changelog.
-- \`active/\`: workspaces ativos por FEAT.
-- \`deposito/\`: documentos brutos, PRDs, wireframes e referencias externas.
+- \`${skills}/\`: curadoria local e bundles.
+- \`${templates}/\`: modelos base de spec, plano, tasks e changelog.
+- \`${active}/\`: workspaces ativos por FEAT.
+- \`${deposito}/\`: documentos brutos, PRDs, wireframes e referencias externas.
 
 ## Regra operacional
 Toda feature concluida deve atualizar a documentacao relevante antes do \`finalize\`.

@@ -95,6 +95,12 @@ Entre no repositorio onde voce quer usar o sistema e rode:
 opensdd install --tools none
 ```
 
+Para ja nascer com nomenclatura mais intuitiva em portugues nas pastas do SDD:
+
+```bash
+opensdd install --tools none --lang pt-BR --layout pt-BR
+```
+
 Se quiser integrar ferramentas suportadas no bootstrap:
 
 ```bash
@@ -122,6 +128,13 @@ Se voce nao quiser habilitar frontend no bootstrap:
 ```bash
 opensdd install --tools none --no-frontend
 ```
+
+Atalhos em portugues no CLI:
+
+- `opensdd instalar` (alias de `opensdd install`)
+- `opensdd sdd iniciar` (alias de `opensdd sdd init`)
+- `opensdd sdd iniciar-contexto` (alias de `opensdd sdd init-context`)
+- `opensdd sdd ideia`, `debater`, `decidir`, `quebrar`, `iniciar-execucao`, `contexto`, `consolidar`, `proximo`, `checar`
 
 ## Como absorver um projeto que ja existe
 
@@ -310,6 +323,7 @@ Guia detalhado em portugues:
 
 - [Manual SDD PT-BR](docs/sdd-manual-pt-br.md)
 - [Release e Rollback](docs/release.md)
+- [Kit estatico do SDD](kits/opensdd-static-kit/README.md)
 
 Guia interno do sistema:
 

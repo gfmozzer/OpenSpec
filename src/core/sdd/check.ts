@@ -397,7 +397,7 @@ export class SddCheckCommand {
     const shouldRender = options.render ?? config.views.autoRender;
     if (shouldRender && errors.length === 0) {
       await renderViews(paths, config, snapshot);
-      await syncSddGuideDocs(projectRoot, paths);
+      await syncSddGuideDocs(projectRoot, paths, config);
     }
     const coreFiles = [
       path.join(paths.coreDir, 'index.md'),
@@ -409,7 +409,7 @@ export class SddCheckCommand {
       coreFiles.push(path.join(paths.coreDir, 'frontend-decisions.md'));
     }
     const coreViewsStale = coreFiles.some((file) => !existsSync(file));
-    const docsValidation = await validateSddGuideDocs(projectRoot, paths);
+    const docsValidation = await validateSddGuideDocs(projectRoot, paths, config);
     if (!docsValidation.documentationSync) {
       warnings.push(
         `Blocos de onboarding nao sincronizados: ${docsValidation.missingBlocks.join(', ')}`

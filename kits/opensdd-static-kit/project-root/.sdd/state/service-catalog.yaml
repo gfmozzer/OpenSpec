@@ -1,0 +1,9 @@
+version: 1
+services:
+  - id: tmp-xkldzr2hmb
+    name: tmp.xKLDzR2HmB
+    responsibility: Servico inicial detectado no bootstrap de contexto
+    owner_refs: []
+    repo_paths: []
+    contracts: []
+    external_dependencies: []

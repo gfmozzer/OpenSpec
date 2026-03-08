@@ -1,0 +1,6 @@
+version: 1
+generatedBy: opensdd sdd init
+frontend:
+  enabled: true
+views:
+  autoRender: true

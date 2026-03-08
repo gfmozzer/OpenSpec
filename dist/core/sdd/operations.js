@@ -141,7 +141,7 @@ ${rationale || '(motivo nao informado)'}
 `;
 }
 async function findDebateFile(paths, debateId) {
-    const debateDir = path.join(paths.discoveryDir, '2-debates');
+    const debateDir = paths.discoveryDebatesDir;
     const entries = await fs.readdir(debateDir, { withFileTypes: true }).catch(() => []);
     const found = entries.find((entry) => entry.isFile() && entry.name.startsWith(`${debateId}-`));
     if (!found)
@@ -210,8 +210,20 @@ async function persistAndRender(paths, config, render) {
     const snapshot = await loadStateSnapshot(paths, config);
     await renderViews(paths, config, snapshot);
 }
+function relProjectPath(paths, absolutePath) {
+    return path.relative(paths.projectRoot, absolutePath).replace(/\\/g, '/');
+}
+function coreDocRef(paths, name) {
+    return relProjectPath(paths, path.join(paths.coreDir, name));
+}
+function planningDocRef(paths, name) {
+    return relProjectPath(paths, path.join(paths.pendenciasDir, name));
+}
+function activeFeatureRef(paths, featureId, fileName) {
+    return relProjectPath(paths, path.join(paths.activeDir, featureId, fileName));
+}
 function featureActiveDir(paths, featureId) {
-    return path.join(paths.memoryRoot, 'active', featureId);
+    return path.join(paths.activeDir, featureId);
 }
 async function writeFileAlways(filePath, content) {
     await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -254,7 +266,9 @@ function buildActivePlanDoc(feature, recommendedBundles) {
 - Bundles: ${recommendedBundles.join(', ') || '-'}
 `;
 }
-function buildActiveTasksDoc(feature) {
+function buildActiveTasksDoc(feature, paths) {
+    const memoryAgentGuide = relProjectPath(paths, path.join(paths.memoryRoot, 'AGENT.md'));
+    const coreDocsDir = relProjectPath(paths, paths.coreDir);
     return `# Tasks ${feature.id}
 
 1. Entender contexto com \`${CLI_NAME} sdd context ${feature.id}\`.
@@ -262,14 +276,14 @@ function buildActiveTasksDoc(feature) {
 3. Implementar com rastreabilidade no changelog.
 4. Atualizar, se houve impacto, a documentação operacional e canônica:
    - \`README.md\`
-   - \`.sdd/AGENT.md\`
+   - \`${memoryAgentGuide}\`
    - \`AGENTS.md\`
    - \`AGENT.md\`
-   - \`.sdd/core/arquitetura.md\`
-   - \`.sdd/core/servicos.md\`
-   - \`.sdd/core/spec-tecnologica.md\`
-   - \`.sdd/core/repo-map.md\`
-   - \`.sdd/core/frontend-decisions.md\` (quando aplicável)
+   - \`${coreDocsDir}/arquitetura.md\`
+   - \`${coreDocsDir}/servicos.md\`
+   - \`${coreDocsDir}/spec-tecnologica.md\`
+   - \`${coreDocsDir}/repo-map.md\`
+   - \`${coreDocsDir}/frontend-decisions.md\` (quando aplicável)
 5. Validar e preparar finalize.
 
 ## Dependências
@@ -299,7 +313,7 @@ async function ensureFeatureActiveWorkspace(paths, feature, recommendedBundles) 
     ];
     await writeFileAlways(docs[0], buildActiveSpecDoc(feature));
     await writeFileAlways(docs[1], buildActivePlanDoc(feature, recommendedBundles));
-    await writeFileAlways(docs[2], buildActiveTasksDoc(feature));
+    await writeFileAlways(docs[2], buildActiveTasksDoc(feature, paths));
     await writeFileAlways(docs[3], buildActiveChangelogDoc(feature));
     const handoffSeedRefs = [feature.id, feature.origin_ref].filter((v) => Boolean(v));
     return {
@@ -332,7 +346,7 @@ export class SddInsightCommand {
         };
         snapshot.discoveryIndex.records.push(record);
         await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
-        const filePath = path.join(paths.discoveryDir, '1-insights', `${id}-${slugify(title)}.md`);
+        const filePath = path.join(paths.discoveryInsightsDir, `${id}-${slugify(title)}.md`);
         await fs.writeFile(filePath, markdownInsightTemplate(id, title, trimmed), 'utf-8');
         await persistAndRender(paths, config, options?.render);
         return { id, title, filePath };
@@ -365,7 +379,7 @@ export class SddDebateCommand {
         insight.updated_at = now;
         snapshot.discoveryIndex.records.push(debate);
         await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
-        const filePath = path.join(paths.discoveryDir, '2-debates', `${id}-${slugify(title)}.md`);
+        const filePath = path.join(paths.discoveryDebatesDir, `${id}-${slugify(title)}.md`);
         await fs.writeFile(filePath, markdownDebateTemplate(insight, id), 'utf-8');
         await persistAndRender(paths, config, options?.render);
         return { id, title, filePath };
@@ -381,7 +395,7 @@ export class SddDecideCommand {
         }
         const debateFile = await findDebateFile(paths, debateId);
         if (!debateFile) {
-            throw new Error(`Arquivo do debate ${debateId} nao encontrado em .sdd/discovery/2-debates.`);
+            throw new Error(`Arquivo do debate ${debateId} nao encontrado em ${path.relative(projectRoot, paths.discoveryDebatesDir)}.`);
         }
         const debateContent = await fs.readFile(debateFile, 'utf-8');
         const missingSections = validateDebateDocument(debateContent);
@@ -392,7 +406,7 @@ export class SddDecideCommand {
         debate.status = outcome === 'radar' ? 'APPROVED' : 'DISCARDED';
         debate.updated_at = now;
         if (outcome === 'discard') {
-            const discardPath = path.join(paths.discoveryDir, '4-discarded', `${debate.id}-${slugify(debate.title)}.md`);
+            const discardPath = path.join(paths.discoveryDiscardedDir, `${debate.id}-${slugify(debate.title)}.md`);
             await fs.writeFile(discardPath, markdownDiscardTemplate(debate, options?.rationale), 'utf-8');
             await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
             await persistAndRender(paths, config, options?.render);
@@ -414,7 +428,7 @@ export class SddDecideCommand {
         debate.related_ids = Array.from(new Set([...debate.related_ids, radarId]));
         snapshot.discoveryIndex.records.push(radarRecord);
         await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
-        const radarPath = path.join(paths.discoveryDir, '3-radar', `${radarId}-${slugify(radarTitle)}.md`);
+        const radarPath = path.join(paths.discoveryRadarDir, `${radarId}-${slugify(radarTitle)}.md`);
         await fs.writeFile(radarPath, markdownRadarTemplate(debate, radarId, options?.rationale), 'utf-8');
         await persistAndRender(paths, config, options?.render);
         return { outcome, debateId, radarId, radarPath };
@@ -974,7 +988,7 @@ export class SddFinalizeCommand {
                 repo_paths: feature.worktree_path ? [feature.worktree_path] : [],
                 depends_on: feature.blocked_by,
             });
-            updatedCoreDocs.add('.sdd/core/arquitetura.md');
+            updatedCoreDocs.add(coreDocRef(paths, 'arquitetura.md'));
             const serviceId = feature.touches[0] || feature.execution_kind;
             upsertArray(snapshot.serviceCatalog.services, (service) => service.id === serviceId, {
                 id: serviceId,
@@ -985,7 +999,7 @@ export class SddFinalizeCommand {
                 contracts: feature.consumes,
                 external_dependencies: [],
             });
-            updatedCoreDocs.add('.sdd/core/servicos.md');
+            updatedCoreDocs.add(coreDocRef(paths, 'servicos.md'));
             for (const tech of feature.touches) {
                 if (!snapshot.techStack.items.some((entry) => entry.layer === tech && entry.technology === tech)) {
                     snapshot.techStack.items.push({
@@ -997,7 +1011,7 @@ export class SddFinalizeCommand {
                     });
                 }
             }
-            updatedCoreDocs.add('.sdd/core/spec-tecnologica.md');
+            updatedCoreDocs.add(coreDocRef(paths, 'spec-tecnologica.md'));
             const contractTokens = Array.from(new Set([...feature.consumes, ...feature.produces]));
             for (const token of contractTokens) {
                 const contractRef = `${token}::${feature.id}`;
@@ -1011,7 +1025,7 @@ export class SddFinalizeCommand {
                 service_ref: serviceId,
                 notes: `Consolidado no finalize ${feature.id}`,
             });
-            updatedCoreDocs.add('.sdd/core/repo-map.md');
+            updatedCoreDocs.add(coreDocRef(paths, 'repo-map.md'));
             if (config.frontend.enabled && snapshot.frontendDecisions && feature.execution_kind === 'frontend_coverage') {
                 upsertArray(snapshot.frontendDecisions.items, (entry) => entry.id === `FD-${feature.id}`, {
                     id: `FD-${feature.id}`,
@@ -1023,7 +1037,7 @@ export class SddFinalizeCommand {
                     route_refs: [],
                     adr_refs: [`ADR-${feature.id}`],
                 });
-                updatedCoreDocs.add('.sdd/core/frontend-decisions.md');
+                updatedCoreDocs.add(coreDocRef(paths, 'frontend-decisions.md'));
             }
             const unlockedByFeature = [];
             for (const dependant of snapshot.backlog.items) {
@@ -1077,7 +1091,7 @@ export class SddFinalizeCommand {
             docWarnings.push('frontend.enabled=true sem frontend-decisions carregado');
         }
         await persistAndRender(paths, config, options?.render);
-        const syncResult = await syncSddGuideDocs(projectRoot, paths);
+        const syncResult = await syncSddGuideDocs(projectRoot, paths, config);
         const remaining = snapshot.finalizeQueue.items.filter((item) => item.status === 'PENDING').length;
         return {
             finalized,
@@ -1117,7 +1131,7 @@ async function listAdrRefs(paths, refs) {
     return entries
         .filter((name) => name.endsWith('.md'))
         .filter((name) => normalized.some((ref) => name.includes(ref)))
-        .map((name) => `.sdd/core/adrs/${name}`)
+        .map((name) => relProjectPath(paths, path.join(adrDir, name)))
         .sort();
 }
 export class SddContextCommand {
@@ -1129,15 +1143,15 @@ export class SddContextCommand {
             throw new Error(`Referencia ${ref} invalida. Use FEAT/RAD/FGAP/TD.`);
         }
         const coreDocs = [
-            '.sdd/core/index.md',
-            '.sdd/core/arquitetura.md',
-            '.sdd/core/servicos.md',
-            '.sdd/core/spec-tecnologica.md',
-            '.sdd/core/repo-map.md',
+            coreDocRef(paths, 'index.md'),
+            coreDocRef(paths, 'arquitetura.md'),
+            coreDocRef(paths, 'servicos.md'),
+            coreDocRef(paths, 'spec-tecnologica.md'),
+            coreDocRef(paths, 'repo-map.md'),
         ];
         if (config.frontend.enabled) {
-            coreDocs.push('.sdd/core/frontend-map.md');
-            coreDocs.push('.sdd/core/frontend-decisions.md');
+            coreDocs.push(coreDocRef(paths, 'frontend-map.md'));
+            coreDocs.push(coreDocRef(paths, 'frontend-decisions.md'));
         }
         if (type === 'FEAT') {
             const item = snapshot.backlog.items.find((entry) => entry.id === ref);
@@ -1174,24 +1188,24 @@ export class SddContextCommand {
             const relevantAdrs = await listAdrRefs(paths, [item.id, item.origin_ref || '', ...item.blocked_by]);
             const activePathAbs = featureActiveDir(paths, item.id);
             const activePath = (await pathExists(activePathAbs))
-                ? path.relative(paths.projectRoot, activePathAbs)
+                ? relProjectPath(paths, activePathAbs)
                 : '';
             const readOrder = [
                 'README.md',
-                '.sdd/AGENT.md',
-                '.sdd/core/index.md',
-                '.sdd/core/arquitetura.md',
-                '.sdd/core/servicos.md',
-                '.sdd/core/spec-tecnologica.md',
-                '.sdd/core/repo-map.md',
+                relProjectPath(paths, path.join(paths.memoryRoot, 'AGENT.md')),
+                coreDocRef(paths, 'index.md'),
+                coreDocRef(paths, 'arquitetura.md'),
+                coreDocRef(paths, 'servicos.md'),
+                coreDocRef(paths, 'spec-tecnologica.md'),
+                coreDocRef(paths, 'repo-map.md'),
                 ...relevantAdrs,
                 ...coreDocs.filter((doc) => doc.includes('frontend')),
                 ...(activePath
                     ? [
-                        `${activePath}/1-spec.md`,
-                        `${activePath}/2-plan.md`,
-                        `${activePath}/3-tasks.md`,
-                        `${activePath}/4-changelog.md`,
+                        activeFeatureRef(paths, item.id, '1-spec.md'),
+                        activeFeatureRef(paths, item.id, '2-plan.md'),
+                        activeFeatureRef(paths, item.id, '3-tasks.md'),
+                        activeFeatureRef(paths, item.id, '4-changelog.md'),
                     ]
                     : []),
             ];
@@ -1244,7 +1258,12 @@ export class SddContextCommand {
                 related_debates: snapshot.discoveryIndex.records
                     .filter((record) => record.type === 'DEB' && record.related_ids.includes(ref))
                     .map((record) => record.id),
-                read_order: ['README.md', '.sdd/AGENT.md', '.sdd/core/index.md', '.sdd/pendencias/backlog-graph.md'],
+                read_order: [
+                    'README.md',
+                    relProjectPath(paths, path.join(paths.memoryRoot, 'AGENT.md')),
+                    coreDocRef(paths, 'index.md'),
+                    planningDocRef(paths, 'backlog-graph.md'),
+                ],
                 core_docs: coreDocs,
             };
         }
@@ -1260,7 +1279,12 @@ export class SddContextCommand {
                 source_feature: gap.origin_feature || '',
                 resolved_by_feature: gap.resolved_by_feature || '',
                 routes: gap.route_targets,
-                read_order: ['README.md', '.sdd/AGENT.md', '.sdd/core/frontend-map.md', '.sdd/pendencias/frontend-gaps.md'],
+                read_order: [
+                    'README.md',
+                    relProjectPath(paths, path.join(paths.memoryRoot, 'AGENT.md')),
+                    coreDocRef(paths, 'frontend-map.md'),
+                    planningDocRef(paths, 'frontend-gaps.md'),
+                ],
                 core_docs: coreDocs,
             };
         }
@@ -1273,7 +1297,11 @@ export class SddContextCommand {
             target_type: type,
             summary: `${debt.title} [${debt.status}]`,
             related_refs: debt.related_refs,
-            read_order: ['README.md', '.sdd/AGENT.md', '.sdd/pendencias/tech-debt.md'],
+            read_order: [
+                'README.md',
+                relProjectPath(paths, path.join(paths.memoryRoot, 'AGENT.md')),
+                planningDocRef(paths, 'tech-debt.md'),
+            ],
             core_docs: coreDocs,
         };
     }
@@ -1286,15 +1314,15 @@ export class SddOnboardCommand {
         const contextCmd = new SddContextCommand();
         const baseReadOrder = [
             'README.md',
-            '.sdd/AGENT.md',
-            '.sdd/core/index.md',
-            '.sdd/core/arquitetura.md',
-            '.sdd/core/servicos.md',
-            '.sdd/core/spec-tecnologica.md',
-            '.sdd/core/repo-map.md',
+            relProjectPath(paths, path.join(paths.memoryRoot, 'AGENT.md')),
+            coreDocRef(paths, 'index.md'),
+            coreDocRef(paths, 'arquitetura.md'),
+            coreDocRef(paths, 'servicos.md'),
+            coreDocRef(paths, 'spec-tecnologica.md'),
+            coreDocRef(paths, 'repo-map.md'),
         ];
         if (config.frontend.enabled) {
-            baseReadOrder.push('.sdd/core/frontend-map.md', '.sdd/core/frontend-decisions.md');
+            baseReadOrder.push(coreDocRef(paths, 'frontend-map.md'), coreDocRef(paths, 'frontend-decisions.md'));
         }
         if (normalized === 'system') {
             const next = await new SddNextCommand().execute(projectRoot, { rank: 'impact', limit: 5 });
@@ -1333,8 +1361,8 @@ export class SddOnboardCommand {
                 summary: `Onboarding da iniciativa ${normalized}`,
                 read_order: [
                     ...baseReadOrder,
-                    '.sdd/pendencias/backlog-graph.md',
-                    ...relatedFeatures.map((item) => `.sdd/active/${item.id}/1-spec.md`),
+                    planningDocRef(paths, 'backlog-graph.md'),
+                    ...relatedFeatures.map((item) => activeFeatureRef(paths, item.id, '1-spec.md')),
                 ],
                 contexto: context,
                 features_relacionadas: relatedFeatures.map((item) => ({
@@ -1599,9 +1627,9 @@ export class SddSkillsSyncCommand {
                 return true;
             return entry.bundle_ids.some((bundle) => bundleFilter.has(bundle));
         });
-        await fs.mkdir(path.join(paths.skillsDir, 'curated'), { recursive: true });
+        await fs.mkdir(paths.skillsCuratedDir, { recursive: true });
         for (const entry of selected) {
-            const localDir = path.join(paths.skillsDir, 'curated', `sdd-curated-${entry.id}`);
+            const localDir = path.join(paths.skillsCuratedDir, `sdd-curated-${entry.id}`);
             await fs.mkdir(localDir, { recursive: true });
             await fs.writeFile(path.join(localDir, 'SKILL.md'), buildCuratedSkillContent(entry), 'utf-8');
         }
