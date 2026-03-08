@@ -6,6 +6,7 @@ export function buildSddInternalReadme(memoryDir = '.sdd', folders = {}) {
     const templates = folders.templates || 'templates';
     const active = folders.active || 'active';
     const deposito = folders.deposito || 'deposito';
+    const prompts = folders.prompts || 'prompts';
     return `# SDD README
 
 Este diretorio guarda a memoria operacional do projeto.
@@ -35,6 +36,7 @@ Este diretorio guarda a memoria operacional do projeto.
 - \`state/\`: fonte canonica em YAML.
 - \`${skills}/\`: curadoria local e bundles.
 - \`${templates}/\`: modelos base de spec, plano, tasks e changelog.
+- \`${prompts}/\`: prompts recomendados para workflows comuns.
 - \`${active}/\`: workspaces ativos por FEAT.
 - \`${deposito}/\`: documentos brutos, PRDs, wireframes e referencias externas.
 
@@ -42,6 +44,163 @@ Este diretorio guarda a memoria operacional do projeto.
 Toda feature concluida deve atualizar a documentacao relevante antes do \`finalize\`.
 `;
 }
+export const PROMPTS_README_MD = `# Prompts Recomendados SDD
+
+Use estes prompts para acelerar workflows no agente sem perder padrao.
+
+## Ordem recomendada para material bruto
+1. \`00-comece-por-aqui.md\`
+2. \`01-ingestao-deposito.md\`
+3. \`02-normalizar-planejamento.md\`
+4. \`03-execucao-feature.md\`
+5. \`04-consolidacao-finalize.md\`
+
+Regra: os prompts guiam o agente, mas o estado canônico continua em \`.sdd/state/*.yaml\`.
+`;
+export const PROMPT_00_COMECE_POR_AQUI_MD = `# Comece Por Aqui (Primeiro Uso)
+
+Se voce nunca usou o OpenSDD, siga exatamente esta ordem.
+
+## 1) Instalar e iniciar no projeto
+
+No terminal, dentro da pasta do seu projeto:
+
+\`\`\`bash
+opensdd install --tools none --lang pt-BR --layout pt-BR
+opensdd sdd init --frontend --lang pt-BR --layout pt-BR
+opensdd sdd init-context
+opensdd sdd check --render
+opensdd sdd onboard system
+\`\`\`
+
+## 2) Entender as pastas principais
+
+- \`.sdd/deposito/\`: onde voce coloca material bruto (PRD, wireframe, historias, referencias).
+- \`.sdd/state/\`: fonte canônica (verdade oficial em YAML).
+- \`.sdd/core/\`: visao humana gerada automaticamente.
+- \`.sdd/planejamento/\` ou \`.sdd/pendencias/\`: backlog, progresso, fila de finalize.
+- \`.sdd/execucao/\` ou \`.sdd/active/\`: pacote de trabalho por FEAT.
+
+## 3) Tenho PRD/wireframe/historias. E agora?
+
+1. Copie os arquivos para \`.sdd/deposito/\` (subpastas corretas).
+2. Rode:
+
+\`\`\`bash
+opensdd sdd ingest-deposito --title "Planejamento inicial do sistema"
+\`\`\`
+
+3. Revise:
+
+\`\`\`bash
+opensdd sdd check --render
+opensdd sdd next
+\`\`\`
+
+Resultado esperado:
+- fontes indexadas em \`.sdd/state/source-index.yaml\`
+- RAD criado/reaproveitado
+- FEATs geradas no backlog
+- primeira FEAT pronta iniciada automaticamente (quando possivel)
+
+## 4) Como executar uma feature
+
+\`\`\`bash
+opensdd sdd start FEAT-001 --fluxo padrao
+opensdd sdd context FEAT-001
+\`\`\`
+
+Implemente e atualize o pacote da FEAT:
+- \`1-especificacao.md\` (ou \`1-spec.md\`)
+- \`2-planejamento.md\` (ou \`2-plan.md\`)
+- \`3-tarefas.md\` (ou \`3-tasks.md\`)
+- \`4-historico.md\` (ou \`4-changelog.md\`)
+
+## 5) Como finalizar sem perder contexto
+
+\`\`\`bash
+opensdd archive <change-name>
+opensdd sdd finalize --ref FEAT-001
+opensdd sdd check --render
+opensdd sdd onboard system
+\`\`\`
+
+Regra de ouro:
+- Uma FEAT so esta realmente pronta depois da consolidacao documental.
+
+## 6) Historia de uso curta (Marina)
+
+Marina colocou PRD + wireframe em \`.sdd/deposito/\`.
+Ela rodou \`opensdd sdd ingest-deposito\` e recebeu RAD + FEATs prontas para iniciar.
+Comecou pela FEAT prioritaria com \`opensdd sdd start FEAT-001\`.
+Antes de codar, rodou \`opensdd sdd context FEAT-001\`.
+Ao terminar, arquivou a change e executou \`opensdd sdd finalize --ref FEAT-001\`.
+Resultado: backlog atualizado, docs sincronizadas e proxima FEAT liberada sem adivinhacao.
+
+## 7) Comandos essenciais (resumo)
+
+- \`opensdd sdd onboard system\`: entender o estado atual.
+- \`opensdd sdd ingest-deposito\`: transformar material bruto em trilha executavel.
+- \`opensdd sdd next\`: ver o que pode comecar agora.
+- \`opensdd sdd start FEAT-###\`: abrir execucao da feature.
+- \`opensdd sdd context FEAT-###\`: gerar contexto focado.
+- \`opensdd sdd finalize --ref FEAT-###\`: consolidar memoria e concluir.
+`;
+export const PROMPT_01_INGESTAO_DEPOSITO_MD = `# Prompt: Ingestao de Deposito
+
+Use as skills:
+- source-intake-sdd
+- business-extractor-sdd
+- frontend-extractor-sdd
+- planning-normalizer-sdd
+
+Objetivo:
+1. Varrer \`.sdd/deposito/\`.
+2. Atualizar \`.sdd/state/source-index.yaml\`.
+3. Consolidar contexto canônico (\`architecture\`, \`service-catalog\`, \`tech-stack\`, \`integration-contracts\`, frontend quando habilitado).
+4. Gerar trilha executável (RAD + FEATs) com rastreabilidade de origem.
+
+Saida obrigatoria:
+- resumo das fontes lidas;
+- IDs criados/atualizados (RAD/FEAT/FGAP/INS quando houver ambiguidade);
+- proximos comandos CLI recomendados.
+`;
+export const PROMPT_02_NORMALIZAR_PLANEJAMENTO_MD = `# Prompt: Normalizar Planejamento
+
+Objetivo:
+Transformar material consolidado em plano executável com dependências claras.
+
+Instrucoes:
+1. Parta de \`.sdd/state/source-index.yaml\` e \`.sdd/core/*.md\`.
+2. Proponha RADs e FEATs com nomes claros em portugues.
+3. Defina dependencias (\`blocked_by\`) e conflitos (\`lock_domains\`).
+4. Liste onde pode paralelizar.
+5. Termine com checklist de consolidacao documental por feature.
+`;
+export const PROMPT_03_EXECUCAO_FEATURE_MD = `# Prompt: Execucao de Feature
+
+Objetivo:
+Executar uma FEAT sem perder rastreabilidade.
+
+Instrucoes:
+1. Rode \`opensdd sdd context FEAT-###\`.
+2. Atualize \`.sdd/execucao|active/FEAT-###/\` (spec/plano/tarefas/historico).
+3. Implemente.
+4. Atualize docs canônicas afetadas.
+5. Finalize com \`opensdd archive <change-name>\` e \`opensdd sdd finalize --ref FEAT-###\`.
+`;
+export const PROMPT_04_CONSOLIDACAO_FINALIZE_MD = `# Prompt: Consolidacao e Finalize
+
+Objetivo:
+Fechar uma feature com memoria operacional completa.
+
+Checklist:
+1. Revisar diff técnico da FEAT.
+2. Atualizar documentação central (\`README.md\`, \`.sdd/AGENT.md\`, \`.sdd/core/*.md\`, \`AGENTS.md\`, \`AGENT.md\`).
+3. Garantir registro de gaps/decisoes de frontend quando aplicavel.
+4. Rodar \`opensdd sdd check --render\`.
+5. Rodar \`opensdd sdd finalize --ref FEAT-###\` e reportar docs atualizados.
+`;
 export const TEMPLATE_1_SPEC_MD = `# Especificacao: [NOME_DA_ENTREGA]
 
 ## Resumo da Entrega

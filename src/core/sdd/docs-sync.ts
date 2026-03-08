@@ -65,6 +65,7 @@ function buildAgentGuideBlock(memoryDir: string, config?: SddRuntimeConfig): str
   const planningDir = config?.folders.planning || 'pendencias';
   const activeDir = config?.folders.active || 'active';
   const depositoDir = config?.folders.deposito || 'deposito';
+  const promptsDir = 'prompts';
   return `# Guia Operacional SDD
 
 Trilha oficial:
@@ -78,7 +79,8 @@ Fontes canônicas:
 - Estados: \`${memoryDir}/state/*.yaml\`
 - Views: \`${memoryDir}/core/*.md\` e \`${memoryDir}/${planningDir}/*.md\`
 - Workspace ativo por feature: \`${memoryDir}/${activeDir}/FEAT-###/\`
-- Deposito bruto: \`${memoryDir}/${depositoDir}/\` (PRDs, RFCs, wireframes e referencias)`;
+- Deposito bruto: \`${memoryDir}/${depositoDir}/\` (PRDs, RFCs, wireframes e referencias)
+- Prompts recomendados: \`${memoryDir}/${promptsDir}/\``;
 }
 
 function buildRootAgentsBlock(memoryDir: string): string {
@@ -169,6 +171,7 @@ export async function syncSddGuideDocs(
     templates: config?.folders.templates,
     active: config?.folders.active,
     deposito: config?.folders.deposito,
+    prompts: 'prompts',
   });
 
   const currentInternalReadme = (await fileExists(internalReadmePath))
@@ -246,6 +249,7 @@ export async function validateSddGuideDocs(
       templates: config?.folders.templates,
       active: config?.folders.active,
       deposito: config?.folders.deposito,
+      prompts: 'prompts',
     })
   ) {
       missingBlocks.push(`${memoryDirName}/README.md::SDD:INTERNAL`);

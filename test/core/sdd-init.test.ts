@@ -61,6 +61,12 @@ describe('SddInitCommand', () => {
     expect(await exists(path.join(testDir, '.sdd', 'core', 'spec-tecnologica.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'core', 'repo-map.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'core', 'fontes.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'prompts', 'README.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'prompts', '00-comece-por-aqui.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'prompts', '01-ingestao-deposito.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'prompts', '02-normalizar-planejamento.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'prompts', '03-execucao-feature.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'prompts', '04-consolidacao-finalize.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'templates', 'template-1-spec.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'templates', 'template-2-plan.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'templates', 'template-3-tasks.md'))).toBe(true);

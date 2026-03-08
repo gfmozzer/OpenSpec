@@ -49,6 +49,7 @@ Depois do bootstrap, o projeto passa a ter:
 - `.sdd/templates/`
 - `.sdd/skills/curated/`
 - `.sdd/deposito/`
+- `.sdd/prompts/`
 - `openspec/changes/`
 
 Dentro de `.sdd/` ficam:
@@ -119,6 +120,7 @@ Esse comando instala de uma vez:
 - `openspec/config.yaml`
 - `.sdd/`
 - skills curadas
+- prompts recomendados por workflow
 - templates
 - estados YAML canonicos
 - documentos iniciais do projeto
@@ -134,7 +136,7 @@ Atalhos em portugues no CLI:
 - `opensdd instalar` (alias de `opensdd install`)
 - `opensdd sdd iniciar` (alias de `opensdd sdd init`)
 - `opensdd sdd iniciar-contexto` (alias de `opensdd sdd init-context`)
-- `opensdd sdd ideia`, `debater`, `decidir`, `desdobrar`, `iniciar-execucao`, `aprovar`, `contexto`, `orientar`, `consolidar`, `proximo`, `checar`
+- `opensdd sdd ideia`, `debater`, `decidir`, `desdobrar`, `iniciar-execucao`, `aprovar`, `contexto`, `orientar`, `consolidar`, `proximo`, `checar`, `ingestao-deposito`
 - `opensdd arquivar` (alias em portugues para `opensdd archive`)
 
 ## Como absorver um projeto que ja existe
@@ -256,6 +258,14 @@ Estrutura:
 └── legado/
 ```
 
+Depois disso, rode:
+
+```bash
+opensdd sdd ingest-deposito --title "Planejamento inicial do sistema"
+```
+
+Esse comando varre o deposito, indexa fontes, cria/reaproveita RAD, desdobra FEATs e tenta iniciar a primeira FEAT pronta.
+
 Depois disso, o sistema usa o indice de fontes e as skills curadas para transformar esse material em:
 
 - contexto canonico
@@ -279,6 +289,12 @@ Entre elas:
 - `business-extractor-sdd`
 - `frontend-extractor-sdd`
 - `planning-normalizer-sdd`
+
+Prompts recomendados tambem sao instalados em:
+
+```text
+.sdd/prompts/
+```
 
 Tambem sao instaladas skills curadas de apoio para execucao e planejamento.
 
@@ -304,6 +320,7 @@ Bootstrap:
 - `opensdd install --tools all`
 - `opensdd sdd init-context`
 - `opensdd sdd check --render`
+- `opensdd sdd ingest-deposito`
 
 Onboarding e operacao:
 
@@ -327,6 +344,7 @@ Descoberta:
 Guia detalhado em portugues:
 
 - [Manual SDD PT-BR](docs/sdd-manual-pt-br.md)
+- [Historia da Marina (uso pratico)](docs/historia-marina-uso-pratico.md)
 - [Release e Rollback](docs/release.md)
 - [Kit estatico do SDD](kits/opensdd-static-kit/README.md)
 

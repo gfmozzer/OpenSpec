@@ -11,6 +11,7 @@ import {
   SddDecideCommand,
   SddFinalizeCommand,
   SddFrontendGapCommand,
+  SddIngestDepositoCommand,
   SddApproveCommand,
   SddInsightCommand,
   SddNextCommand,
@@ -48,6 +49,19 @@ interface SddSkillsSuggestCliOptions {
 
 interface SddInsightCliOptions {
   title?: string;
+  render?: boolean;
+}
+
+interface SddIngestDepositoCliOptions {
+  sourceDir?: string;
+  title?: string;
+  radar?: string;
+  titles?: string;
+  scale?: 'QUICK' | 'STANDARD' | 'LARGE';
+  flowMode?: 'direto' | 'padrao' | 'rigoroso';
+  fluxo?: 'direto' | 'padrao' | 'rigoroso';
+  start?: boolean;
+  json?: boolean;
   render?: boolean;
 }
 
@@ -246,6 +260,69 @@ export function registerSddCommand(program: Command): void {
       console.log(chalk.green(`Insight criado: ${result.id}`));
       console.log(`Titulo: ${result.title}`);
       console.log(`Arquivo: ${result.filePath}`);
+    });
+
+  sddCmd
+    .command('ingest-deposito')
+    .description('Varre o deposito, indexa fontes e gera trilha executavel inicial')
+    .alias('ingestao-deposito')
+    .alias('ingest')
+    .option('--source-dir <path>', 'Diretorio fonte (padrao: .sdd/deposito)')
+    .option('--title <title>', 'Titulo do RAD inicial (quando nao houver --radar)')
+    .option('--radar <radarId>', 'Reaproveita RAD existente (RAD-###)')
+    .option('--titles <list>', 'Titulos de FEAT separados por virgula')
+    .option('--scale <scale>', 'Escala QUICK|STANDARD|LARGE')
+    .option('--flow-mode <flowMode>', 'Fluxo da FEAT iniciada: direto|padrao|rigoroso')
+    .option('--fluxo <flowMode>', 'Alias em portugues para --flow-mode')
+    .option('--no-start', 'Nao inicia automaticamente a primeira FEAT pronta')
+    .option('--json', 'Saida em JSON')
+    .option('--no-render', 'Nao gera views apos atualizar estado')
+    .action(async (options?: SddIngestDepositoCliOptions) => {
+      const flow = options?.flowMode || options?.fluxo;
+      if (flow && !['direto', 'padrao', 'rigoroso'].includes(flow)) {
+        throw new Error('Valor invalido em --flow-mode/--fluxo. Use direto, padrao ou rigoroso.');
+      }
+      if (options?.radar && !/^RAD-\d{3,}$/.test(options.radar)) {
+        throw new Error('Valor invalido em --radar. Use RAD-###.');
+      }
+
+      const command = new SddIngestDepositoCommand();
+      const result = await command.execute('.', {
+        sourceDir: options?.sourceDir,
+        title: options?.title,
+        radarId: options?.radar,
+        titles: parseCsvOption(options?.titles),
+        scale: options?.scale,
+        flowMode: flow,
+        start: options?.start,
+        render: options?.render,
+      });
+
+      if (options?.json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      console.log(chalk.green('Ingestao de deposito concluida.'));
+      console.log(`Diretorio varrido: ${result.source_dir}`);
+      console.log(`Arquivos lidos: ${result.scanned_files}`);
+      console.log(`Fontes criadas: ${result.indexed_created}`);
+      console.log(`Fontes atualizadas: ${result.indexed_updated}`);
+      console.log(`RAD: ${result.radar_id}`);
+      console.log(`FEATs criadas: ${result.created_features.join(', ') || '-'}`);
+      console.log(`FEATs reaproveitadas: ${result.linked_existing.join(', ') || '-'}`);
+      console.log(`FEAT iniciada: ${result.started_feature_id || '-'}`);
+      if (result.active_path) {
+        console.log(`Workspace ativo: ${result.active_path}`);
+      }
+      if (result.generated_docs.length > 0) {
+        console.log(`Docs gerados: ${result.generated_docs.join(', ')}`);
+      }
+      if (result.start_warning) {
+        console.log(chalk.yellow(`Aviso: ${result.start_warning}`));
+      }
+      console.log(`Skills recomendadas no fluxo: ${result.used_skills.join(', ')}`);
+      console.log(`Prompt recomendado: ${result.recommended_prompt}`);
     });
 
   sddCmd

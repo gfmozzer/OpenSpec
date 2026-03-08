@@ -12,6 +12,7 @@ import {
   SddDecideCommand,
   SddFinalizeCommand,
   SddFrontendGapCommand,
+  SddIngestDepositoCommand,
   SddInsightCommand,
   SddNextCommand,
   SddOnboardCommand,
@@ -598,5 +599,45 @@ describe('sdd operations', () => {
       'utf-8'
     );
     expect(intakeSkill).toContain('.sdd/deposito/');
+  });
+
+  it('ingests deposito sources and creates initial executable trail', async () => {
+    await fs.writeFile(
+      path.join(testDir, '.sdd', 'deposito', 'prds', 'PRD-inicial.md'),
+      '# PRD Inicial\n\nSistema de agendamento para petshop com painel admin.',
+      'utf-8'
+    );
+    await fs.writeFile(
+      path.join(testDir, '.sdd', 'deposito', 'historias', 'jornadas.md'),
+      'Como atendente, quero aprovar agendamento por loja.',
+      'utf-8'
+    );
+
+    const result = await new SddIngestDepositoCommand().execute(testDir, {
+      title: 'Planejamento inicial petshop',
+      start: true,
+      render: true,
+    });
+
+    expect(result.scanned_files).toBeGreaterThanOrEqual(2);
+    expect(result.radar_id).toMatch(/^RAD-\d{3,}$/);
+    expect(result.created_features.length).toBeGreaterThan(0);
+    expect(result.recommended_prompt).toContain('.sdd/prompts/01-ingestao-deposito.md');
+
+    const sourceIndex = await readYamlFile<Record<string, any>>(
+      path.join(testDir, '.sdd', 'state', 'source-index.yaml')
+    );
+    expect(sourceIndex.sources.length).toBeGreaterThanOrEqual(2);
+    expect(sourceIndex.sources.some((source: any) => source.status === 'PLANNED')).toBe(true);
+
+    const backlog = await readYamlFile<Record<string, any>>(
+      path.join(testDir, '.sdd', 'state', 'backlog.yaml')
+    );
+    expect(backlog.items.length).toBeGreaterThan(0);
+
+    if (result.started_feature_id) {
+      expect(result.active_path).toContain('.sdd/active/');
+      expect(result.generated_docs.length).toBeGreaterThan(0);
+    }
   });
 });

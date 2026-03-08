@@ -21,6 +21,7 @@ import {
   saveIntegrationContractsState,
   saveRepoMapState,
   saveServiceCatalogState,
+  saveSourceIndexState,
   saveTechStackState,
   saveUnblockEventsState,
   type SddPaths,
@@ -36,6 +37,7 @@ import type {
   PlanningMode,
   Scale,
   SkillCatalogEntry,
+  SourceDocumentRecord,
 } from './types.js';
 import { renderViews } from './views.js';
 import { syncSddGuideDocs } from './docs-sync.js';
@@ -168,6 +170,29 @@ READY
 `;
 }
 
+function markdownRadarFromDepositoTemplate(
+  radarId: string,
+  title: string,
+  sourceCount: number,
+  rationale?: string
+): string {
+  return `# Radar ${radarId}
+
+## Origem
+- Origem: ingestao de deposito
+- Fontes indexadas: ${sourceCount}
+
+## Resumo aprovado
+${rationale || 'Planejamento inicial gerado a partir dos insumos do deposito.'}
+
+## Titulo
+${title}
+
+## Status
+READY
+`;
+}
+
 function markdownDiscardTemplate(debate: DiscoveryRecord, rationale?: string): string {
   return `# Descartado ${debate.id}
 
@@ -178,6 +203,143 @@ function markdownDiscardTemplate(debate: DiscoveryRecord, rationale?: string): s
 ## Motivo do descarte
 ${rationale || '(motivo nao informado)'}
 `;
+}
+
+function sourceTypeFromRelativePath(relativePath: string): SourceDocumentRecord['type'] {
+  const normalized = relativePath.replace(/\\/g, '/').toLowerCase();
+  if (normalized.includes('/prds/')) return 'prd';
+  if (normalized.includes('/rfcs/')) return 'rfc';
+  if (normalized.includes('/briefings/')) return 'briefing';
+  if (normalized.includes('/historias/')) return 'historia';
+  if (normalized.includes('/wireframes/')) return 'wireframe';
+  if (normalized.includes('/html-mocks/')) return 'html_mock';
+  if (normalized.includes('/referencias-visuais/')) return 'referencia_visual';
+  if (normalized.includes('/entrevistas/')) return 'entrevista';
+  if (normalized.includes('/anexos/')) return 'anexo';
+  if (normalized.includes('/legado/')) return 'legado';
+  return 'outro';
+}
+
+function defaultConsolidationTargets(type: SourceDocumentRecord['type']): string[] {
+  switch (type) {
+    case 'prd':
+    case 'briefing':
+    case 'historia':
+      return ['contexto', 'radar', 'backlog'];
+    case 'wireframe':
+    case 'html_mock':
+    case 'referencia_visual':
+      return ['frontend-map', 'frontend-gaps', 'frontend-decisions', 'backlog'];
+    case 'rfc':
+      return ['arquitetura', 'servicos', 'integration-contracts', 'backlog'];
+    case 'legado':
+      return ['repo-map', 'arquitetura', 'backlog'];
+    case 'entrevista':
+      return ['insights', 'radar'];
+    default:
+      return ['contexto'];
+  }
+}
+
+function deriveInitialFeatureTitles(
+  sources: SourceDocumentRecord[],
+  frontendEnabled: boolean
+): string[] {
+  const types = new Set(sources.map((source) => source.type));
+  const titles: string[] = [];
+
+  if (types.has('prd') || types.has('historia') || types.has('briefing') || types.has('rfc')) {
+    titles.push('Nucleo de negocio inicial e contratos principais');
+  }
+  if (
+    frontendEnabled &&
+    (types.has('wireframe') || types.has('html_mock') || types.has('referencia_visual'))
+  ) {
+    titles.push('Estrutura inicial de frontend baseada nas referencias');
+  }
+  if (types.has('legado')) {
+    titles.push('Mapeamento e adaptacao do legado para a arquitetura atual');
+  }
+
+  titles.push('Consolidar documentacao operacional e trilha de handoff');
+  return Array.from(new Set(titles));
+}
+
+async function listFilesRecursively(rootDir: string): Promise<string[]> {
+  const entries = await fs.readdir(rootDir, { withFileTypes: true }).catch(() => []);
+  const files: string[] = [];
+  for (const entry of entries) {
+    const absolute = path.join(rootDir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...(await listFilesRecursively(absolute)));
+      continue;
+    }
+    if (!entry.isFile()) continue;
+    files.push(absolute);
+  }
+  return files;
+}
+
+function sourceTitleFromPath(filePath: string): string {
+  const base = path.basename(filePath, path.extname(filePath));
+  const cleaned = base.replace(/[-_]+/g, ' ').trim();
+  if (!cleaned) return base || 'fonte sem titulo';
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+function normalizeSourceStatus(
+  current: SourceDocumentRecord['status'],
+  desired: SourceDocumentRecord['status']
+): SourceDocumentRecord['status'] {
+  const order: Record<SourceDocumentRecord['status'], number> = {
+    RAW: 0,
+    INDEXED: 1,
+    NORMALIZED: 2,
+    PLANNED: 3,
+    ARCHIVED: 4,
+  };
+  return order[current] >= order[desired] ? current : desired;
+}
+
+function nextSourceId(existingIds: string[]): string {
+  let max = 0;
+  for (const id of existingIds) {
+    const match = /^SRC-(\d+)$/.exec(id);
+    if (!match) continue;
+    const numeric = Number(match[1]);
+    if (Number.isFinite(numeric)) {
+      max = Math.max(max, numeric);
+    }
+  }
+  return `SRC-${String(max + 1).padStart(3, '0')}`;
+}
+
+async function extractSourceSummary(filePath: string): Promise<string> {
+  const ext = path.extname(filePath).toLowerCase();
+  const textLike = new Set([
+    '.md',
+    '.txt',
+    '.rst',
+    '.adoc',
+    '.json',
+    '.yaml',
+    '.yml',
+    '.html',
+    '.htm',
+    '.csv',
+  ]);
+  if (!textLike.has(ext)) {
+    return '';
+  }
+
+  const raw = await fs.readFile(filePath, 'utf-8').catch(() => '');
+  if (!raw.trim()) return '';
+  const lines = raw
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^#+\s*/, '').replace(/<[^>]+>/g, '').trim())
+    .filter((line) => line.length > 0);
+  const candidate = lines.find((line) => line.length > 20) || lines[0] || '';
+  return candidate.slice(0, 220);
 }
 
 async function findDebateFile(paths: SddPaths, debateId: string): Promise<string | null> {
@@ -982,6 +1144,218 @@ export class SddBreakdownCommand {
           added_blocked_by: Array.from(deps).sort(),
         })),
       skipped_duplicates: skippedDuplicates,
+    };
+  }
+}
+
+export class SddIngestDepositoCommand {
+  async execute(
+    projectRoot: string,
+    options?: {
+      sourceDir?: string;
+      title?: string;
+      radarId?: string;
+      titles?: string[];
+      scale?: Scale;
+      flowMode?: FlowMode;
+      start?: boolean;
+      render?: boolean;
+    }
+  ): Promise<{
+    source_dir: string;
+    scanned_files: number;
+    indexed_created: number;
+    indexed_updated: number;
+    radar_id: string;
+    created_features: string[];
+    linked_existing: string[];
+    started_feature_id: string;
+    active_path: string;
+    generated_docs: string[];
+    start_warning: string;
+    used_skills: string[];
+    recommended_prompt: string;
+  }> {
+    const { config, paths } = await getRuntime(projectRoot);
+    const snapshot = await loadStateSnapshot(paths, config);
+    const now = nowIso();
+
+    const sourceDir = options?.sourceDir
+      ? path.resolve(projectRoot, options.sourceDir)
+      : paths.depositoDir;
+    const sourceDirExists = await pathExists(sourceDir);
+    if (!sourceDirExists) {
+      throw new Error(`Diretorio de deposito nao encontrado: ${sourceDir}`);
+    }
+
+    const scannedFiles = (await listFilesRecursively(sourceDir))
+      .filter((filePath) => !path.basename(filePath).startsWith('.'))
+      .filter((filePath) => path.basename(filePath).toLowerCase() !== 'readme.md')
+      .sort((a, b) => a.localeCompare(b));
+
+    if (scannedFiles.length === 0) {
+      throw new Error('Nenhuma fonte encontrada no deposito. Adicione arquivos e rode novamente.');
+    }
+
+    const sourceByPath = new Map(
+      snapshot.sourceIndex.sources.map((source) => [source.path.replace(/\\/g, '/'), source])
+    );
+    const scannedSourceRefs = new Set<string>();
+    let indexedCreated = 0;
+    let indexedUpdated = 0;
+
+    for (const filePath of scannedFiles) {
+      const relative = relProjectPath(paths, filePath);
+      const normalizedPath = relative.replace(/\\/g, '/');
+      const type = sourceTypeFromRelativePath(normalizedPath);
+      const title = sourceTitleFromPath(filePath);
+      const summary = await extractSourceSummary(filePath);
+      const existing = sourceByPath.get(normalizedPath);
+
+      if (!existing) {
+        const id = nextSourceId(snapshot.sourceIndex.sources.map((source) => source.id));
+        const created: SourceDocumentRecord = {
+          id,
+          type,
+          path: normalizedPath,
+          title,
+          status: 'INDEXED',
+          summary,
+          imported_at: now,
+          updated_at: now,
+          used_by: [],
+          notes: [],
+          consolidation_targets: defaultConsolidationTargets(type),
+        };
+        snapshot.sourceIndex.sources.push(created);
+        sourceByPath.set(normalizedPath, created);
+        scannedSourceRefs.add(created.id);
+        indexedCreated += 1;
+        continue;
+      }
+
+      existing.type = type;
+      existing.title = existing.title || title;
+      existing.status = normalizeSourceStatus(existing.status, 'INDEXED');
+      existing.summary = existing.summary || summary;
+      existing.updated_at = now;
+      existing.consolidation_targets = Array.from(
+        new Set([...existing.consolidation_targets, ...defaultConsolidationTargets(type)])
+      );
+      scannedSourceRefs.add(existing.id);
+      indexedUpdated += 1;
+    }
+
+    let radarId = options?.radarId || '';
+    let radar = radarId
+      ? snapshot.discoveryIndex.records.find((record) => record.id === radarId && record.type === 'RAD')
+      : undefined;
+
+    if (!radar) {
+      radarId = await allocateEntityId(paths, 'RAD');
+      syncCounterFromId(snapshot.discoveryIndex, radarId);
+      radar = {
+        id: radarId,
+        type: 'RAD',
+        title: (options?.title || 'Planejamento inicial a partir do deposito').slice(0, 120),
+        status: 'READY',
+        origin_prompt: `Gerado por ingestao de deposito em ${now}`,
+        related_ids: [],
+        created_at: now,
+        updated_at: now,
+      };
+      snapshot.discoveryIndex.records.push(radar);
+      const radarPath = path.join(paths.discoveryRadarDir, `${radarId}-${slugify(radar.title)}.md`);
+      await fs.writeFile(
+        radarPath,
+        markdownRadarFromDepositoTemplate(radarId, radar.title, scannedFiles.length, options?.title),
+        'utf-8'
+      );
+    }
+
+    await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
+    await saveSourceIndexState(paths, snapshot.sourceIndex);
+
+    const plannedTitles =
+      options?.titles && options.titles.length > 0
+        ? options.titles.filter((title) => title.trim().length > 0)
+        : deriveInitialFeatureTitles(
+            snapshot.sourceIndex.sources.filter((source) => scannedSourceRefs.has(source.id)),
+            config.frontend.enabled
+          );
+
+    const breakdownResult = await new SddBreakdownCommand().execute(projectRoot, radarId, {
+      titles: plannedTitles,
+      scale: options?.scale || 'STANDARD',
+      mode: 'graph',
+      incremental: true,
+      dedupe: 'normal',
+      render: false,
+    });
+
+    const postPlan = await loadStateSnapshot(paths, config);
+    const usedByRefs = [radarId, ...breakdownResult.created, ...breakdownResult.linked_existing];
+    for (const source of postPlan.sourceIndex.sources) {
+      if (!scannedSourceRefs.has(source.id)) continue;
+      source.used_by = Array.from(new Set([...source.used_by, ...usedByRefs]));
+      source.status = normalizeSourceStatus(source.status, 'PLANNED');
+      source.updated_at = nowIso();
+      source.consolidation_targets = Array.from(
+        new Set([...source.consolidation_targets, 'radar', 'backlog'])
+      );
+    }
+    await saveSourceIndexState(paths, postPlan.sourceIndex);
+
+    const shouldStart = options?.start ?? true;
+    let startedFeatureId = '';
+    let activePath = '';
+    let generatedDocs: string[] = [];
+    let startWarning = '';
+
+    if (shouldStart) {
+      const candidateIds = new Set([...breakdownResult.created, ...breakdownResult.linked_existing]);
+      const candidates = postPlan.backlog.items
+        .filter((item) => candidateIds.has(item.id))
+        .filter((item) => featureReadiness(item, postPlan.backlog.items) === 'READY')
+        .sort((a, b) => a.id.localeCompare(b.id));
+      const candidate = candidates[0];
+
+      if (candidate) {
+        const started = await new SddStartCommand().execute(projectRoot, candidate.id, {
+          scale: options?.scale,
+          flowMode: options?.flowMode,
+          render: false,
+        });
+        startedFeatureId = started.featureId;
+        activePath = started.active_path;
+        generatedDocs = started.generated_docs;
+      } else {
+        startWarning =
+          'Nenhuma FEAT pronta para iniciar automaticamente (dependencias/locks pendentes). Use "opensdd sdd next".';
+      }
+    }
+
+    await persistAndRender(paths, config, options?.render);
+
+    return {
+      source_dir: relProjectPath(paths, sourceDir),
+      scanned_files: scannedFiles.length,
+      indexed_created: indexedCreated,
+      indexed_updated: indexedUpdated,
+      radar_id: radarId,
+      created_features: breakdownResult.created,
+      linked_existing: breakdownResult.linked_existing,
+      started_feature_id: startedFeatureId,
+      active_path: activePath,
+      generated_docs: generatedDocs,
+      start_warning: startWarning,
+      used_skills: [
+        'source-intake-sdd',
+        'business-extractor-sdd',
+        'frontend-extractor-sdd',
+        'planning-normalizer-sdd',
+      ],
+      recommended_prompt: relProjectPath(paths, path.join(paths.promptsDir, '01-ingestao-deposito.md')),
     };
   }
 }

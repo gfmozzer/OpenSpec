@@ -1,1 +1,1 @@
-{"version":3,"file":"sdd.d.ts","sourceRoot":"","sources":["../../src/commands/sdd.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,WAAW,CAAC;AA2JpC,wBAAgB,kBAAkB,CAAC,OAAO,EAAE,OAAO,GAAG,IAAI,CAilBzD"}
+{"version":3,"file":"sdd.d.ts","sourceRoot":"","sources":["../../src/commands/sdd.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,WAAW,CAAC;AAyKpC,wBAAgB,kBAAkB,CAAC,OAAO,EAAE,OAAO,GAAG,IAAI,CAgpBzD"}

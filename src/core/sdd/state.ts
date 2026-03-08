@@ -41,6 +41,12 @@ import {
 } from './default-skills.js';
 import {
   buildSddInternalReadme,
+  PROMPT_00_COMECE_POR_AQUI_MD,
+  PROMPT_01_INGESTAO_DEPOSITO_MD,
+  PROMPT_02_NORMALIZAR_PLANEJAMENTO_MD,
+  PROMPT_03_EXECUCAO_FEATURE_MD,
+  PROMPT_04_CONSOLIDACAO_FINALIZE_MD,
+  PROMPTS_README_MD,
   TEMPLATE_1_SPEC_MD,
   TEMPLATE_2_PLAN_MD,
   TEMPLATE_3_TASKS_MD,
@@ -80,6 +86,7 @@ export interface SddPaths {
   skillsCuratedDir: string;
   skillsBundlesDir: string;
   templatesDir: string;
+  promptsDir: string;
   depositoDir: string;
   activeDir: string;
   discoveryInsightsDir: string;
@@ -334,6 +341,7 @@ export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): 
   const skillsCuratedDir = path.join(skillsDir, 'curated');
   const skillsBundlesDir = path.join(skillsDir, 'bundles');
   const templatesDir = path.join(memoryRoot, config.folders.templates);
+  const promptsDir = path.join(memoryRoot, 'prompts');
   const depositoDir = path.join(memoryRoot, config.folders.deposito);
   const activeDir = path.join(memoryRoot, config.folders.active);
   const discoveryInsightsDir = path.join(discoveryDir, '1-insights');
@@ -353,6 +361,7 @@ export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): 
     skillsCuratedDir,
     skillsBundlesDir,
     templatesDir,
+    promptsDir,
     depositoDir,
     activeDir,
     discoveryInsightsDir,
@@ -391,6 +400,7 @@ export async function ensureBaseStructure(paths: SddPaths): Promise<void> {
     ensureDir(paths.skillsCuratedDir),
     ensureDir(paths.skillsBundlesDir),
     ensureDir(paths.templatesDir),
+    ensureDir(paths.promptsDir),
     ensureDir(paths.discoveryInsightsDir),
     ensureDir(paths.discoveryDebatesDir),
     ensureDir(paths.discoveryRadarDir),
@@ -532,6 +542,7 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
       templates: config.folders.templates,
       active: config.folders.active,
       deposito: config.folders.deposito,
+      prompts: 'prompts',
     })
   );
   await writeFileIfMissing(
@@ -544,6 +555,27 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
   await writeFileIfMissing(
     path.join(paths.depositoDir, 'README.md'),
     `# Deposito de Fontes Brutas\n\nEsta pasta guarda PRDs, RFCs, wireframes, HTMLs, referencias visuais, entrevistas e outros insumos consolidados.\n\nRegra: nada aqui e fonte canonica. O inventario oficial fica em \`.sdd/state/source-index.yaml\`.\n`
+  );
+  await writeFileIfMissing(path.join(paths.promptsDir, 'README.md'), PROMPTS_README_MD);
+  await writeFileIfMissing(
+    path.join(paths.promptsDir, '00-comece-por-aqui.md'),
+    PROMPT_00_COMECE_POR_AQUI_MD
+  );
+  await writeFileIfMissing(
+    path.join(paths.promptsDir, '01-ingestao-deposito.md'),
+    PROMPT_01_INGESTAO_DEPOSITO_MD
+  );
+  await writeFileIfMissing(
+    path.join(paths.promptsDir, '02-normalizar-planejamento.md'),
+    PROMPT_02_NORMALIZAR_PLANEJAMENTO_MD
+  );
+  await writeFileIfMissing(
+    path.join(paths.promptsDir, '03-execucao-feature.md'),
+    PROMPT_03_EXECUCAO_FEATURE_MD
+  );
+  await writeFileIfMissing(
+    path.join(paths.promptsDir, '04-consolidacao-finalize.md'),
+    PROMPT_04_CONSOLIDACAO_FINALIZE_MD
   );
   await writeFileIfMissing(path.join(paths.templatesDir, 'template-1-spec.md'), TEMPLATE_1_SPEC_MD);
   await writeFileIfMissing(path.join(paths.templatesDir, 'template-2-plan.md'), TEMPLATE_2_PLAN_MD);

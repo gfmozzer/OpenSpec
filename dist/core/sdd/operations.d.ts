@@ -61,6 +61,32 @@ export declare class SddBreakdownCommand {
         }[];
     }>;
 }
+export declare class SddIngestDepositoCommand {
+    execute(projectRoot: string, options?: {
+        sourceDir?: string;
+        title?: string;
+        radarId?: string;
+        titles?: string[];
+        scale?: Scale;
+        flowMode?: FlowMode;
+        start?: boolean;
+        render?: boolean;
+    }): Promise<{
+        source_dir: string;
+        scanned_files: number;
+        indexed_created: number;
+        indexed_updated: number;
+        radar_id: string;
+        created_features: string[];
+        linked_existing: string[];
+        started_feature_id: string;
+        active_path: string;
+        generated_docs: string[];
+        start_warning: string;
+        used_skills: string[];
+        recommended_prompt: string;
+    }>;
+}
 export declare class SddStartCommand {
     execute(projectRoot: string, refOrText: string, options?: {
         scale?: Scale;

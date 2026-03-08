@@ -397,10 +397,32 @@ Regra:
 
 Fluxo recomendado:
 1. colocar os documentos no deposito;
-2. usar a skill `source-intake-sdd` para indexar as fontes;
-3. usar `business-extractor-sdd` para extrair regras, historias, atores e integracoes;
-4. usar `frontend-extractor-sdd` para extrair rotas, superficies, gaps e decisoes de frontend;
-5. usar `planning-normalizer-sdd` para converter isso em contexto, `RADs`, `FEATs` e `INSIGHTs` apenas quando houver ambiguidade.
+2. rodar `opensdd sdd ingest-deposito`;
+3. validar o resultado com `opensdd sdd check --render`;
+4. continuar por `opensdd sdd next` e `opensdd sdd context FEAT-###`.
+
+Comando principal:
+
+```bash
+opensdd sdd ingest-deposito --title "Planejamento inicial do sistema"
+```
+
+Se for seu primeiro contato com o sistema, abra primeiro:
+- `.sdd/prompts/00-comece-por-aqui.md`
+
+O que ele faz:
+- varre `.sdd/deposito/`;
+- atualiza `.sdd/state/source-index.yaml`;
+- cria (ou reaproveita) RAD;
+- desdobra em FEATs com `breakdown` incremental;
+- tenta iniciar automaticamente a primeira FEAT pronta e gerar workspace em `.sdd/active/FEAT-###/`;
+- aponta skills e prompt recomendado em `.sdd/prompts/01-ingestao-deposito.md`.
+
+Flags úteis:
+- `--no-start`: só gera trilha executável, sem iniciar FEAT.
+- `--radar RAD-###`: reaproveita uma iniciativa existente.
+- `--titles "A,B,C"`: força títulos de FEAT.
+- `--source-dir <path>`: usa outro diretório de insumos.
 
 Resumo objetivo:
 - documento bruto nao vira task direto;
@@ -648,6 +670,9 @@ Observacao:
 | `opensdd sdd iniciar-contexto` | Alias em portugues para `opensdd sdd init-context` |
 | `opensdd sdd check --render` | Valida e renderiza |
 | `opensdd sdd checar --render` | Alias em portugues para `opensdd sdd check --render` |
+| `opensdd sdd ingest-deposito` | Varrer depósito e gerar trilha executável inicial |
+| `opensdd sdd ingestao-deposito` | Alias em portugues para `opensdd sdd ingest-deposito` |
+| `opensdd sdd ingest` | Alias curto para `opensdd sdd ingest-deposito` |
 | `opensdd sdd insight "<texto>"` | Cria um insight |
 | `opensdd sdd ideia "<texto>"` | Alias em portugues para `opensdd sdd insight` |
 | `opensdd sdd debate INS-###` | Abre debate |
@@ -685,13 +710,15 @@ Observacao: quando o backlog ainda nao tiver FEAT pronta, `onboard system` retor
 ## 8.1 Fluxo rapido para PRD e documentos consolidados
 
 1. Copie o material para `.sdd/deposito/`.
-2. Indexe e classifique as fontes com `source-intake-sdd`.
-3. Extraia negocio com `business-extractor-sdd`.
-4. Extraia frontend com `frontend-extractor-sdd`.
-5. Normalize em contexto, `RADs` e `FEATs` com `planning-normalizer-sdd`.
-6. So use `insight/debate` para excecoes e ambiguidades.
+2. Rode `opensdd sdd ingest-deposito`.
+3. Use `opensdd sdd check --render` para revisar.
+4. Continue por `opensdd sdd next` e `opensdd sdd start FEAT-###`.
+5. So use `insight/debate` para excecoes e ambiguidades.
 
 ## 9. Exemplo completo: como a Marina usaria
+
+Versao estendida desta historia:
+- `docs/historia-marina-uso-pratico.md`
 
 ### 9.1 Marina instala e cria a base
 
