@@ -108,10 +108,14 @@ README.md                                 # Entrada principal para humano e agen
 │   └── legado/                           # Documentos herdados
 ├── active/                               # Execução viva por FEAT
 │   └── FEAT-###/
-│      ├── 1-spec.md                      # O que a FEAT precisa entregar
-│      ├── 2-plan.md                      # Plano técnico
-│      ├── 3-tasks.md                     # Checklist da execução
-│      └── 4-changelog.md                 # Mudanças estruturais feitas
+│      ├── 1-spec.md                      # O que a FEAT precisa entregar (layout legacy)
+│      ├── 2-plan.md                      # Plano técnico (layout legacy)
+│      ├── 3-tasks.md                     # Checklist da execução (layout legacy)
+│      ├── 4-changelog.md                 # Mudanças estruturais feitas (layout legacy)
+│      ├── 1-especificacao.md             # O que a FEAT precisa entregar (layout pt-BR)
+│      ├── 2-planejamento.md              # Plano técnico (layout pt-BR)
+│      ├── 3-tarefas.md                   # Checklist da execução (layout pt-BR)
+│      └── 4-historico.md                 # Histórico da execução (layout pt-BR)
 ├── core/                                 # Visão macro atual do sistema
 │   ├── index.md                          # Índice do contexto
 │   ├── arquitetura.md                    # Arquitetura atual
@@ -468,13 +472,13 @@ O que isso faz:
 No SDD, há dois níveis:
 
 1. Criar uma `FEAT`:
-- pelo `breakdown` de um `RAD`; ou
+- pelo `desdobrar` (alias de `breakdown`) de um `RAD`; ou
 - direto com `start` usando texto livre.
 
-Exemplo criando FEAT direta:
+Exemplo criando FEAT direta com fluxo:
 
 ```bash
-opensdd sdd start "Criar endpoint de healthcheck"
+opensdd sdd start "Criar endpoint de healthcheck" --fluxo padrao
 ```
 
 2. Criar a lista de tarefas internas da execução:
@@ -485,6 +489,12 @@ O comando gera:
 - `.sdd/active/FEAT-###/2-plan.md`
 - `.sdd/active/FEAT-###/3-tasks.md`
 - `.sdd/active/FEAT-###/4-changelog.md`
+
+No layout `pt-BR`, os nomes gerados sao:
+- `.sdd/execucao/FEAT-###/1-especificacao.md`
+- `.sdd/execucao/FEAT-###/2-planejamento.md`
+- `.sdd/execucao/FEAT-###/3-tarefas.md`
+- `.sdd/execucao/FEAT-###/4-historico.md`
 
 ### 7.7 Como iniciar a execução de uma FEAT
 
@@ -647,16 +657,21 @@ Observacao:
 | `opensdd sdd decidir DEB-### --outcome ...` | Alias em portugues para `opensdd sdd decide` |
 | `opensdd sdd breakdown RAD-### --mode graph` | Planeja um RAD em FEATs |
 | `opensdd sdd quebrar RAD-### --mode graph` | Alias em portugues para `opensdd sdd breakdown` |
+| `opensdd sdd desdobrar RAD-### --mode graph` | Alias em portugues para `opensdd sdd breakdown` |
 | `opensdd sdd start FEAT-###` | Inicia execução |
 | `opensdd sdd start "texto livre"` | Cria FEAT direta e já inicia |
+| `opensdd sdd start ... --fluxo direto|padrao|rigoroso` | Define o nivel de rigor sem burocracia excessiva |
 | `opensdd sdd iniciar-execucao FEAT-###` | Alias em portugues para `opensdd sdd start` |
+| `opensdd sdd aprovar FEAT-### --etapa proposta|planejamento|tarefas` | Aprova gate de etapa para a FEAT |
 | `opensdd sdd next` | Diz o que começar agora |
 | `opensdd sdd proximo` | Alias em portugues para `opensdd sdd next` |
 | `opensdd sdd context FEAT-###` | Gera contexto da FEAT |
 | `opensdd sdd contexto FEAT-###` | Alias em portugues para `opensdd sdd context` |
 | `opensdd sdd onboard system` | Gera onboarding global |
 | `opensdd sdd integrar system` | Alias em portugues para `opensdd sdd onboard` |
+| `opensdd sdd orientar system` | Alias em portugues para `opensdd sdd onboard` |
 | `opensdd archive <change-name>` | Arquiva a mudança técnica |
+| `opensdd arquivar <change-name>` | Alias em portugues para `opensdd archive` |
 | `opensdd sdd finalize --ref FEAT-###` | Consolida memória e conclui FEAT |
 | `opensdd sdd consolidar --ref FEAT-###` | Alias em portugues para `opensdd sdd finalize` |
 | `opensdd sdd fgap add ...` | Registra gap de frontend |

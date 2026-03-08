@@ -3,7 +3,7 @@ import { SddInitCommand, SddInitContextCommand } from '../core/sdd/init.js';
 import { SddCheckCommand } from '../core/sdd/check.js';
 import { loadProjectSddConfig, loadSkillCatalogState, resolveSddPaths } from '../core/sdd/state.js';
 import { listBundles, suggestSkills } from '../core/sdd/skills.js';
-import { SddBreakdownCommand, SddContextCommand, SddDebateCommand, SddDecideCommand, SddFinalizeCommand, SddFrontendGapCommand, SddInsightCommand, SddNextCommand, SddOnboardCommand, SddSkillsSyncCommand, SddStartCommand, } from '../core/sdd/operations.js';
+import { SddBreakdownCommand, SddContextCommand, SddDebateCommand, SddDecideCommand, SddFinalizeCommand, SddFrontendGapCommand, SddApproveCommand, SddInsightCommand, SddNextCommand, SddOnboardCommand, SddSkillsSyncCommand, SddStartCommand, } from '../core/sdd/operations.js';
 function parseCsvOption(value) {
     if (!value)
         return [];
@@ -156,6 +156,7 @@ export function registerSddCommand(program) {
         .command('breakdown <radarId>')
         .description('Quebra um item RAD em uma ou mais features FEAT')
         .alias('quebrar')
+        .alias('desdobrar')
         .option('--titles <list>', 'Titulos separados por virgula para gerar varias FEAT')
         .option('--scale <scale>', 'Escala QUICK|STANDARD|LARGE')
         .option('--mode <mode>', 'Modo de quebra: graph|flat (padrao: graph)')
@@ -196,14 +197,21 @@ export function registerSddCommand(program) {
         .option('--scale <scale>', 'Escala QUICK|STANDARD|LARGE')
         .option('--schema <schema>', 'Schema para criar change em openspec/changes')
         .option('--force', 'Bypass de bloqueios e conflitos de lock')
+        .option('--flow-mode <flowMode>', 'Fluxo: direto|padrao|rigoroso')
+        .option('--fluxo <flowMode>', 'Alias em portugues para --flow-mode')
         .option('--json', 'Saida em JSON')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (refOrText, options) => {
+        const flow = options?.flowMode || options?.fluxo;
+        if (flow && !['direto', 'padrao', 'rigoroso'].includes(flow)) {
+            throw new Error('Valor invalido em --flow-mode/--fluxo. Use direto, padrao ou rigoroso.');
+        }
         const command = new SddStartCommand();
         const result = await command.execute('.', refOrText, {
             scale: options?.scale,
             schema: options?.schema,
             force: options?.force,
+            flowMode: flow,
             render: options?.render,
         });
         if (options?.json) {
@@ -216,6 +224,7 @@ export function registerSddCommand(program) {
         console.log(`Guardrails: blocked=${result.start_guardrails.blocked_check.ok ? 'ok' : 'fail'} | lock=${result.start_guardrails.lock_check.ok ? 'ok' : 'fail'} | forced=${result.start_guardrails.forced ? 'sim' : 'nao'}`);
         console.log(`Workspace ativo: ${result.active_path}`);
         console.log(`Docs gerados: ${result.generated_docs.join(', ')}`);
+        console.log(`Fluxo: ${result.flow_mode}`);
         console.log(`Bundles sugeridos: ${result.recommended_bundles.join(', ') || '-'}`);
     });
     sddCmd
@@ -290,6 +299,7 @@ export function registerSddCommand(program) {
         .command('onboard [target]')
         .description('Gera onboarding estruturado para system, RAD-### ou FEAT-###')
         .alias('integrar')
+        .alias('orientar')
         .option('--json', 'Saida em JSON')
         .option('--compact', 'Retorna payload resumido')
         .action(async (target = 'system', options) => {
@@ -308,6 +318,33 @@ export function registerSddCommand(program) {
         if (Array.isArray(view.proximos_passos)) {
             console.log(`Proximos passos: ${view.proximos_passos.join(', ')}`);
         }
+    });
+    sddCmd
+        .command('aprovar <featId>')
+        .description('Aprova etapa de proposta, planejamento ou tarefas de uma FEAT')
+        .requiredOption('--etapa <etapa>', 'Etapa: proposta|planejamento|tarefas')
+        .option('--por <nome>', 'Quem aprovou')
+        .option('--observacao <texto>', 'Observacao da aprovacao')
+        .option('--json', 'Saida em JSON')
+        .option('--no-render', 'Nao gera views apos atualizar estado')
+        .action(async (featId, options) => {
+        const etapa = options?.etapa;
+        if (!etapa || !['proposta', 'planejamento', 'tarefas'].includes(etapa)) {
+            throw new Error('Valor invalido em --etapa. Use proposta, planejamento ou tarefas.');
+        }
+        const command = new SddApproveCommand();
+        const result = await command.execute('.', featId, etapa, {
+            by: options?.por,
+            note: options?.observacao,
+            render: options?.render,
+        });
+        if (options?.json) {
+            console.log(JSON.stringify(result, null, 2));
+            return;
+        }
+        console.log(chalk.green(`Etapa ${result.stage} aprovada para ${result.feature_id}`));
+        console.log(`Status do gate: ${result.status}`);
+        console.log(`Etapa atual da feature: ${result.current_stage}`);
     });
     sddCmd
         .command('next [path]')

@@ -27,6 +27,9 @@ export const ExecutionKindSchema = z.enum([
   'documentation',
 ]);
 export const PlanningModeSchema = z.enum(['local_plan', 'direct_tasks']);
+export const FlowModeSchema = z.enum(['direto', 'padrao', 'rigoroso']);
+export const FlowStageSchema = z.enum(['proposta', 'planejamento', 'tarefas', 'execucao', 'consolidacao']);
+export const GateStatusSchema = z.enum(['nao_exigida', 'rascunho', 'pronta', 'aprovada']);
 export const SourceDocumentTypeSchema = z.enum([
   'prd',
   'rfc',
@@ -96,6 +99,17 @@ export const TechDebtStatusSchema = z.enum(['OPEN', 'IN_PROGRESS', 'DONE']);
 
 const NullableStringSchema = z.string().optional();
 const StringArraySchema = z.array(z.string()).default([]);
+const StageGateSchema = z.object({
+  status: GateStatusSchema.default('rascunho'),
+  approved_at: NullableStringSchema,
+  approved_by: NullableStringSchema,
+  note: NullableStringSchema,
+});
+const BacklogGatesSchema = z.object({
+  proposta: StageGateSchema.default({ status: 'rascunho' }),
+  planejamento: StageGateSchema.default({ status: 'rascunho' }),
+  tarefas: StageGateSchema.default({ status: 'rascunho' }),
+});
 
 export const DiscoveryRecordSchema = z
   .object({
@@ -132,6 +146,13 @@ export const BacklogItemSchema = z.object({
   parallel_group: NullableStringSchema,
   execution_kind: ExecutionKindSchema.default('feature'),
   planning_mode: PlanningModeSchema.default('local_plan'),
+  flow_mode: FlowModeSchema.default('padrao'),
+  current_stage: FlowStageSchema.default('proposta'),
+  gates: BacklogGatesSchema.default({
+    proposta: { status: 'rascunho' },
+    planejamento: { status: 'rascunho' },
+    tarefas: { status: 'rascunho' },
+  }),
   acceptance_refs: StringArraySchema,
   produces: StringArraySchema,
   consumes: StringArraySchema,
@@ -373,6 +394,9 @@ export type OriginType = z.infer<typeof OriginTypeSchema>;
 export type Scale = z.infer<typeof ScaleSchema>;
 export type ExecutionKind = z.infer<typeof ExecutionKindSchema>;
 export type PlanningMode = z.infer<typeof PlanningModeSchema>;
+export type FlowMode = z.infer<typeof FlowModeSchema>;
+export type FlowStage = z.infer<typeof FlowStageSchema>;
+export type GateStatus = z.infer<typeof GateStatusSchema>;
 export type DiscoveryRecord = z.infer<typeof DiscoveryRecordSchema>;
 export type BacklogItem = z.infer<typeof BacklogItemSchema>;
 export type TechDebtRecord = z.infer<typeof TechDebtRecordSchema>;

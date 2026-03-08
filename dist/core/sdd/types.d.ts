@@ -30,6 +30,24 @@ export declare const PlanningModeSchema: z.ZodEnum<{
     local_plan: "local_plan";
     direct_tasks: "direct_tasks";
 }>;
+export declare const FlowModeSchema: z.ZodEnum<{
+    direto: "direto";
+    padrao: "padrao";
+    rigoroso: "rigoroso";
+}>;
+export declare const FlowStageSchema: z.ZodEnum<{
+    proposta: "proposta";
+    planejamento: "planejamento";
+    tarefas: "tarefas";
+    execucao: "execucao";
+    consolidacao: "consolidacao";
+}>;
+export declare const GateStatusSchema: z.ZodEnum<{
+    nao_exigida: "nao_exigida";
+    rascunho: "rascunho";
+    pronta: "pronta";
+    aprovada: "aprovada";
+}>;
 export declare const SourceDocumentTypeSchema: z.ZodEnum<{
     prd: "prd";
     rfc: "rfc";
@@ -169,6 +187,53 @@ export declare const BacklogItemSchema: z.ZodObject<{
         local_plan: "local_plan";
         direct_tasks: "direct_tasks";
     }>>;
+    flow_mode: z.ZodDefault<z.ZodEnum<{
+        direto: "direto";
+        padrao: "padrao";
+        rigoroso: "rigoroso";
+    }>>;
+    current_stage: z.ZodDefault<z.ZodEnum<{
+        proposta: "proposta";
+        planejamento: "planejamento";
+        tarefas: "tarefas";
+        execucao: "execucao";
+        consolidacao: "consolidacao";
+    }>>;
+    gates: z.ZodDefault<z.ZodObject<{
+        proposta: z.ZodDefault<z.ZodObject<{
+            status: z.ZodDefault<z.ZodEnum<{
+                nao_exigida: "nao_exigida";
+                rascunho: "rascunho";
+                pronta: "pronta";
+                aprovada: "aprovada";
+            }>>;
+            approved_at: z.ZodOptional<z.ZodString>;
+            approved_by: z.ZodOptional<z.ZodString>;
+            note: z.ZodOptional<z.ZodString>;
+        }, z.core.$strip>>;
+        planejamento: z.ZodDefault<z.ZodObject<{
+            status: z.ZodDefault<z.ZodEnum<{
+                nao_exigida: "nao_exigida";
+                rascunho: "rascunho";
+                pronta: "pronta";
+                aprovada: "aprovada";
+            }>>;
+            approved_at: z.ZodOptional<z.ZodString>;
+            approved_by: z.ZodOptional<z.ZodString>;
+            note: z.ZodOptional<z.ZodString>;
+        }, z.core.$strip>>;
+        tarefas: z.ZodDefault<z.ZodObject<{
+            status: z.ZodDefault<z.ZodEnum<{
+                nao_exigida: "nao_exigida";
+                rascunho: "rascunho";
+                pronta: "pronta";
+                aprovada: "aprovada";
+            }>>;
+            approved_at: z.ZodOptional<z.ZodString>;
+            approved_by: z.ZodOptional<z.ZodString>;
+            note: z.ZodOptional<z.ZodString>;
+        }, z.core.$strip>>;
+    }, z.core.$strip>>;
     acceptance_refs: z.ZodDefault<z.ZodArray<z.ZodString>>;
     produces: z.ZodDefault<z.ZodArray<z.ZodString>>;
     consumes: z.ZodDefault<z.ZodArray<z.ZodString>>;
@@ -434,6 +499,53 @@ export declare const BacklogStateSchema: z.ZodObject<{
             local_plan: "local_plan";
             direct_tasks: "direct_tasks";
         }>>;
+        flow_mode: z.ZodDefault<z.ZodEnum<{
+            direto: "direto";
+            padrao: "padrao";
+            rigoroso: "rigoroso";
+        }>>;
+        current_stage: z.ZodDefault<z.ZodEnum<{
+            proposta: "proposta";
+            planejamento: "planejamento";
+            tarefas: "tarefas";
+            execucao: "execucao";
+            consolidacao: "consolidacao";
+        }>>;
+        gates: z.ZodDefault<z.ZodObject<{
+            proposta: z.ZodDefault<z.ZodObject<{
+                status: z.ZodDefault<z.ZodEnum<{
+                    nao_exigida: "nao_exigida";
+                    rascunho: "rascunho";
+                    pronta: "pronta";
+                    aprovada: "aprovada";
+                }>>;
+                approved_at: z.ZodOptional<z.ZodString>;
+                approved_by: z.ZodOptional<z.ZodString>;
+                note: z.ZodOptional<z.ZodString>;
+            }, z.core.$strip>>;
+            planejamento: z.ZodDefault<z.ZodObject<{
+                status: z.ZodDefault<z.ZodEnum<{
+                    nao_exigida: "nao_exigida";
+                    rascunho: "rascunho";
+                    pronta: "pronta";
+                    aprovada: "aprovada";
+                }>>;
+                approved_at: z.ZodOptional<z.ZodString>;
+                approved_by: z.ZodOptional<z.ZodString>;
+                note: z.ZodOptional<z.ZodString>;
+            }, z.core.$strip>>;
+            tarefas: z.ZodDefault<z.ZodObject<{
+                status: z.ZodDefault<z.ZodEnum<{
+                    nao_exigida: "nao_exigida";
+                    rascunho: "rascunho";
+                    pronta: "pronta";
+                    aprovada: "aprovada";
+                }>>;
+                approved_at: z.ZodOptional<z.ZodString>;
+                approved_by: z.ZodOptional<z.ZodString>;
+                note: z.ZodOptional<z.ZodString>;
+            }, z.core.$strip>>;
+        }, z.core.$strip>>;
         acceptance_refs: z.ZodDefault<z.ZodArray<z.ZodString>>;
         produces: z.ZodDefault<z.ZodArray<z.ZodString>>;
         consumes: z.ZodDefault<z.ZodArray<z.ZodString>>;
@@ -661,6 +773,9 @@ export type OriginType = z.infer<typeof OriginTypeSchema>;
 export type Scale = z.infer<typeof ScaleSchema>;
 export type ExecutionKind = z.infer<typeof ExecutionKindSchema>;
 export type PlanningMode = z.infer<typeof PlanningModeSchema>;
+export type FlowMode = z.infer<typeof FlowModeSchema>;
+export type FlowStage = z.infer<typeof FlowStageSchema>;
+export type GateStatus = z.infer<typeof GateStatusSchema>;
 export type DiscoveryRecord = z.infer<typeof DiscoveryRecordSchema>;
 export type BacklogItem = z.infer<typeof BacklogItemSchema>;
 export type TechDebtRecord = z.infer<typeof TechDebtRecordSchema>;

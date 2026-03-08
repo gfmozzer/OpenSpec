@@ -56,20 +56,39 @@ Toda feature concluida deve atualizar a documentacao relevante antes do \`finali
 `;
 }
 
-export const TEMPLATE_1_SPEC_MD = `# Especificacao: [NOME_DA_FEATURE]
+export const TEMPLATE_1_SPEC_MD = `# Especificacao: [NOME_DA_ENTREGA]
+
+## Resumo da Entrega
+- Entrega:
+- Fluxo: direto|padrao|rigoroso
+- Origem: INS/DEB/RAD/FEAT direta
+
+## Problema
+Descreva a dor real que esta entrega resolve.
 
 ## Objetivo
-Descreva o que esta feature precisa entregar para o usuario ou para o sistema.
+Descreva o resultado esperado para usuario ou sistema.
 
-## Historias do Usuario
-- Como um [ator], quero [acao] para que [motivo].
+## Escopo
+- [ ] Item 1
+- [ ] Item 2
+
+## Fora do Escopo
+- [ ] Item 1
+- [ ] Item 2
+
+## Valor Esperado
+- Indicador:
+- Meta:
 
 ## Regras de Negocio
 - [ ] Regra 1
 - [ ] Regra 2
 
-## Cenarios de Aceite
-- Ao fazer [x], espero que [y].
+## Criterios de Aceite
+- CA-01:
+- CA-02:
+- CA-03:
 
 ## Referencias
 - FEAT:
@@ -78,10 +97,19 @@ Descreva o que esta feature precisa entregar para o usuario ou para o sistema.
 - ADR:
 `;
 
-export const TEMPLATE_2_PLAN_MD = `# Plano de Execucao: [NOME_DA_FEATURE]
+export const TEMPLATE_2_PLAN_MD = `# Planejamento: [NOME_DA_ENTREGA]
 
 ## Abordagem Tecnica
 Descreva como a solucao sera implementada.
+
+## Fatias Executaveis
+- F1:
+- F2:
+- F3:
+
+## Paralelizacao
+- Pode rodar em paralelo:
+- Depende de:
 
 ## Impacto Arquitetural
 - Servicos afetados:
@@ -103,7 +131,7 @@ Descreva como a solucao sera implementada.
 - Documentacao que precisa mudar:
 `;
 
-export const TEMPLATE_3_TASKS_MD = `# Checklist de Tarefas: [NOME_DA_FEATURE]
+export const TEMPLATE_3_TASKS_MD = `# Checklist de Tarefas: [NOME_DA_ENTREGA]
 
 ## Passos de Implementacao
 - [ ] Entender o contexto com \`${CLI_NAME} sdd context FEAT-###\`
@@ -116,6 +144,12 @@ export const TEMPLATE_3_TASKS_MD = `# Checklist de Tarefas: [NOME_DA_FEATURE]
 - [ ] Registrar gaps de frontend criados ou resolvidos
 - [ ] Atualizar o changelog da feature
 - [ ] Arquivar a mudanca tecnica e executar \`${CLI_NAME} sdd finalize --ref FEAT-###\`
+
+## Definition of Done
+- [DOC] Documentacao central atualizada
+- [UI] Lacunas/decisoes de frontend registradas (quando aplicavel)
+- [ARQ] Change tecnica arquivada no OpenSpec
+- [MEM] Memoria consolidada com \`${CLI_NAME} sdd consolidar --ref FEAT-###\`
 `;
 
 export const TEMPLATE_4_CHANGELOG_MD = `# Changelog de Arquitetura: [NOME_DA_FEATURE]

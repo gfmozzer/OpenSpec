@@ -134,7 +134,8 @@ Atalhos em portugues no CLI:
 - `opensdd instalar` (alias de `opensdd install`)
 - `opensdd sdd iniciar` (alias de `opensdd sdd init`)
 - `opensdd sdd iniciar-contexto` (alias de `opensdd sdd init-context`)
-- `opensdd sdd ideia`, `debater`, `decidir`, `quebrar`, `iniciar-execucao`, `contexto`, `consolidar`, `proximo`, `checar`
+- `opensdd sdd ideia`, `debater`, `decidir`, `desdobrar`, `iniciar-execucao`, `aprovar`, `contexto`, `orientar`, `consolidar`, `proximo`, `checar`
+- `opensdd arquivar` (alias em portugues para `opensdd archive`)
 
 ## Como absorver um projeto que ja existe
 
@@ -176,7 +177,7 @@ opensdd sdd next
 3. Iniciar uma feature
 
 ```bash
-opensdd sdd start FEAT-001
+opensdd sdd start FEAT-001 --fluxo padrao
 ```
 
 4. Ler o contexto da feature
@@ -307,8 +308,10 @@ Bootstrap:
 Onboarding e operacao:
 
 - `opensdd sdd onboard system`
+- `opensdd sdd orientar system`
 - `opensdd sdd next`
-- `opensdd sdd start FEAT-###`
+- `opensdd sdd start FEAT-### --fluxo direto|padrao|rigoroso`
+- `opensdd sdd aprovar FEAT-### --etapa proposta|planejamento|tarefas`
 - `opensdd sdd context FEAT-###`
 - `opensdd sdd finalize --ref FEAT-###`
 
@@ -317,7 +320,7 @@ Descoberta:
 - `opensdd sdd insight "..."`
 - `opensdd sdd debate INS-###`
 - `opensdd sdd decide DEB-### --outcome radar|discard`
-- `opensdd sdd breakdown RAD-### --mode graph --incremental`
+- `opensdd sdd desdobrar RAD-### --mode graph --incremental`
 
 ## Documentacao
 

@@ -358,6 +358,7 @@ changeCmd
 program
   .command('archive [change-name]')
   .description('Archive a completed change and update main specs')
+  .alias('arquivar')
   .option('-y, --yes', 'Skip confirmation prompts')
   .option('--skip-specs', 'Skip spec update operations (useful for infrastructure, tooling, or doc-only changes)')
   .option('--no-validate', 'Skip validation (not recommended, requires confirmation)')

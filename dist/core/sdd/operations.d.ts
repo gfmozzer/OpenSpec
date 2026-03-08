@@ -1,4 +1,4 @@
-import type { Scale } from './types.js';
+import type { FlowMode, Scale } from './types.js';
 export declare class SddInsightCommand {
     execute(projectRoot: string, text: string, options?: {
         title?: string;
@@ -67,6 +67,7 @@ export declare class SddStartCommand {
         render?: boolean;
         schema?: string;
         force?: boolean;
+        flowMode?: FlowMode;
     }): Promise<{
         featureId: string;
         changeName: string;
@@ -86,6 +87,7 @@ export declare class SddStartCommand {
         generated_docs: string[];
         recommended_bundles: string[];
         handoff_seed_refs: string[];
+        flow_mode: "direto" | "padrao" | "rigoroso";
     }>;
 }
 export declare class SddFinalizeCommand {
@@ -131,6 +133,29 @@ export declare class SddContextCommand {
         lock_domains: string[];
         parallel_group: string | undefined;
         planning_mode: "local_plan" | "direct_tasks";
+        flow_mode: "direto" | "padrao" | "rigoroso";
+        current_stage: "proposta" | "planejamento" | "tarefas" | "execucao" | "consolidacao";
+        gates: {
+            proposta: {
+                status: "nao_exigida" | "rascunho" | "pronta" | "aprovada";
+                approved_at?: string | undefined;
+                approved_by?: string | undefined;
+                note?: string | undefined;
+            };
+            planejamento: {
+                status: "nao_exigida" | "rascunho" | "pronta" | "aprovada";
+                approved_at?: string | undefined;
+                approved_by?: string | undefined;
+                note?: string | undefined;
+            };
+            tarefas: {
+                status: "nao_exigida" | "rascunho" | "pronta" | "aprovada";
+                approved_at?: string | undefined;
+                approved_by?: string | undefined;
+                note?: string | undefined;
+            };
+        };
+        next_action: string;
         execution_kind: "documentation" | "feature" | "infra" | "migration" | "frontend_coverage";
         produces: string[];
         consumes: string[];
@@ -184,6 +209,10 @@ export declare class SddContextCommand {
         lock_domains?: undefined;
         parallel_group?: undefined;
         planning_mode?: undefined;
+        flow_mode?: undefined;
+        current_stage?: undefined;
+        gates?: undefined;
+        next_action?: undefined;
         execution_kind?: undefined;
         produces?: undefined;
         consumes?: undefined;
@@ -220,6 +249,10 @@ export declare class SddContextCommand {
         lock_domains?: undefined;
         parallel_group?: undefined;
         planning_mode?: undefined;
+        flow_mode?: undefined;
+        current_stage?: undefined;
+        gates?: undefined;
+        next_action?: undefined;
         execution_kind?: undefined;
         produces?: undefined;
         consumes?: undefined;
@@ -253,6 +286,10 @@ export declare class SddContextCommand {
         lock_domains?: undefined;
         parallel_group?: undefined;
         planning_mode?: undefined;
+        flow_mode?: undefined;
+        current_stage?: undefined;
+        gates?: undefined;
+        next_action?: undefined;
         execution_kind?: undefined;
         produces?: undefined;
         consumes?: undefined;
@@ -276,6 +313,21 @@ export declare class SddOnboardCommand {
     execute(projectRoot: string, target?: string, options?: {
         compact?: boolean;
     }): Promise<Record<string, unknown>>;
+}
+type ApprovalStage = 'proposta' | 'planejamento' | 'tarefas';
+export declare class SddApproveCommand {
+    execute(projectRoot: string, featureId: string, stage: ApprovalStage, options?: {
+        by?: string;
+        note?: string;
+        render?: boolean;
+    }): Promise<{
+        feature_id: string;
+        stage: ApprovalStage;
+        status: "nao_exigida" | "aprovada";
+        approved_at: string;
+        approved_by: string;
+        current_stage: "proposta" | "planejamento" | "tarefas" | "execucao" | "consolidacao";
+    }>;
 }
 type NextRankMode = 'impact' | 'criticality' | 'fifo';
 export declare class SddNextCommand {

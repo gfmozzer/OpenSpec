@@ -15,6 +15,7 @@ import {
   SddInsightCommand,
   SddNextCommand,
   SddOnboardCommand,
+  SddApproveCommand,
   SddSkillsSyncCommand,
   SddStartCommand,
 } from '../../src/core/sdd/operations.js';
@@ -133,6 +134,44 @@ describe('sdd operations', () => {
 
     const context = await new SddContextCommand().execute(testDir, 'FEAT-001');
     expect(context.target_type).toBe('FEAT');
+  });
+
+  it('supports flow mode rigoroso with explicit gate approvals', async () => {
+    const startCmd = new SddStartCommand();
+    const approveCmd = new SddApproveCommand();
+    const finalizeCmd = new SddFinalizeCommand();
+
+    const started = await startCmd.execute(testDir, 'Entrega critica de permissao', {
+      flowMode: 'rigoroso',
+    });
+    expect(started.flow_mode).toBe('rigoroso');
+
+    const archiveDir = path.join(testDir, 'openspec', 'changes', 'archive', started.changeName);
+    await fs.mkdir(archiveDir, { recursive: true });
+
+    const blockedFinalize = await finalizeCmd.execute(testDir, { allReady: true });
+    expect(blockedFinalize.finalized).toHaveLength(0);
+    expect(blockedFinalize.doc_warnings.some((warning) => warning.includes('modo rigoroso'))).toBe(true);
+
+    await approveCmd.execute(testDir, 'FEAT-001', 'proposta', { by: 'marina' });
+    await approveCmd.execute(testDir, 'FEAT-001', 'planejamento', { by: 'marina' });
+    await approveCmd.execute(testDir, 'FEAT-001', 'tarefas', { by: 'marina' });
+
+    const finalized = await finalizeCmd.execute(testDir, { allReady: true });
+    expect(finalized.finalized).toContain('FEAT-001');
+
+    const context = await new SddContextCommand().execute(testDir, 'FEAT-001');
+    expect((context as any).flow_mode).toBe('rigoroso');
+    expect((context as any).gates.proposta.status).toBe('aprovada');
+  });
+
+  it('creates active workspace docs with portuguese names in pt-BR layout', async () => {
+    await new SddInitCommand().execute(testDir, { layout: 'pt-BR', render: false });
+    const start = await new SddStartCommand().execute(testDir, 'Tela de atendimento');
+    expect(start.generated_docs.some((doc) => doc.endsWith('1-especificacao.md'))).toBe(true);
+    expect(start.generated_docs.some((doc) => doc.endsWith('2-planejamento.md'))).toBe(true);
+    expect(start.generated_docs.some((doc) => doc.endsWith('3-tarefas.md'))).toBe(true);
+    expect(start.generated_docs.some((doc) => doc.endsWith('4-historico.md'))).toBe(true);
   });
 
   it('syncs curated skills to configured tool directories', async () => {

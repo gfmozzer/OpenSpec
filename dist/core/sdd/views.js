@@ -64,15 +64,15 @@ function renderBacklog(state) {
         .sort((a, b) => a.id.localeCompare(b.id))
         .map((item) => {
         const blocked = item.blocked_by.length > 0 ? item.blocked_by.join(', ') : '-';
-        return `| ${item.id} | ${item.status} | ${item.title} | ${item.origin_type} | ${item.scale} | ${item.execution_kind} | ${item.planning_mode} | ${item.parallel_group || '-'} | ${blocked} |`;
+        return `| ${item.id} | ${item.status} | ${item.title} | ${item.origin_type} | ${item.scale} | ${item.execution_kind} | ${item.planning_mode} | ${item.flow_mode} | ${item.parallel_group || '-'} | ${blocked} |`;
     });
     return `# Backlog de Features
 
 Documento gerado a partir de \`.sdd/state/backlog.yaml\`.
 
-| ID | Status | Titulo | Origem | Escala | Tipo | Modo | Grupo paralelo | Bloqueado por |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-${rows.length > 0 ? rows.join('\n') : '| - | - | Sem itens | - | - | - | - | - | - |'}
+| ID | Status | Titulo | Origem | Escala | Tipo | Modo | Fluxo | Grupo paralelo | Bloqueado por |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+${rows.length > 0 ? rows.join('\n') : '| - | - | Sem itens | - | - | - | - | - | - | - |'}
 `;
 }
 function renderBacklogGraph(state) {
@@ -97,7 +97,7 @@ function renderBacklogGraph(state) {
             const deps = item.blocked_by.length > 0 ? item.blocked_by.join(', ') : 'nenhuma';
             const locks = item.lock_domains.length > 0 ? item.lock_domains.join(', ') : 'nenhum';
             lines.push(`- ${item.id} [${item.status}] ${item.title}`);
-            lines.push(`  - tipo: ${item.execution_kind} | modo: ${item.planning_mode} | grupo: ${item.parallel_group || '-'}`);
+            lines.push(`  - tipo: ${item.execution_kind} | modo: ${item.planning_mode} | fluxo: ${item.flow_mode} | grupo: ${item.parallel_group || '-'}`);
             lines.push(`  - depende de: ${deps}`);
             lines.push(`  - lock domains: ${locks}`);
         }

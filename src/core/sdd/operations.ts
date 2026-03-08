@@ -32,6 +32,7 @@ import type {
   DiscoveryRecord,
   ExecutionKind,
   FinalizeQueueItem,
+  FlowMode,
   PlanningMode,
   Scale,
   SkillCatalogEntry,
@@ -288,6 +289,50 @@ function featureActiveDir(paths: SddPaths, featureId: string): string {
   return path.join(paths.activeDir, featureId);
 }
 
+interface ActiveDocNames {
+  spec: string;
+  plan: string;
+  tasks: string;
+  changelog: string;
+}
+
+function activeDocNamesForLayout(config: SddRuntimeConfig): ActiveDocNames {
+  if (config.layout === 'pt-BR') {
+    return {
+      spec: '1-especificacao.md',
+      plan: '2-planejamento.md',
+      tasks: '3-tarefas.md',
+      changelog: '4-historico.md',
+    };
+  }
+  return {
+    spec: '1-spec.md',
+    plan: '2-plan.md',
+    tasks: '3-tasks.md',
+    changelog: '4-changelog.md',
+  };
+}
+
+function activeDocCandidateNames(config: SddRuntimeConfig): string[] {
+  const preferred = activeDocNamesForLayout(config);
+  const english = ['1-spec.md', '2-plan.md', '3-tasks.md', '4-changelog.md'];
+  const portuguese = ['1-especificacao.md', '2-planejamento.md', '3-tarefas.md', '4-historico.md'];
+  return Array.from(new Set([preferred.spec, preferred.plan, preferred.tasks, preferred.changelog, ...english, ...portuguese]));
+}
+
+async function resolveActiveDocRefs(paths: SddPaths, featureId: string, config: SddRuntimeConfig): Promise<string[]> {
+  const activePath = featureActiveDir(paths, featureId);
+  const names = activeDocCandidateNames(config);
+  const refs: string[] = [];
+  for (const name of names) {
+    const filePath = path.join(activePath, name);
+    if (await pathExists(filePath)) {
+      refs.push(activeFeatureRef(paths, featureId, name));
+    }
+  }
+  return refs;
+}
+
 async function writeFileAlways(filePath: string, content: string): Promise<void> {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(filePath, content, 'utf-8');
@@ -301,6 +346,13 @@ function buildActiveSpecDoc(feature: BacklogItem): string {
 - Origem: ${feature.origin_type}${feature.origin_ref ? ` (${feature.origin_ref})` : ''}
 - Tipo: ${feature.execution_kind}
 - Modo: ${feature.planning_mode}
+- Fluxo: ${feature.flow_mode}
+- Etapa atual: ${feature.current_stage}
+
+## Gates
+- Proposta: ${feature.gates.proposta.status}
+- Planejamento: ${feature.gates.planejamento.status}
+- Tarefas: ${feature.gates.tarefas.status}
 
 ## Objetivo
 Descrever o resultado esperado desta feature com criterios de aceite objetivos.
@@ -357,6 +409,12 @@ function buildActiveTasksDoc(feature: BacklogItem, paths: SddPaths): string {
 
 ## Definição de pronto
 - A feature não está pronta enquanto as mudanças de documentação e handoff não estiverem refletidas.
+
+## Checklist DOD
+- [DOC] Atualizar documentacao central e de handoff
+- [UI] Registrar lacunas/decisoes de frontend quando aplicavel
+- [ARQ] Arquivar a mudanca tecnica no OpenSpec
+- [MEM] Consolidar memoria com \`${CLI_NAME} sdd consolidar --ref ${feature.id}\`
 `;
 }
 
@@ -373,15 +431,17 @@ function buildActiveChangelogDoc(feature: BacklogItem): string {
 
 async function ensureFeatureActiveWorkspace(
   paths: SddPaths,
+  config: SddRuntimeConfig,
   feature: BacklogItem,
   recommendedBundles: string[]
 ): Promise<{ activePath: string; generatedDocs: string[]; handoffSeedRefs: string[] }> {
   const activePath = featureActiveDir(paths, feature.id);
+  const names = activeDocNamesForLayout(config);
   const docs = [
-    path.join(activePath, '1-spec.md'),
-    path.join(activePath, '2-plan.md'),
-    path.join(activePath, '3-tasks.md'),
-    path.join(activePath, '4-changelog.md'),
+    path.join(activePath, names.spec),
+    path.join(activePath, names.plan),
+    path.join(activePath, names.tasks),
+    path.join(activePath, names.changelog),
   ];
   await writeFileAlways(docs[0], buildActiveSpecDoc(feature));
   await writeFileAlways(docs[1], buildActivePlanDoc(feature, recommendedBundles));
@@ -566,6 +626,7 @@ function buildBacklogItem(
     parallelGroup?: string;
     executionKind?: ExecutionKind;
     planningMode?: PlanningMode;
+    flowMode?: FlowMode;
     acceptanceRefs?: string[];
     touches?: string[];
     lockDomains?: string[];
@@ -573,6 +634,19 @@ function buildBacklogItem(
     consumes?: string[];
   }
 ): BacklogItem {
+  const flowMode = options?.flowMode || 'padrao';
+  const gates =
+    flowMode === 'direto'
+      ? {
+          proposta: { status: 'nao_exigida' as const, approved_at: '', approved_by: '', note: '' },
+          planejamento: { status: 'nao_exigida' as const, approved_at: '', approved_by: '', note: '' },
+          tarefas: { status: 'rascunho' as const, approved_at: '', approved_by: '', note: '' },
+        }
+      : {
+          proposta: { status: 'rascunho' as const, approved_at: '', approved_by: '', note: '' },
+          planejamento: { status: 'rascunho' as const, approved_at: '', approved_by: '', note: '' },
+          tarefas: { status: 'rascunho' as const, approved_at: '', approved_by: '', note: '' },
+        };
   return {
     id,
     title,
@@ -587,6 +661,9 @@ function buildBacklogItem(
     parallel_group: options?.parallelGroup || '',
     execution_kind: options?.executionKind || 'feature',
     planning_mode: options?.planningMode || 'local_plan',
+    flow_mode: flowMode,
+    current_stage: 'proposta',
+    gates,
     acceptance_refs: options?.acceptanceRefs || [],
     produces: options?.produces || [],
     consumes: options?.consumes || [],
@@ -920,7 +997,7 @@ export class SddStartCommand {
   async execute(
     projectRoot: string,
     refOrText: string,
-    options?: { scale?: Scale; render?: boolean; schema?: string; force?: boolean }
+    options?: { scale?: Scale; render?: boolean; schema?: string; force?: boolean; flowMode?: FlowMode }
   ) {
     const value = refOrText.trim();
     if (!value) {
@@ -964,10 +1041,11 @@ export class SddStartCommand {
             acceptanceRefs: [value],
             touches: shape.touches,
             lockDomains: shape.lockDomains,
-            produces: shape.produces,
-            consumes: shape.consumes,
-          }
-        );
+              produces: shape.produces,
+              consumes: shape.consumes,
+              flowMode: options?.flowMode,
+            }
+          );
         snapshot.backlog.items.push(feature);
       }
     } else {
@@ -988,9 +1066,18 @@ export class SddStartCommand {
           lockDomains: shape.lockDomains,
           produces: shape.produces,
           consumes: shape.consumes,
+          flowMode: options?.flowMode,
         }
       );
       snapshot.backlog.items.push(feature);
+    }
+
+    if (options?.flowMode) {
+      feature.flow_mode = options.flowMode;
+      if (options.flowMode === 'direto') {
+        feature.gates.proposta.status = 'nao_exigida';
+        feature.gates.planejamento.status = 'nao_exigida';
+      }
     }
 
     const unresolved = unresolvedDependencies(feature, snapshot.backlog.items);
@@ -1027,6 +1114,7 @@ export class SddStartCommand {
     }
 
     feature.status = 'IN_PROGRESS';
+    feature.current_stage = 'execucao';
     feature.last_sync_at = now;
     feature.recommended_skills = pickTopSkills(catalog.skills, feature.recommended_skills, 3);
     if (options?.force && (unresolved.length > 0 || lockConflicts.length > 0)) {
@@ -1046,7 +1134,7 @@ export class SddStartCommand {
     }
 
     const recommendedBundles = bundlesForSkills(catalog, feature.recommended_skills);
-    const activeWorkspace = await ensureFeatureActiveWorkspace(paths, feature, recommendedBundles);
+    const activeWorkspace = await ensureFeatureActiveWorkspace(paths, config, feature, recommendedBundles);
 
     updateDependencyMetadata(snapshot.backlog.items);
     await saveBacklogState(paths, snapshot.backlog);
@@ -1062,6 +1150,7 @@ export class SddStartCommand {
       generated_docs: activeWorkspace.generatedDocs,
       recommended_bundles: recommendedBundles,
       handoff_seed_refs: activeWorkspace.handoffSeedRefs,
+      flow_mode: feature.flow_mode,
     };
   }
 }
@@ -1141,6 +1230,10 @@ function upsertArray<T>(array: T[], predicate: (item: T) => boolean, nextValue: 
   array.push(nextValue);
 }
 
+function gateSatisfied(status: string): boolean {
+  return status === 'aprovada' || status === 'nao_exigida';
+}
+
 export class SddFinalizeCommand {
   async execute(
     projectRoot: string,
@@ -1181,7 +1274,19 @@ export class SddFinalizeCommand {
     for (const featureId of targets) {
       const feature = snapshot.backlog.items.find((item) => item.id === featureId);
       if (!feature) continue;
+      if (
+        feature.flow_mode === 'rigoroso' &&
+        (!gateSatisfied(feature.gates.proposta.status) ||
+          !gateSatisfied(feature.gates.planejamento.status) ||
+          !gateSatisfied(feature.gates.tarefas.status))
+      ) {
+        docWarnings.push(
+          `${feature.id} em modo rigoroso sem gates aprovados (proposta=${feature.gates.proposta.status}, planejamento=${feature.gates.planejamento.status}, tarefas=${feature.gates.tarefas.status})`
+        );
+        continue;
+      }
       feature.status = 'DONE';
+      feature.current_stage = 'consolidacao';
       feature.done_at = now;
       feature.last_sync_at = now;
 
@@ -1451,6 +1556,15 @@ export class SddContextCommand {
       const activePath = (await pathExists(activePathAbs))
         ? relProjectPath(paths, activePathAbs)
         : '';
+      const activeDocs = await resolveActiveDocRefs(paths, item.id, config);
+      const nextAction =
+        item.flow_mode === 'rigoroso' && !gateSatisfied(item.gates.proposta.status)
+          ? `${CLI_NAME} sdd aprovar ${item.id} --etapa proposta`
+          : item.flow_mode === 'rigoroso' && !gateSatisfied(item.gates.planejamento.status)
+            ? `${CLI_NAME} sdd aprovar ${item.id} --etapa planejamento`
+            : item.flow_mode === 'rigoroso' && !gateSatisfied(item.gates.tarefas.status)
+              ? `${CLI_NAME} sdd aprovar ${item.id} --etapa tarefas`
+              : `${CLI_NAME} sdd start ${item.id}`;
       const readOrder = [
         'README.md',
         relProjectPath(paths, path.join(paths.memoryRoot, 'AGENT.md')),
@@ -1461,14 +1575,7 @@ export class SddContextCommand {
         coreDocRef(paths, 'repo-map.md'),
         ...relevantAdrs,
         ...coreDocs.filter((doc) => doc.includes('frontend')),
-        ...(activePath
-          ? [
-              activeFeatureRef(paths, item.id, '1-spec.md'),
-              activeFeatureRef(paths, item.id, '2-plan.md'),
-              activeFeatureRef(paths, item.id, '3-tasks.md'),
-              activeFeatureRef(paths, item.id, '4-changelog.md'),
-            ]
-          : []),
+        ...(activePath ? activeDocs : []),
       ];
       return {
         context_pack_version: 1,
@@ -1489,6 +1596,10 @@ export class SddContextCommand {
         lock_domains: item.lock_domains,
         parallel_group: item.parallel_group,
         planning_mode: item.planning_mode,
+        flow_mode: item.flow_mode,
+        current_stage: item.current_stage,
+        gates: item.gates,
+        next_action: nextAction,
         execution_kind: item.execution_kind,
         produces: item.produces,
         consumes: item.consumes,
@@ -1718,7 +1829,9 @@ export class SddOnboardCommand {
         read_order: [
           ...baseReadOrder,
           planningDocRef(paths, 'backlog-graph.md'),
-          ...relatedFeatures.map((item) => activeFeatureRef(paths, item.id, '1-spec.md')),
+          ...(await Promise.all(
+            relatedFeatures.map((item) => resolveActiveDocRefs(paths, item.id, config))
+          )).flat(),
         ],
         contexto: context,
         features_relacionadas: relatedFeatures.map((item) => ({
@@ -1758,6 +1871,51 @@ export class SddOnboardCommand {
     }
 
     throw new Error('Referencia invalida para onboard. Use system, RAD-### ou FEAT-###.');
+  }
+}
+
+type ApprovalStage = 'proposta' | 'planejamento' | 'tarefas';
+
+export class SddApproveCommand {
+  async execute(
+    projectRoot: string,
+    featureId: string,
+    stage: ApprovalStage,
+    options?: { by?: string; note?: string; render?: boolean }
+  ) {
+    const { config, paths } = await getRuntime(projectRoot);
+    const snapshot = await loadStateSnapshot(paths, config);
+    const feature = resolveFeat(snapshot.backlog.items, featureId);
+    const now = nowIso();
+
+    if (feature.flow_mode === 'direto' && (stage === 'proposta' || stage === 'planejamento')) {
+      feature.gates[stage].status = 'nao_exigida';
+      feature.gates[stage].approved_at = now;
+      feature.gates[stage].approved_by = options?.by || '';
+      feature.gates[stage].note = options?.note || 'Etapa nao exigida no fluxo direto.';
+    } else {
+      feature.gates[stage].status = 'aprovada';
+      feature.gates[stage].approved_at = now;
+      feature.gates[stage].approved_by = options?.by || '';
+      feature.gates[stage].note = options?.note || '';
+    }
+
+    if (stage === 'proposta') feature.current_stage = 'planejamento';
+    if (stage === 'planejamento') feature.current_stage = 'tarefas';
+    if (stage === 'tarefas') feature.current_stage = 'execucao';
+    feature.last_sync_at = now;
+
+    await saveBacklogState(paths, snapshot.backlog);
+    await persistAndRender(paths, config, options?.render);
+
+    return {
+      feature_id: feature.id,
+      stage,
+      status: feature.gates[stage].status,
+      approved_at: feature.gates[stage].approved_at || '',
+      approved_by: feature.gates[stage].approved_by || '',
+      current_stage: feature.current_stage,
+    };
   }
 }
 

@@ -362,6 +362,12 @@ export async function ensureBaseFiles(paths, config) {
     await writeFileIfMissing(path.join(paths.templatesDir, 'template-2-plan.md'), TEMPLATE_2_PLAN_MD);
     await writeFileIfMissing(path.join(paths.templatesDir, 'template-3-tasks.md'), TEMPLATE_3_TASKS_MD);
     await writeFileIfMissing(path.join(paths.templatesDir, 'template-4-changelog.md'), TEMPLATE_4_CHANGELOG_MD);
+    if (config.layout === 'pt-BR') {
+        await writeFileIfMissing(path.join(paths.templatesDir, 'modelo-1-especificacao.md'), TEMPLATE_1_SPEC_MD);
+        await writeFileIfMissing(path.join(paths.templatesDir, 'modelo-2-planejamento.md'), TEMPLATE_2_PLAN_MD);
+        await writeFileIfMissing(path.join(paths.templatesDir, 'modelo-3-tarefas.md'), TEMPLATE_3_TASKS_MD);
+        await writeFileIfMissing(path.join(paths.templatesDir, 'modelo-4-historico.md'), TEMPLATE_4_CHANGELOG_MD);
+    }
 }
 async function readYaml(filePath) {
     const content = await fs.readFile(filePath, 'utf-8');
