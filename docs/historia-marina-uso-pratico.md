@@ -102,6 +102,18 @@ Para revisar contexto antes de codar:
 opensdd sdd contexto FEAT-001
 ```
 
+Antes de fechar a entrega, ela declara impacto de frontend:
+
+```bash
+opensdd sdd impacto-frontend FEAT-001 --status required --reason "Nova rota e novo fluxo visual"
+```
+
+Se for somente backend sem efeito de UI:
+
+```bash
+opensdd sdd impacto-frontend FEAT-001 --status none --reason "Apenas refatoracao interna sem alteracao de interface"
+```
+
 ---
 
 ## Fase 5: Gates Leves (Quando Necessario)
@@ -148,6 +160,8 @@ opensdd sdd orientar system
 - Atualizacao das views (`.sdd/core` e `.sdd/planejamento`).
 - ADR da entrega (quando aplicavel).
 - Desbloqueio visivel de dependentes.
+- Guardrail frontend: sem declaracao/cobertura, `finalize` bloqueia por padrao.
+- Auditoria visivel em `.sdd/planejamento/frontend-auditoria.md`.
 
 ---
 

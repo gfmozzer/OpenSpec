@@ -124,6 +124,7 @@ README.md                                 # Entrada principal para humano e agen
 │   ├── repo-map.md                       # Mapa dos diretórios relevantes
 │   ├── fontes.md                         # Inventário das fontes brutas indexadas
 │   ├── frontend-map.md                   # O que existe no frontend
+│   ├── frontend-sitemap.md               # Visão consolidada de rotas + gaps
 │   ├── frontend-decisions.md             # Por que o frontend foi feito assim
 │   └── adrs/                             # ADRs por FEAT consolidada
 ├── discovery/                            # Funil de descoberta
@@ -137,7 +138,9 @@ README.md                                 # Entrada principal para humano e agen
 │   ├── progress.md                       # Progresso global e por RAD
 │   ├── unblocked.md                      # FEATs recém-desbloqueadas
 │   ├── tech-debt.md                      # Dívida técnica
-│   └── frontend-gaps.md                  # Gaps de frontend
+│   ├── frontend-gaps.md                  # Gaps de frontend pendentes
+│   ├── frontend-gaps-resolvidos.md       # Gaps de frontend resolvidos
+│   └── frontend-auditoria.md             # Auditoria por FEAT (impacto/cobertura)
 └── state/                                # Fonte de verdade canônica
    ├── discovery-index.yaml               # INS/DEB/RAD
    ├── backlog.yaml                       # FEATs
@@ -601,7 +604,23 @@ Resumo:
 - `archive` move a change para `openspec/changes/archive/`;
 - `finalize` marca a FEAT como concluída e consolida a memória documental.
 
-### 7.12 Como finalizar uma execução
+### 7.12 Como declarar impacto de frontend (obrigatório)
+
+```bash
+opensdd sdd frontend-impact FEAT-001 --status required --reason "Nova rota e interface de cadastro"
+```
+
+Sem isso, o `finalize` bloqueia por padrão.
+
+Para caso sem impacto:
+
+```bash
+opensdd sdd frontend-impact FEAT-001 --status none --reason "Mudança interna de backend sem alteração de UI"
+```
+
+A justificativa para `none` precisa ter no mínimo 20 caracteres.
+
+### 7.13 Como finalizar uma execução
 
 ```bash
 opensdd sdd finalize --ref FEAT-001
@@ -613,8 +632,9 @@ O que isso faz:
 - desbloqueia dependentes;
 - atualiza arquitetura, serviços, stack e repo-map;
 - sincroniza `README.md`, `.sdd/AGENT.md`, `AGENTS.md` e `AGENT.md`.
+- aplica guardrails de frontend (bloqueia quando faltar declaração/cobertura).
 
-### 7.13 Como registrar gap de frontend
+### 7.14 Como registrar gap de frontend
 
 Abrir um gap:
 
@@ -628,7 +648,14 @@ Marcar como resolvido:
 opensdd sdd fgap done FGAP-001 --feature FEAT-008 --files src/pages/prontuario.tsx --routes /prontuario
 ```
 
-### 7.14 Como usar skills
+Automacao nova:
+- no `finalize`, se `frontend_impact_status=required` e ainda nao houver `frontend_gap_refs`, o SDD cria `FGAP` automatico e bloqueia a finalizacao na mesma execucao (a menos que use `--force-frontend`).
+- o arquivo `frontend-gaps.md` mostra apenas pendentes.
+- os resolvidos ficam em `frontend-gaps-resolvidos.md`.
+- o panorama consolidado de rotas + pendencias + resolvidos fica em `.sdd/core/frontend-sitemap.md`.
+- a auditoria consolidada por FEAT fica em `.sdd/pendencias/frontend-auditoria.md`.
+
+### 7.15 Como usar skills
 
 Listar bundles:
 
@@ -692,6 +719,8 @@ Observacao:
 | `opensdd sdd proximo` | Alias em portugues para `opensdd sdd next` |
 | `opensdd sdd context FEAT-###` | Gera contexto da FEAT |
 | `opensdd sdd contexto FEAT-###` | Alias em portugues para `opensdd sdd context` |
+| `opensdd sdd frontend-impact FEAT-### --status required\|none --reason "..."` | Declara impacto frontend obrigatório antes do finalize |
+| `opensdd sdd impacto-frontend FEAT-### ...` | Alias em portugues para `opensdd sdd frontend-impact` |
 | `opensdd sdd onboard system` | Gera onboarding global |
 | `opensdd sdd integrar system` | Alias em portugues para `opensdd sdd onboard` |
 | `opensdd sdd orientar system` | Alias em portugues para `opensdd sdd onboard` |
@@ -760,6 +789,7 @@ opensdd sdd breakdown RAD-001 --mode graph --incremental --titles "API de agenda
 opensdd sdd next
 opensdd sdd start FEAT-001
 opensdd sdd context FEAT-001
+opensdd sdd frontend-impact FEAT-001 --status required --reason "Nova rota e nova tela de agendamento"
 ```
 
 ### 9.6 Marina aparece com insight no meio do caminho

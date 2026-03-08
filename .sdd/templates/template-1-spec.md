@@ -13,6 +13,11 @@ Descreva o que esta feature precisa entregar para o usuario ou para o sistema.
 ## Cenarios de Aceite
 - Ao fazer [x], espero que [y].
 
+## Declaracao de Impacto Frontend
+- Status (`unknown|none|required`):
+- Justificativa:
+- Comando: `opensdd sdd frontend-impact FEAT-### --status required|none --reason "..."`
+
 ## Referencias
 - FEAT:
 - RAD:

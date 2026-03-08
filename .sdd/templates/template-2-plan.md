@@ -12,6 +12,7 @@ Descreva como a solucao sera implementada.
 - Rotas afetadas:
 - Gaps criados ou resolvidos:
 - Decisoes de frontend relevantes:
+- Declaracao obrigatoria: `opensdd sdd frontend-impact FEAT-### --status required|none --reason "..."`
 
 ## Skills e Bundles
 - Skills consultadas:

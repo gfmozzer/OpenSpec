@@ -1,5 +1,7 @@
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { createChange } from '../../utils/change-utils.js';
 import { AI_TOOLS } from '../config.js';
 import { CLI_NAME } from '../branding.js';
@@ -41,6 +43,8 @@ import type {
 } from './types.js';
 import { renderViews } from './views.js';
 import { syncSddGuideDocs } from './docs-sync.js';
+
+const execFileAsync = promisify(execFile);
 
 const RADAR_TO_DISCOVERY_STATUS: Record<string, DiscoveryRecord['status']> = {
   READY: 'READY',
@@ -535,6 +539,7 @@ function buildActivePlanDoc(feature: BacklogItem, recommendedBundles: string[]):
 ## Impacto Frontend
 - Frontend gaps relacionados: ${feature.frontend_gap_refs.join(', ') || '-'}
 - Rotas/áreas impactadas: (preencher)
+- Declaracao obrigatoria: ${CLI_NAME} sdd frontend-impact ${feature.id} --status required|none --reason "<justificativa>"
 
 ## Contratos Afetados
 - Consome: ${feature.consumes.join(', ') || '-'}
@@ -554,7 +559,9 @@ function buildActiveTasksDoc(feature: BacklogItem, paths: SddPaths): string {
 1. Entender contexto com \`${CLI_NAME} sdd context ${feature.id}\`.
 2. Confirmar plano e tarefas técnicas.
 3. Implementar com rastreabilidade no changelog.
-4. Atualizar, se houve impacto, a documentação operacional e canônica:
+4. Declarar impacto de frontend (obrigatorio) com \`${CLI_NAME} sdd frontend-impact ${feature.id} ...\`.
+5. Se frontend_impact_status=required, abrir/atualizar FGAP antes do finalize.
+6. Atualizar, se houve impacto, a documentação operacional e canônica:
    - \`README.md\`
    - \`${memoryAgentGuide}\`
    - \`AGENTS.md\`
@@ -564,7 +571,7 @@ function buildActiveTasksDoc(feature: BacklogItem, paths: SddPaths): string {
    - \`${coreDocsDir}/spec-tecnologica.md\`
    - \`${coreDocsDir}/repo-map.md\`
    - \`${coreDocsDir}/frontend-decisions.md\` (quando aplicável)
-5. Validar e preparar finalize.
+7. Validar e preparar finalize.
 
 ## Dependências
 - blocked_by: ${feature.blocked_by.join(', ') || '-'}
@@ -574,7 +581,7 @@ function buildActiveTasksDoc(feature: BacklogItem, paths: SddPaths): string {
 
 ## Checklist DOD
 - [DOC] Atualizar documentacao central e de handoff
-- [UI] Registrar lacunas/decisoes de frontend quando aplicavel
+- [UI] Declarar impacto frontend e registrar lacunas/decisoes quando aplicavel
 - [ARQ] Arquivar a mudanca tecnica no OpenSpec
 - [MEM] Consolidar memoria com \`${CLI_NAME} sdd consolidar --ref ${feature.id}\`
 `;
@@ -836,6 +843,11 @@ function buildBacklogItem(
     change_name: '',
     branch_name: '',
     worktree_path: '',
+    start_commit_sha: '',
+    frontend_impact_status: 'unknown',
+    frontend_impact_reason: '',
+    frontend_impact_declared_at: '',
+    frontend_surface_tokens: [],
     frontend_gap_refs: [],
     spec_refs: [],
     last_sync_at: nowIso(),
@@ -972,6 +984,204 @@ function updateDependencyMetadata(items: BacklogItem[]): void {
   for (const item of items) {
     item.dependency_count = item.blocked_by.length;
   }
+}
+
+function parseRouteToken(value: string): string | null {
+  const token = value.trim();
+  if (!token) return null;
+  if (token.startsWith('route:')) {
+    const raw = token.slice('route:'.length).trim();
+    if (!raw) return null;
+    return raw.startsWith('/') ? raw : `/${raw}`;
+  }
+  if (token.startsWith('/')) return token;
+  const inlineRoute = token.match(/\/[a-z0-9_\-/:]*/i);
+  if (inlineRoute && inlineRoute[0]) return inlineRoute[0];
+  return null;
+}
+
+function inferRouteTargetsFromFeature(feature: BacklogItem): string[] {
+  const routes = [
+    ...feature.produces.map(parseRouteToken),
+    ...feature.consumes.map(parseRouteToken),
+    ...(feature.frontend_surface_tokens || []).map(parseRouteToken),
+  ].filter((value): value is string => Boolean(value));
+  return Array.from(new Set(routes));
+}
+
+function inferSurfaceTargetsFromFeature(feature: BacklogItem): string[] {
+  return Array.from(
+    new Set((feature.frontend_surface_tokens || []).map((token) => token.trim()).filter(Boolean))
+  );
+}
+
+async function gitHeadCommit(projectRoot: string): Promise<string> {
+  try {
+    const { stdout } = await execFileAsync('git', ['rev-parse', 'HEAD'], { cwd: projectRoot });
+    return stdout.trim();
+  } catch {
+    return '';
+  }
+}
+
+async function gitChangedFiles(projectRoot: string, baseRef: string): Promise<{
+  files: string[];
+  warning: string;
+}> {
+  if (!baseRef) {
+    return { files: [], warning: 'base_ref_ausente' };
+  }
+  try {
+    const { stdout } = await execFileAsync('git', ['diff', '--name-only', `${baseRef}..HEAD`], {
+      cwd: projectRoot,
+    });
+    const files = stdout
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    return { files, warning: '' };
+  } catch {
+    return { files: [], warning: 'git_diff_indisponivel' };
+  }
+}
+
+function isFrontendPath(filePath: string): boolean {
+  const normalized = filePath.replace(/\\/g, '/').toLowerCase();
+  const frontendDirs = [
+    '/frontend/',
+    '/web/',
+    '/ui/',
+    '/app/',
+    '/pages/',
+    '/components/',
+    '/routes/',
+    '/views/',
+    '/templates/',
+    '/public/',
+  ];
+  if (frontendDirs.some((segment) => normalized.includes(segment))) return true;
+  if (
+    normalized.includes('/src/') &&
+    (normalized.includes('/src/app/') ||
+      normalized.includes('/src/pages/') ||
+      normalized.includes('/src/components/'))
+  ) {
+    return true;
+  }
+  return /\.(tsx|jsx|vue|svelte|css|scss|sass|less|html)$/.test(normalized);
+}
+
+function detectFrontendImpactEvidence(
+  feature: BacklogItem,
+  changedFiles: string[]
+): {
+  metadata_routes: string[];
+  metadata_surfaces: string[];
+  diff_files: string[];
+  evidence_sources: Array<'metadata' | 'diff'>;
+  has_frontend_evidence: boolean;
+} {
+  const metadataRoutes = inferRouteTargetsFromFeature(feature);
+  const metadataSurfaces = inferSurfaceTargetsFromFeature(feature);
+  const diffFiles = changedFiles.filter(isFrontendPath);
+  const metadataEvidence =
+    metadataRoutes.length > 0 ||
+    metadataSurfaces.length > 0 ||
+    feature.execution_kind === 'frontend_coverage' ||
+    feature.touches.includes('frontend');
+  const sources: Array<'metadata' | 'diff'> = [];
+  if (metadataEvidence) sources.push('metadata');
+  if (diffFiles.length > 0) sources.push('diff');
+  return {
+    metadata_routes: metadataRoutes,
+    metadata_surfaces: metadataSurfaces,
+    diff_files: diffFiles,
+    evidence_sources: sources,
+    has_frontend_evidence: sources.length > 0,
+  };
+}
+
+function ensureRouteInFrontendMap(
+  snapshot: Awaited<ReturnType<typeof loadStateSnapshot>>,
+  routePath: string,
+  gapId: string
+): void {
+  if (!snapshot.frontendMap) return;
+  const routeId = `route-${slugify(routePath) || 'root'}`;
+  const existing = snapshot.frontendMap.routes.find((route) => route.id === routeId);
+  if (existing) {
+    existing.ui_status = existing.ui_status === 'OK' ? 'PARTIAL' : existing.ui_status;
+    existing.source_gap_ids = Array.from(new Set([...(existing.source_gap_ids || []), gapId]));
+    return;
+  }
+  snapshot.frontendMap.routes.push({
+    id: routeId,
+    path: routePath,
+    parent_id: '',
+    label: '',
+    nav_surface: '',
+    ui_status: 'GAP',
+    source_gap_ids: [gapId],
+    implemented_files: [],
+    notes: '',
+  });
+}
+
+async function maybeCreateAutomaticFrontendGap(
+  paths: SddPaths,
+  snapshot: Awaited<ReturnType<typeof loadStateSnapshot>>,
+  feature: BacklogItem,
+  options?: {
+    force?: boolean;
+    routeTargets?: string[];
+    detectionSources?: Array<'metadata' | 'diff' | 'manual'>;
+  }
+): Promise<string> {
+  if (!snapshot.frontendGaps || !snapshot.frontendMap) return '';
+  if (feature.frontend_gap_refs.length > 0) return '';
+
+  const backendImpact =
+    feature.touches.includes('backend') ||
+    feature.execution_kind === 'feature' ||
+    feature.execution_kind === 'migration';
+  if (!backendImpact && !options?.force) return '';
+
+  const gapId = await allocateEntityId(paths, 'FGAP');
+  syncCounterFromId(snapshot.discoveryIndex, gapId);
+  const now = nowIso();
+  const routeTargets = Array.from(
+    new Set([...(options?.routeTargets || []), ...inferRouteTargetsFromFeature(feature)])
+  );
+
+  snapshot.frontendGaps.items.push({
+    id: gapId,
+    title: `Cobertura frontend pendente para ${feature.id}: ${feature.title}`,
+    status: 'OPEN',
+    origin_kind: 'automatic',
+    detection_sources: options?.detectionSources || ['metadata'],
+    origin_feature: feature.id,
+    backend_refs: [feature.id],
+    frontend_scope: '',
+    route_targets: routeTargets,
+    menu_targets: [],
+    suggested_files: [],
+    implemented_files: [],
+    resolved_by_feature: '',
+    related_route_ids: routeTargets.map((route) => `route-${slugify(route) || 'root'}`),
+    notes: 'Gerado automaticamente no finalize para evitar perda de rastreabilidade.',
+    created_at: now,
+    updated_at: now,
+  });
+  feature.frontend_gap_refs = Array.from(new Set([...feature.frontend_gap_refs, gapId]));
+  feature.summary = [feature.summary || '', `FGAP automático criado: ${gapId}`]
+    .filter(Boolean)
+    .join('\n');
+
+  for (const routePath of routeTargets) {
+    ensureRouteInFrontendMap(snapshot, routePath, gapId);
+  }
+
+  return gapId;
 }
 
 export class SddBreakdownCommand {
@@ -1490,6 +1700,12 @@ export class SddStartCommand {
     feature.status = 'IN_PROGRESS';
     feature.current_stage = 'execucao';
     feature.last_sync_at = now;
+    if (!feature.start_commit_sha) {
+      feature.start_commit_sha = await gitHeadCommit(projectRoot);
+    }
+    if (feature.execution_kind === 'frontend_coverage' && feature.frontend_impact_status === 'unknown') {
+      feature.frontend_impact_status = 'required';
+    }
     feature.recommended_skills = pickTopSkills(catalog.skills, feature.recommended_skills, 3);
     if (options?.force && (unresolved.length > 0 || lockConflicts.length > 0)) {
       const notes = [
@@ -1525,6 +1741,7 @@ export class SddStartCommand {
       recommended_bundles: recommendedBundles,
       handoff_seed_refs: activeWorkspace.handoffSeedRefs,
       flow_mode: feature.flow_mode,
+      start_commit_sha: feature.start_commit_sha || '',
     };
   }
 }
@@ -1611,7 +1828,13 @@ function gateSatisfied(status: string): boolean {
 export class SddFinalizeCommand {
   async execute(
     projectRoot: string,
-    options?: { ref?: string; allReady?: boolean; render?: boolean; noAdr?: boolean }
+    options?: {
+      ref?: string;
+      allReady?: boolean;
+      render?: boolean;
+      noAdr?: boolean;
+      forceFrontend?: boolean;
+    }
   ) {
     const { config, paths } = await getRuntime(projectRoot);
     const snapshot = await loadStateSnapshot(paths, config);
@@ -1633,13 +1856,33 @@ export class SddFinalizeCommand {
       await saveBacklogState(paths, snapshot.backlog);
       await saveUnblockEventsState(paths, snapshot.unblockEvents);
       await persistAndRender(paths, config, options?.render);
-      return { finalized: [], unblocked: [], pending: pending.length };
+      return {
+        finalized: [],
+        unblocked: [],
+        pending: pending.length,
+        updated_core_docs: [],
+        updated_readme: false,
+        updated_agent_guide: false,
+        doc_warnings: [],
+        auto_frontend_gaps: [],
+        frontend_guardrails: [],
+      };
     }
 
     const finalized: string[] = [];
     const unblocked = new Set<string>();
     const updatedCoreDocs = new Set<string>();
     const docWarnings: string[] = [];
+    const autoFrontendGaps: string[] = [];
+    const frontendGuardrails: Array<{
+      feature_id: string;
+      declared_status: 'unknown' | 'none' | 'required';
+      evidence_sources: string[];
+      auto_gap_created: string;
+      blocked: boolean;
+      forced: boolean;
+      reasons: string[];
+    }> = [];
     const now = nowIso();
     const existingEvents = new Set(
       snapshot.unblockEvents.events.map((event) => `${event.feature_id}:${event.unblocked_by}`)
@@ -1659,6 +1902,73 @@ export class SddFinalizeCommand {
         );
         continue;
       }
+
+      if (config.frontend.enabled) {
+        const changed = await gitChangedFiles(projectRoot, feature.start_commit_sha || '');
+        const evidence = detectFrontendImpactEvidence(feature, changed.files);
+        const declaredStatus = feature.frontend_impact_status || 'unknown';
+        const reasons: string[] = [];
+        let autoGapId = '';
+
+        if (declaredStatus === 'unknown') {
+          reasons.push('frontend_impact_status=unknown');
+        }
+        if (declaredStatus === 'none') {
+          const reason = (feature.frontend_impact_reason || '').trim();
+          if (reason.length < 20) {
+            reasons.push('frontend_impact_status=none sem justificativa minima (20 chars)');
+          }
+          if (evidence.has_frontend_evidence) {
+            reasons.push('frontend_impact_status=none contradiz evidencias (metadata/diff)');
+          }
+        }
+        if (declaredStatus === 'required' && feature.frontend_gap_refs.length === 0) {
+          autoGapId = await maybeCreateAutomaticFrontendGap(paths, snapshot, feature, {
+            force: true,
+            routeTargets: evidence.metadata_routes,
+            detectionSources:
+              evidence.evidence_sources.length > 0
+                ? [...evidence.evidence_sources]
+                : ['metadata'],
+          });
+          if (autoGapId) {
+            autoFrontendGaps.push(autoGapId);
+            docWarnings.push(
+              `${feature.id} gerou ${autoGapId} automaticamente (cobertura frontend pendente).`
+            );
+          }
+          reasons.push(
+            `frontend_impact_status=required exige FGAP vinculado antes do finalize (${autoGapId || 'nao criado'})`
+          );
+        }
+
+        if (changed.warning) {
+          docWarnings.push(`${feature.id}: deteccao diff com baixa confianca (${changed.warning}).`);
+        }
+
+        const blockedByGuardrail = reasons.length > 0;
+        const forcedByGuardrail = blockedByGuardrail && !!options?.forceFrontend;
+        frontendGuardrails.push({
+          feature_id: feature.id,
+          declared_status: declaredStatus,
+          evidence_sources: evidence.evidence_sources,
+          auto_gap_created: autoGapId,
+          blocked: blockedByGuardrail,
+          forced: forcedByGuardrail,
+          reasons,
+        });
+
+        if (blockedByGuardrail && !options?.forceFrontend) {
+          docWarnings.push(`${feature.id} bloqueada pelos guardrails de frontend: ${reasons.join(' | ')}`);
+          continue;
+        }
+        if (forcedByGuardrail) {
+          docWarnings.push(
+            `${feature.id} finalizada com --force-frontend apesar de guardrails: ${reasons.join(' | ')}`
+          );
+        }
+      }
+
       feature.status = 'DONE';
       feature.current_stage = 'consolidacao';
       feature.done_at = now;
@@ -1821,6 +2131,12 @@ export class SddFinalizeCommand {
     await saveRepoMapState(paths, snapshot.repoMap);
     if (config.frontend.enabled && snapshot.frontendDecisions) {
       await saveFrontendDecisionsState(paths, snapshot.frontendDecisions);
+      if (snapshot.frontendGaps) {
+        await saveFrontendGapsState(paths, snapshot.frontendGaps);
+      }
+      if (snapshot.frontendMap) {
+        await saveFrontendMapState(paths, snapshot.frontendMap);
+      }
     } else if (config.frontend.enabled) {
       docWarnings.push('frontend.enabled=true sem frontend-decisions carregado');
     }
@@ -1837,6 +2153,8 @@ export class SddFinalizeCommand {
       updated_readme: syncResult.updatedReadme,
       updated_agent_guide: syncResult.updatedAgentGuide || syncResult.updatedRootAgents,
       doc_warnings: docWarnings,
+      auto_frontend_gaps: autoFrontendGaps,
+      frontend_guardrails: frontendGuardrails,
     };
   }
 }
@@ -1889,7 +2207,9 @@ export class SddContextCommand {
     ];
     if (config.frontend.enabled) {
       coreDocs.push(coreDocRef(paths, 'frontend-map.md'));
+      coreDocs.push(coreDocRef(paths, 'frontend-sitemap.md'));
       coreDocs.push(coreDocRef(paths, 'frontend-decisions.md'));
+      coreDocs.push(planningDocRef(paths, 'frontend-auditoria.md'));
     }
 
     if (type === 'FEAT') {
@@ -1973,6 +2293,11 @@ export class SddContextCommand {
         flow_mode: item.flow_mode,
         current_stage: item.current_stage,
         gates: item.gates,
+        frontend_impact_status: item.frontend_impact_status,
+        frontend_impact_reason: item.frontend_impact_reason || '',
+        frontend_impact_declared_at: item.frontend_impact_declared_at || '',
+        frontend_surface_tokens: item.frontend_surface_tokens,
+        start_commit_sha: item.start_commit_sha || '',
         next_action: nextAction,
         execution_kind: item.execution_kind,
         produces: item.produces,
@@ -2715,6 +3040,58 @@ export class SddSkillsSyncCommand {
   }
 }
 
+export class SddFrontendImpactCommand {
+  async execute(
+    projectRoot: string,
+    featureId: string,
+    options: {
+      status: 'unknown' | 'none' | 'required';
+      reason?: string;
+      routes?: string[];
+      surfaces?: string[];
+      render?: boolean;
+    }
+  ) {
+    const { config, paths } = await getRuntime(projectRoot);
+    if (!config.frontend.enabled) {
+      throw new Error(`Modulo de frontend desativado. Execute "${CLI_NAME} sdd init --frontend".`);
+    }
+
+    const snapshot = await loadStateSnapshot(paths, config);
+    const feature = resolveFeat(snapshot.backlog.items, featureId);
+    const status = options.status;
+    const reason = (options.reason || '').trim();
+    if (status === 'none' && reason.length < 20) {
+      throw new Error('Para frontend_impact=none, informe --reason com no minimo 20 caracteres.');
+    }
+
+    const routeTokens = (options.routes || [])
+      .map((route) => route.trim())
+      .filter(Boolean)
+      .map((route) => (route.startsWith('/') ? route : `/${route}`))
+      .map((route) => `route:${route}`);
+    const extraSurfaces = (options.surfaces || []).map((surface) => surface.trim()).filter(Boolean);
+    feature.frontend_surface_tokens = Array.from(
+      new Set([...(feature.frontend_surface_tokens || []), ...routeTokens, ...extraSurfaces])
+    );
+    feature.frontend_impact_status = status;
+    feature.frontend_impact_reason = reason;
+    feature.frontend_impact_declared_at = nowIso();
+    feature.last_sync_at = feature.frontend_impact_declared_at;
+
+    await saveBacklogState(paths, snapshot.backlog);
+    await persistAndRender(paths, config, options.render);
+
+    return {
+      feature_id: feature.id,
+      frontend_impact_status: feature.frontend_impact_status,
+      frontend_impact_reason: feature.frontend_impact_reason || '',
+      frontend_impact_declared_at: feature.frontend_impact_declared_at || '',
+      frontend_surface_tokens: feature.frontend_surface_tokens,
+    };
+  }
+}
+
 export class SddFrontendGapCommand {
   async add(
     projectRoot: string,
@@ -2737,6 +3114,8 @@ export class SddFrontendGapCommand {
       id,
       title: title.trim(),
       status: 'OPEN',
+      origin_kind: 'manual',
+      detection_sources: ['manual'],
       origin_feature: options?.originFeature || '',
       backend_refs: [],
       frontend_scope: '',

@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { CLI_NAME } from '../branding.js';
 import { ID_PATTERNS, } from './types.js';
@@ -163,6 +164,60 @@ function validateFrontendReferences(gaps, backlog, errors, warnings) {
         }
     }
 }
+async function validateActiveTaskChecklist(activeDir, items, warnings) {
+    const taskCandidates = ['3-tarefas.md', '3-tasks.md'];
+    const requiredMarkers = ['frontend-impact', 'README.md', 'finalize --ref FEAT-'];
+    for (const item of items) {
+        if (item.status !== 'IN_PROGRESS')
+            continue;
+        let taskDocPath = '';
+        for (const fileName of taskCandidates) {
+            const candidate = path.join(activeDir, item.id, fileName);
+            if (existsSync(candidate)) {
+                taskDocPath = candidate;
+                break;
+            }
+        }
+        if (!taskDocPath) {
+            warnings.push(`Checklist de tarefas ausente para ${item.id} em .sdd/active|execucao.`);
+            continue;
+        }
+        const content = await fs.readFile(taskDocPath, 'utf-8').catch(() => '');
+        const missing = requiredMarkers.filter((marker) => !content.includes(marker));
+        if (missing.length > 0) {
+            warnings.push(`Checklist incompleto em ${path.basename(taskDocPath)} (${item.id}): faltando ${missing.join(', ')}`);
+        }
+    }
+}
+function parseRouteToken(value) {
+    const token = value.trim();
+    if (!token)
+        return null;
+    if (token.startsWith('route:')) {
+        const raw = token.slice('route:'.length).trim();
+        if (!raw)
+            return null;
+        return raw.startsWith('/') ? raw : `/${raw}`;
+    }
+    if (token.startsWith('/'))
+        return token;
+    const inlineRoute = token.match(/\/[a-z0-9_\-/:]*/i);
+    if (inlineRoute && inlineRoute[0])
+        return inlineRoute[0];
+    return null;
+}
+function featureHasMetadataFrontendEvidence(item) {
+    const routes = [
+        ...item.produces.map(parseRouteToken),
+        ...item.consumes.map(parseRouteToken),
+        ...(item.frontend_surface_tokens || []).map(parseRouteToken),
+    ].filter((value) => Boolean(value));
+    const surfaces = (item.frontend_surface_tokens || []).map((value) => value.trim()).filter(Boolean);
+    return (routes.length > 0 ||
+        surfaces.length > 0 ||
+        item.touches.includes('frontend') ||
+        item.execution_kind === 'frontend_coverage');
+}
 export class SddCheckCommand {
     async execute(projectRoot, options = {}) {
         const config = await loadProjectSddConfig(projectRoot);
@@ -230,6 +285,10 @@ export class SddCheckCommand {
                     documentation_sync: false,
                     core_views_stale: true,
                     missing_architecture_fields: [],
+                    frontend_coverage_sync: true,
+                    features_missing_frontend_declaration: [],
+                    features_with_frontend_conflict: [],
+                    features_missing_fgap_link: [],
                     graph: {
                         readyForParallel: 0,
                         blocked: 0,
@@ -263,6 +322,10 @@ export class SddCheckCommand {
                     documentation_sync: false,
                     core_views_stale: true,
                     missing_architecture_fields: [],
+                    frontend_coverage_sync: true,
+                    features_missing_frontend_declaration: [],
+                    features_with_frontend_conflict: [],
+                    features_missing_fgap_link: [],
                     graph: {
                         readyForParallel: 0,
                         blocked: 0,
@@ -281,6 +344,27 @@ export class SddCheckCommand {
             checkUniqueIds(snapshot.frontendGaps.items, 'frontend-gaps.items', errors);
             validateFrontendReferences(snapshot.frontendGaps.items, snapshot.backlog.items, errors, warnings);
         }
+        await validateActiveTaskChecklist(paths.activeDir, snapshot.backlog.items, warnings);
+        const featuresMissingFrontendDeclaration = config.frontend.enabled
+            ? snapshot.backlog.items
+                .filter((item) => item.status !== 'ARCHIVED' && item.status !== 'DONE')
+                .filter((item) => (item.frontend_impact_status || 'unknown') === 'unknown')
+                .map((item) => item.id)
+            : [];
+        const featuresWithFrontendConflict = config.frontend.enabled
+            ? snapshot.backlog.items
+                .filter((item) => item.status !== 'ARCHIVED' && item.status !== 'DONE')
+                .filter((item) => (item.frontend_impact_status || 'unknown') === 'none')
+                .filter((item) => featureHasMetadataFrontendEvidence(item))
+                .map((item) => item.id)
+            : [];
+        const featuresMissingFgapLink = config.frontend.enabled
+            ? snapshot.backlog.items
+                .filter((item) => item.status !== 'ARCHIVED' && item.status !== 'DONE')
+                .filter((item) => (item.frontend_impact_status || 'unknown') === 'required')
+                .filter((item) => item.frontend_gap_refs.length === 0)
+                .map((item) => item.id)
+            : [];
         const missingArchitectureFields = [];
         if (snapshot.architecture.nodes.length === 0) {
             missingArchitectureFields.push('architecture.nodes vazio');
@@ -312,6 +396,8 @@ export class SddCheckCommand {
             path.join(paths.coreDir, 'repo-map.md'),
         ];
         if (config.frontend.enabled) {
+            coreFiles.push(path.join(paths.coreDir, 'frontend-map.md'));
+            coreFiles.push(path.join(paths.coreDir, 'frontend-sitemap.md'));
             coreFiles.push(path.join(paths.coreDir, 'frontend-decisions.md'));
         }
         const coreViewsStale = coreFiles.some((file) => !existsSync(file));
@@ -319,8 +405,20 @@ export class SddCheckCommand {
         if (!docsValidation.documentationSync) {
             warnings.push(`Blocos de onboarding nao sincronizados: ${docsValidation.missingBlocks.join(', ')}`);
         }
+        if (featuresMissingFrontendDeclaration.length > 0) {
+            warnings.push(`Features sem declaracao de impacto frontend: ${featuresMissingFrontendDeclaration.join(', ')}`);
+        }
+        if (featuresWithFrontendConflict.length > 0) {
+            warnings.push(`Features com conflito de cobertura frontend: ${featuresWithFrontendConflict.join(', ')}`);
+        }
+        if (featuresMissingFgapLink.length > 0) {
+            warnings.push(`Features com frontend_impact=required sem FGAP vinculado: ${featuresMissingFgapLink.join(', ')}`);
+        }
         const graph = computeGraphSummary(snapshot.backlog.items);
         const progress = computeProgress(snapshot.backlog.items);
+        const frontendCoverageSync = featuresMissingFrontendDeclaration.length === 0 &&
+            featuresWithFrontendConflict.length === 0 &&
+            featuresMissingFgapLink.length === 0;
         return {
             valid: errors.length === 0,
             errors,
@@ -341,6 +439,10 @@ export class SddCheckCommand {
                 documentation_sync: docsValidation.documentationSync,
                 core_views_stale: coreViewsStale,
                 missing_architecture_fields: missingArchitectureFields,
+                frontend_coverage_sync: frontendCoverageSync,
+                features_missing_frontend_declaration: featuresMissingFrontendDeclaration,
+                features_with_frontend_conflict: featuresWithFrontendConflict,
+                features_missing_fgap_link: featuresMissingFgapLink,
                 graph,
             },
         };

@@ -5,6 +5,7 @@ import os from 'node:os';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import { SddInitCommand } from '../../src/core/sdd/init.js';
 import { SddCheckCommand } from '../../src/core/sdd/check.js';
+import { SddStartCommand } from '../../src/core/sdd/operations.js';
 
 describe('SddCheckCommand', () => {
   let testDir: string;
@@ -69,5 +70,14 @@ describe('SddCheckCommand', () => {
     const report = await new SddCheckCommand().execute(testDir, { render: false });
     expect(report.valid).toBe(false);
     expect(report.errors.some((e) => e.includes('Schema de estado invalido'))).toBe(true);
+  });
+
+  it('reports frontend coverage sync gaps when declaration is missing', async () => {
+    await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
+    await new SddStartCommand().execute(testDir, 'Criar API de clientes');
+
+    const report = await new SddCheckCommand().execute(testDir, { render: true });
+    expect(report.summary.frontend_coverage_sync).toBe(false);
+    expect(report.summary.features_missing_frontend_declaration).toContain('FEAT-001');
   });
 });

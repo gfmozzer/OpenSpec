@@ -86,6 +86,9 @@ export const FrontendGapStatusSchema = z.enum([
   'DONE',
   'SUPERSEDED',
 ]);
+export const FrontendImpactStatusSchema = z.enum(['unknown', 'none', 'required']);
+export const FrontendGapOriginKindSchema = z.enum(['manual', 'automatic']);
+export const FrontendGapDetectionSourceSchema = z.enum(['metadata', 'diff', 'manual']);
 
 export const FrontendUiStatusSchema = z.enum([
   'OK',
@@ -163,6 +166,11 @@ export const BacklogItemSchema = z.object({
   change_name: NullableStringSchema,
   branch_name: NullableStringSchema,
   worktree_path: NullableStringSchema,
+  start_commit_sha: NullableStringSchema,
+  frontend_impact_status: FrontendImpactStatusSchema.default('unknown'),
+  frontend_impact_reason: NullableStringSchema,
+  frontend_impact_declared_at: NullableStringSchema,
+  frontend_surface_tokens: StringArraySchema,
   frontend_gap_refs: StringArraySchema,
   spec_refs: StringArraySchema,
   last_sync_at: NullableStringSchema,
@@ -278,6 +286,8 @@ export const FrontendGapRecordSchema = z.object({
   id: z.string().regex(ID_PATTERNS.frontendGap, 'Invalid FGAP id format'),
   title: z.string().min(1),
   status: FrontendGapStatusSchema,
+  origin_kind: FrontendGapOriginKindSchema.default('manual'),
+  detection_sources: z.array(FrontendGapDetectionSourceSchema).default([]),
   origin_feature: NullableStringSchema,
   backend_refs: StringArraySchema,
   frontend_scope: NullableStringSchema,

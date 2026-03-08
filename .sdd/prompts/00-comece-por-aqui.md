@@ -49,6 +49,7 @@ Resultado esperado:
 ```bash
 opensdd sdd start FEAT-001 --fluxo padrao
 opensdd sdd context FEAT-001
+opensdd sdd frontend-impact FEAT-001 --status required --reason "Nova rota e elementos de interface"
 ```
 
 Implemente e atualize o pacote da FEAT:
@@ -85,4 +86,5 @@ Resultado: backlog atualizado, docs sincronizadas e proxima FEAT liberada sem ad
 - `opensdd sdd next`: ver o que pode comecar agora.
 - `opensdd sdd start FEAT-###`: abrir execucao da feature.
 - `opensdd sdd context FEAT-###`: gerar contexto focado.
+- `opensdd sdd frontend-impact FEAT-### --status required|none --reason "...":` declarar impacto frontend.
 - `opensdd sdd finalize --ref FEAT-###`: consolidar memoria e concluir.

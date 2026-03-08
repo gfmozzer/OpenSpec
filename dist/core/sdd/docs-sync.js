@@ -43,12 +43,14 @@ Ordem de leitura para qualquer agente novo:
 6. \`${memoryDir}/core/spec-tecnologica.md\`
 7. \`${memoryDir}/core/repo-map.md\`
 8. \`${memoryDir}/core/fontes.md\`
-9. \`${memoryDir}/core/frontend-decisions.md\` (quando frontend estiver ativado)
+9. \`${memoryDir}/core/frontend-sitemap.md\` (quando frontend estiver ativado)
+10. \`${memoryDir}/core/frontend-decisions.md\` (quando frontend estiver ativado)
 
 Comandos essenciais:
 - \`${CLI_NAME} sdd onboard system\`
 - \`${CLI_NAME} sdd next\`
 - \`${CLI_NAME} sdd context FEAT-###\`
+- \`${CLI_NAME} sdd frontend-impact FEAT-### --status required|none --reason "..."\`
 - \`${CLI_NAME} sdd finalize --ref FEAT-###\``;
 }
 function buildAgentGuideBlock(memoryDir, config) {
@@ -63,7 +65,8 @@ Trilha oficial:
 2. Use \`${CLI_NAME} sdd next\` para escolher trabalho pronto.
 3. Use \`${CLI_NAME} sdd start FEAT-###\` para abrir execução.
 4. Use \`${CLI_NAME} sdd context FEAT-###\` antes de codar.
-5. Após archive, rode \`${CLI_NAME} sdd finalize --ref FEAT-###\`.
+5. Declare impacto de frontend com \`${CLI_NAME} sdd frontend-impact FEAT-### ...\`.
+6. Após archive, rode \`${CLI_NAME} sdd finalize --ref FEAT-###\`.
 
 Fontes canônicas:
 - Estados: \`${memoryDir}/state/*.yaml\`
@@ -81,13 +84,14 @@ Required execution order:
 1. Run \`${CLI_NAME} sdd onboard system\` before broad work.
 2. Run \`${CLI_NAME} sdd start FEAT-###\` before implementation.
 3. Use \`${CLI_NAME} sdd context FEAT-###\` before coding.
-4. Before archive/finalize, update the documentation affected by the feature:
+4. Before archive/finalize, declare frontend impact with \`${CLI_NAME} sdd frontend-impact FEAT-### ...\`.
+5. Before archive/finalize, update the documentation affected by the feature:
    - \`README.md\`
    - \`${memoryDir}/AGENT.md\`
    - \`${memoryDir}/core/*.md\`
    - \`AGENTS.md\`
    - \`AGENT.md\`
-5. Run \`${CLI_NAME} sdd finalize --ref FEAT-###\` to consolidate memory.
+6. Run \`${CLI_NAME} sdd finalize --ref FEAT-###\` to consolidate memory.
 
 Canonical state lives in \`${memoryDir}/state/*.yaml\`. Markdown files are operational views or guides derived from that state.`;
 }

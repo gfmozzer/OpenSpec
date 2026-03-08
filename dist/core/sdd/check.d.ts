@@ -30,6 +30,10 @@ export interface SddCheckReport {
         documentation_sync: boolean;
         core_views_stale: boolean;
         missing_architecture_fields: string[];
+        frontend_coverage_sync: boolean;
+        features_missing_frontend_declaration: string[];
+        features_with_frontend_conflict: string[];
+        features_missing_fgap_link: string[];
         graph: {
             readyForParallel: number;
             blocked: number;

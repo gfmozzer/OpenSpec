@@ -44,7 +44,8 @@ Este documento e gerado automaticamente a partir dos arquivos em \`${memoryDirLa
 - \`${memoryDirLabel}/${planningDir}/progress.md\`
 - \`${memoryDirLabel}/${planningDir}/unblocked.md\`
 - \`${memoryDirLabel}/${planningDir}/tech-debt.md\`
-${config.frontend.enabled ? `- \`${memoryDirLabel}/core/frontend-map.md\`\n- \`${memoryDirLabel}/core/frontend-decisions.md\`\n- \`${memoryDirLabel}/${planningDir}/frontend-gaps.md\`` : ''}
+${config.frontend.enabled ? `- \`${memoryDirLabel}/core/frontend-map.md\`\n- \`${memoryDirLabel}/core/frontend-sitemap.md\`\n- \`${memoryDirLabel}/core/frontend-decisions.md\`\n- \`${memoryDirLabel}/${planningDir}/frontend-gaps.md\`\n- \`${memoryDirLabel}/${planningDir}/frontend-gaps-resolvidos.md\`` : ''}
+${config.frontend.enabled ? `- \`${memoryDirLabel}/${planningDir}/frontend-auditoria.md\`` : ''}
 `;
 }
 
@@ -276,20 +277,102 @@ ${lines.length > 0 ? lines.join('\n') : '- Sem rotas mapeadas.'}
 
 function renderFrontendGaps(state: SddStateSnapshot): string {
   const rows = (state.frontendGaps?.items ?? [])
+    .filter((item) => item.status !== 'DONE' && item.status !== 'SUPERSEDED')
     .slice()
     .sort((a, b) => a.id.localeCompare(b.id))
     .map((item) => {
       const resolvedBy = item.resolved_by_feature || '-';
-      return `| ${item.id} | ${item.status} | ${item.title} | ${item.origin_feature || '-'} | ${resolvedBy} |`;
+      const detection = item.detection_sources.length > 0 ? item.detection_sources.join(', ') : '-';
+      return `| ${item.id} | ${item.status} | ${item.title} | ${item.origin_kind} | ${detection} | ${item.origin_feature || '-'} | ${resolvedBy} |`;
     });
 
   return `# Gaps de Frontend
 
 Documento gerado a partir de \`.sdd/state/frontend-gaps.yaml\`.
 
-| ID | Status | Titulo | Feature de origem | Resolvido por |
+| ID | Status | Titulo | Origem | Deteccao | Feature de origem | Resolvido por |
+| --- | --- | --- | --- | --- | --- | --- |
+${rows.length > 0 ? rows.join('\n') : '| - | - | Sem gaps | - | - | - | - |'}
+`;
+}
+
+function renderFrontendGapsResolved(state: SddStateSnapshot): string {
+  const rows = (state.frontendGaps?.items ?? [])
+    .filter((item) => item.status === 'DONE' || item.status === 'SUPERSEDED')
+    .slice()
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((item) => {
+      const resolvedBy = item.resolved_by_feature || '-';
+      const detection = item.detection_sources.length > 0 ? item.detection_sources.join(', ') : '-';
+      return `| ${item.id} | ${item.status} | ${item.title} | ${item.origin_kind} | ${detection} | ${item.origin_feature || '-'} | ${resolvedBy} |`;
+    });
+
+  return `# Gaps de Frontend Resolvidos
+
+Documento gerado a partir de \`.sdd/state/frontend-gaps.yaml\`.
+
+| ID | Status | Titulo | Origem | Deteccao | Feature de origem | Resolvido por |
+| --- | --- | --- | --- | --- | --- | --- |
+${rows.length > 0 ? rows.join('\n') : '| - | - | Sem gaps resolvidos | - | - | - | - |'}
+`;
+}
+
+function renderFrontendSitemap(state: SddStateSnapshot): string {
+  const routes = (state.frontendMap?.routes ?? [])
+    .slice()
+    .sort((a, b) => a.path.localeCompare(b.path));
+  const gapsById = new Map((state.frontendGaps?.items ?? []).map((gap) => [gap.id, gap]));
+
+  const rows = routes.map((route) => {
+    const routeGapIds = route.source_gap_ids || [];
+    const pending = routeGapIds.filter((id) => {
+      const gap = gapsById.get(id);
+      return !!gap && gap.status !== 'DONE' && gap.status !== 'SUPERSEDED';
+    });
+    const resolved = routeGapIds.filter((id) => {
+      const gap = gapsById.get(id);
+      return !!gap && (gap.status === 'DONE' || gap.status === 'SUPERSEDED');
+    });
+    const implementedFiles =
+      route.implemented_files && route.implemented_files.length > 0
+        ? route.implemented_files.join(', ')
+        : '-';
+    return `| ${route.path} | ${route.ui_status} | ${pending.join(', ') || '-'} | ${resolved.join(', ') || '-'} | ${implementedFiles} |`;
+  });
+
+  return `# Sitemap Frontend
+
+Documento gerado a partir de \`.sdd/state/frontend-map.yaml\` + \`.sdd/state/frontend-gaps.yaml\`.
+
+| Rota | Status UI | Gaps pendentes | Gaps resolvidos | Arquivos implementados |
 | --- | --- | --- | --- | --- |
-${rows.length > 0 ? rows.join('\n') : '| - | - | Sem gaps | - | - |'}
+${rows.length > 0 ? rows.join('\n') : '| - | - | - | - | - |'}
+`;
+}
+
+function renderFrontendAudit(state: SddStateSnapshot): string {
+  const rows = state.backlog.items
+    .filter((item) => item.status !== 'ARCHIVED')
+    .slice()
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((item) => {
+      const impactStatus = item.frontend_impact_status || 'unknown';
+      const reason = (item.frontend_impact_reason || '').trim() || '-';
+      const gapRefs = item.frontend_gap_refs.length > 0 ? item.frontend_gap_refs.join(', ') : '-';
+      const surfaces =
+        (item.frontend_surface_tokens || []).length > 0
+          ? item.frontend_surface_tokens.join(', ')
+          : '-';
+      return `| ${item.id} | ${item.status} | ${impactStatus} | ${reason} | ${surfaces} | ${gapRefs} |`;
+    });
+
+  return `# Auditoria de Cobertura Frontend
+
+Documento gerado a partir de \`.sdd/state/backlog.yaml\` + \`.sdd/state/frontend-gaps.yaml\`.
+
+| Feature | Status | Impacto declarado | Justificativa | Superficies/rotas | FGAP refs |
+| --- | --- | --- | --- | --- | --- |
+${rows.length > 0 ? rows.join('\n') : '| - | - | - | Sem features | - | - |'}
 `;
 }
 
@@ -438,6 +521,7 @@ export async function renderViews(
   if (config.frontend.enabled) {
     writes.push(
       fs.writeFile(path.join(paths.coreDir, 'frontend-map.md'), renderFrontendMap(state), 'utf-8'),
+      fs.writeFile(path.join(paths.coreDir, 'frontend-sitemap.md'), renderFrontendSitemap(state), 'utf-8'),
       fs.writeFile(
         path.join(paths.coreDir, 'frontend-decisions.md'),
         renderFrontendDecisions(state),
@@ -446,6 +530,16 @@ export async function renderViews(
       fs.writeFile(
         path.join(paths.pendenciasDir, 'frontend-gaps.md'),
         renderFrontendGaps(state),
+        'utf-8'
+      ),
+      fs.writeFile(
+        path.join(paths.pendenciasDir, 'frontend-gaps-resolvidos.md'),
+        renderFrontendGapsResolved(state),
+        'utf-8'
+      ),
+      fs.writeFile(
+        path.join(paths.pendenciasDir, 'frontend-auditoria.md'),
+        renderFrontendAudit(state),
         'utf-8'
       )
     );

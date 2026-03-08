@@ -271,7 +271,8 @@ Depois disso, o sistema usa o indice de fontes e as skills curadas para transfor
 - contexto canonico
 - radar
 - features
-- gaps e decisoes de frontend
+- gaps pendentes e resolvidos de frontend
+- sitemap frontend consolidado
 - insights apenas quando houver ambiguidade real
 
 ## Skills incluidas no bootstrap
@@ -401,11 +402,13 @@ Ordem de leitura para qualquer agente novo:
 6. `.sdd/core/spec-tecnologica.md`
 7. `.sdd/core/repo-map.md`
 8. `.sdd/core/fontes.md`
-9. `.sdd/core/frontend-decisions.md` (quando frontend estiver ativado)
+9. `.sdd/core/frontend-sitemap.md` (quando frontend estiver ativado)
+10. `.sdd/core/frontend-decisions.md` (quando frontend estiver ativado)
 
 Comandos essenciais:
 - `opensdd sdd onboard system`
 - `opensdd sdd next`
 - `opensdd sdd context FEAT-###`
+- `opensdd sdd frontend-impact FEAT-### --status required|none --reason "..."`
 - `opensdd sdd finalize --ref FEAT-###`
 <!-- SDD:ONBOARDING:END -->

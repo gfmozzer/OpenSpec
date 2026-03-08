@@ -11,6 +11,7 @@ import {
   SddDebateCommand,
   SddDecideCommand,
   SddFinalizeCommand,
+  SddFrontendImpactCommand,
   SddFrontendGapCommand,
   SddIngestDepositoCommand,
   SddInsightCommand,
@@ -130,6 +131,12 @@ describe('sdd operations', () => {
 
     const archiveDir = path.join(testDir, 'openspec', 'changes', 'archive', start.changeName);
     await fs.mkdir(archiveDir, { recursive: true });
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = await readYamlFile<Record<string, any>>(backlogPath);
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    feat1.frontend_impact_status = 'none';
+    feat1.frontend_impact_reason = 'Mudanca interna sem impacto de interface para o usuario final.';
+    await writeYamlFile(backlogPath, backlog);
 
     const finalize = await new SddFinalizeCommand().execute(testDir, { allReady: true });
     expect(finalize.finalized).toContain('FEAT-001');
@@ -158,6 +165,12 @@ describe('sdd operations', () => {
     await approveCmd.execute(testDir, 'FEAT-001', 'proposta', { by: 'marina' });
     await approveCmd.execute(testDir, 'FEAT-001', 'planejamento', { by: 'marina' });
     await approveCmd.execute(testDir, 'FEAT-001', 'tarefas', { by: 'marina' });
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = await readYamlFile<Record<string, any>>(backlogPath);
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    feat1.frontend_impact_status = 'none';
+    feat1.frontend_impact_reason = 'Entrega sem impacto visual no frontend, somente regra interna.';
+    await writeYamlFile(backlogPath, backlog);
 
     const finalized = await finalizeCmd.execute(testDir, { allReady: true });
     expect(finalized.finalized).toContain('FEAT-001');
@@ -308,6 +321,100 @@ describe('sdd operations', () => {
     expect((context as any).relevant_contracts).toBeDefined();
   });
 
+  it('blocks finalize when frontend impact declaration is missing', async () => {
+    await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
+    const start = await new SddStartCommand().execute(testDir, 'Criar API de pedidos');
+    const archiveDir = path.join(testDir, 'openspec', 'changes', 'archive', start.changeName);
+    await fs.mkdir(archiveDir, { recursive: true });
+
+    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-001' });
+    expect(result.finalized).toHaveLength(0);
+    expect(result.frontend_guardrails[0].blocked).toBe(true);
+    expect(result.frontend_guardrails[0].declared_status).toBe('unknown');
+  });
+
+  it('blocks finalize when frontend_impact=none has invalid justification', async () => {
+    await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
+    const start = await new SddStartCommand().execute(testDir, 'Criar API de pedidos');
+    const archiveDir = path.join(testDir, 'openspec', 'changes', 'archive', start.changeName);
+    await fs.mkdir(archiveDir, { recursive: true });
+
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = await readYamlFile<Record<string, any>>(backlogPath);
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    feat1.frontend_impact_status = 'none';
+    feat1.frontend_impact_reason = 'curta';
+    await writeYamlFile(backlogPath, backlog);
+
+    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-001' });
+    expect(result.finalized).toHaveLength(0);
+    expect(result.frontend_guardrails[0].reasons.some((reason: string) => reason.includes('justificativa'))).toBe(true);
+  });
+
+  it('blocks finalize when frontend_impact=none conflicts with metadata evidence', async () => {
+    await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
+    const start = await new SddStartCommand().execute(testDir, 'Criar API de pedidos');
+    await new SddFrontendImpactCommand().execute(testDir, 'FEAT-001', {
+      status: 'none',
+      reason: 'Mudanca puramente interna sem alteracao de interface para usuarios.',
+    });
+    const archiveDir = path.join(testDir, 'openspec', 'changes', 'archive', start.changeName);
+    await fs.mkdir(archiveDir, { recursive: true });
+
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = await readYamlFile<Record<string, any>>(backlogPath);
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    feat1.produces = ['route:/pedidos'];
+    await writeYamlFile(backlogPath, backlog);
+
+    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-001' });
+    expect(result.finalized).toHaveLength(0);
+    expect(result.frontend_guardrails[0].reasons.some((reason: string) => reason.includes('contradiz'))).toBe(true);
+  });
+
+  it('allows finalize with --force-frontend and records audit warning', async () => {
+    await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
+    const start = await new SddStartCommand().execute(testDir, 'Criar API de pedidos');
+    await new SddFrontendImpactCommand().execute(testDir, 'FEAT-001', {
+      status: 'none',
+      reason: 'Mudanca puramente interna sem alteracao de interface para usuarios.',
+    });
+    const archiveDir = path.join(testDir, 'openspec', 'changes', 'archive', start.changeName);
+    await fs.mkdir(archiveDir, { recursive: true });
+
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = await readYamlFile<Record<string, any>>(backlogPath);
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    feat1.produces = ['route:/pedidos'];
+    await writeYamlFile(backlogPath, backlog);
+
+    const result = await new SddFinalizeCommand().execute(testDir, {
+      ref: 'FEAT-001',
+      forceFrontend: true,
+    });
+    expect(result.finalized).toContain('FEAT-001');
+    expect(result.frontend_guardrails[0].forced).toBe(true);
+  });
+
+  it('persists frontend-impact command and exposes fields in context', async () => {
+    await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
+    await new SddStartCommand().execute(testDir, 'Criar API de pedidos');
+    const command = new SddFrontendImpactCommand();
+    const updated = await command.execute(testDir, 'FEAT-001', {
+      status: 'required',
+      reason: 'Entrega adiciona novas superficies de atendimento no frontend.',
+      routes: ['/pedidos'],
+      surfaces: ['menu:pedidos'],
+    });
+    expect(updated.frontend_impact_status).toBe('required');
+    expect(updated.frontend_surface_tokens).toContain('route:/pedidos');
+    expect(updated.frontend_surface_tokens).toContain('menu:pedidos');
+
+    const context = await new SddContextCommand().execute(testDir, 'FEAT-001');
+    expect((context as any).frontend_impact_status).toBe('required');
+    expect((context as any).frontend_surface_tokens).toContain('route:/pedidos');
+  });
+
   it('supports breakdown incremental with rewire and cross-RAD dependency linking', async () => {
     await new SddStartCommand().execute(testDir, 'API de estoque');
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
@@ -448,6 +555,8 @@ describe('sdd operations', () => {
     feat1.status = 'IN_PROGRESS';
     feat2.status = 'BLOCKED';
     feat2.blocked_by = ['FEAT-001'];
+    feat1.frontend_impact_status = 'none';
+    feat1.frontend_impact_reason = 'Entrega interna no backend sem alteracao de interface visual.';
     await writeYamlFile(backlogPath, backlog);
 
     const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-001' });
@@ -470,6 +579,49 @@ describe('sdd operations', () => {
     const unblockedViewPath = path.join(testDir, '.sdd', 'pendencias', 'unblocked.md');
     const unblockedView = await fs.readFile(unblockedViewPath, 'utf-8');
     expect(unblockedView).toContain('FEAT-002');
+  });
+
+  it('finalize auto-creates frontend gap for backend change without explicit coverage', async () => {
+    await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
+    const startCmd = new SddStartCommand();
+    await startCmd.execute(testDir, 'Criar API de clientes');
+    await new SddFrontendImpactCommand().execute(testDir, 'FEAT-001', {
+      status: 'required',
+      reason: 'Nova rota de clientes exige cobertura de frontend posterior.',
+      routes: ['/clientes'],
+    });
+
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = await readYamlFile<Record<string, any>>(backlogPath);
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    feat1.produces = ['route:/clientes'];
+    await writeYamlFile(backlogPath, backlog);
+
+    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-001', render: true });
+    expect(result.finalized).toHaveLength(0);
+    expect(Array.isArray(result.auto_frontend_gaps)).toBe(true);
+    expect(result.auto_frontend_gaps.length).toBe(1);
+    expect(result.frontend_guardrails[0].blocked).toBe(true);
+
+    const frontendGapsPath = path.join(testDir, '.sdd', 'state', 'frontend-gaps.yaml');
+    const frontendGaps = await readYamlFile<Record<string, any>>(frontendGapsPath);
+    const createdGap = frontendGaps.items.find((item: any) => item.id === result.auto_frontend_gaps[0]);
+    expect(createdGap).toBeDefined();
+    expect(createdGap.origin_feature).toBe('FEAT-001');
+    expect(createdGap.route_targets).toContain('/clientes');
+    expect(createdGap.origin_kind).toBe('automatic');
+
+    const updatedBacklog = await readYamlFile<Record<string, any>>(backlogPath);
+    const finalizedFeat = updatedBacklog.items.find((item: any) => item.id === 'FEAT-001');
+    expect(finalizedFeat.frontend_gap_refs).toContain(result.auto_frontend_gaps[0]);
+
+    const sitemapPath = path.join(testDir, '.sdd', 'core', 'frontend-sitemap.md');
+    const sitemap = await fs.readFile(sitemapPath, 'utf-8');
+    expect(sitemap).toContain('/clientes');
+
+    const resolvedViewPath = path.join(testDir, '.sdd', 'pendencias', 'frontend-gaps-resolvidos.md');
+    const resolvedView = await fs.readFile(resolvedViewPath, 'utf-8');
+    expect(resolvedView).toContain('Sem gaps resolvidos');
   });
 
   it('provides onboarding payload for system and feature', async () => {

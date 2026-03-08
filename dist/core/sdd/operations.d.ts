@@ -114,6 +114,7 @@ export declare class SddStartCommand {
         recommended_bundles: string[];
         handoff_seed_refs: string[];
         flow_mode: "direto" | "padrao" | "rigoroso";
+        start_commit_sha: string;
     }>;
 }
 export declare class SddFinalizeCommand {
@@ -122,15 +123,8 @@ export declare class SddFinalizeCommand {
         allReady?: boolean;
         render?: boolean;
         noAdr?: boolean;
+        forceFrontend?: boolean;
     }): Promise<{
-        finalized: never[];
-        unblocked: never[];
-        pending: number;
-        updated_core_docs?: undefined;
-        updated_readme?: undefined;
-        updated_agent_guide?: undefined;
-        doc_warnings?: undefined;
-    } | {
         finalized: string[];
         unblocked: string[];
         pending: number;
@@ -138,6 +132,16 @@ export declare class SddFinalizeCommand {
         updated_readme: boolean;
         updated_agent_guide: boolean;
         doc_warnings: string[];
+        auto_frontend_gaps: string[];
+        frontend_guardrails: {
+            feature_id: string;
+            declared_status: "unknown" | "none" | "required";
+            evidence_sources: string[];
+            auto_gap_created: string;
+            blocked: boolean;
+            forced: boolean;
+            reasons: string[];
+        }[];
     }>;
 }
 export declare class SddContextCommand {
@@ -181,6 +185,11 @@ export declare class SddContextCommand {
                 note?: string | undefined;
             };
         };
+        frontend_impact_status: "unknown" | "none" | "required";
+        frontend_impact_reason: string;
+        frontend_impact_declared_at: string;
+        frontend_surface_tokens: string[];
+        start_commit_sha: string;
         next_action: string;
         execution_kind: "documentation" | "feature" | "infra" | "migration" | "frontend_coverage";
         produces: string[];
@@ -238,6 +247,11 @@ export declare class SddContextCommand {
         flow_mode?: undefined;
         current_stage?: undefined;
         gates?: undefined;
+        frontend_impact_status?: undefined;
+        frontend_impact_reason?: undefined;
+        frontend_impact_declared_at?: undefined;
+        frontend_surface_tokens?: undefined;
+        start_commit_sha?: undefined;
         next_action?: undefined;
         execution_kind?: undefined;
         produces?: undefined;
@@ -278,6 +292,11 @@ export declare class SddContextCommand {
         flow_mode?: undefined;
         current_stage?: undefined;
         gates?: undefined;
+        frontend_impact_status?: undefined;
+        frontend_impact_reason?: undefined;
+        frontend_impact_declared_at?: undefined;
+        frontend_surface_tokens?: undefined;
+        start_commit_sha?: undefined;
         next_action?: undefined;
         execution_kind?: undefined;
         produces?: undefined;
@@ -315,6 +334,11 @@ export declare class SddContextCommand {
         flow_mode?: undefined;
         current_stage?: undefined;
         gates?: undefined;
+        frontend_impact_status?: undefined;
+        frontend_impact_reason?: undefined;
+        frontend_impact_declared_at?: undefined;
+        frontend_surface_tokens?: undefined;
+        start_commit_sha?: undefined;
         next_action?: undefined;
         execution_kind?: undefined;
         produces?: undefined;
@@ -410,6 +434,21 @@ export declare class SddSkillsSyncCommand {
         synced: number;
         local_synced: number;
         tools: string[];
+    }>;
+}
+export declare class SddFrontendImpactCommand {
+    execute(projectRoot: string, featureId: string, options: {
+        status: 'unknown' | 'none' | 'required';
+        reason?: string;
+        routes?: string[];
+        surfaces?: string[];
+        render?: boolean;
+    }): Promise<{
+        feature_id: string;
+        frontend_impact_status: "unknown" | "none" | "required";
+        frontend_impact_reason: string;
+        frontend_impact_declared_at: string;
+        frontend_surface_tokens: string[];
     }>;
 }
 export declare class SddFrontendGapCommand {

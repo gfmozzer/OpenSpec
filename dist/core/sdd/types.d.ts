@@ -105,6 +105,20 @@ export declare const FrontendGapStatusSchema: z.ZodEnum<{
     IN_PROGRESS: "IN_PROGRESS";
     DONE: "DONE";
 }>;
+export declare const FrontendImpactStatusSchema: z.ZodEnum<{
+    unknown: "unknown";
+    none: "none";
+    required: "required";
+}>;
+export declare const FrontendGapOriginKindSchema: z.ZodEnum<{
+    manual: "manual";
+    automatic: "automatic";
+}>;
+export declare const FrontendGapDetectionSourceSchema: z.ZodEnum<{
+    metadata: "metadata";
+    manual: "manual";
+    diff: "diff";
+}>;
 export declare const FrontendUiStatusSchema: z.ZodEnum<{
     PLANNED: "PLANNED";
     OK: "OK";
@@ -244,6 +258,15 @@ export declare const BacklogItemSchema: z.ZodObject<{
     change_name: z.ZodOptional<z.ZodString>;
     branch_name: z.ZodOptional<z.ZodString>;
     worktree_path: z.ZodOptional<z.ZodString>;
+    start_commit_sha: z.ZodOptional<z.ZodString>;
+    frontend_impact_status: z.ZodDefault<z.ZodEnum<{
+        unknown: "unknown";
+        none: "none";
+        required: "required";
+    }>>;
+    frontend_impact_reason: z.ZodOptional<z.ZodString>;
+    frontend_impact_declared_at: z.ZodOptional<z.ZodString>;
+    frontend_surface_tokens: z.ZodDefault<z.ZodArray<z.ZodString>>;
     frontend_gap_refs: z.ZodDefault<z.ZodArray<z.ZodString>>;
     spec_refs: z.ZodDefault<z.ZodArray<z.ZodString>>;
     last_sync_at: z.ZodOptional<z.ZodString>;
@@ -386,6 +409,15 @@ export declare const FrontendGapRecordSchema: z.ZodObject<{
         IN_PROGRESS: "IN_PROGRESS";
         DONE: "DONE";
     }>;
+    origin_kind: z.ZodDefault<z.ZodEnum<{
+        manual: "manual";
+        automatic: "automatic";
+    }>>;
+    detection_sources: z.ZodDefault<z.ZodArray<z.ZodEnum<{
+        metadata: "metadata";
+        manual: "manual";
+        diff: "diff";
+    }>>>;
     origin_feature: z.ZodOptional<z.ZodString>;
     backend_refs: z.ZodDefault<z.ZodArray<z.ZodString>>;
     frontend_scope: z.ZodOptional<z.ZodString>;
@@ -556,6 +588,15 @@ export declare const BacklogStateSchema: z.ZodObject<{
         change_name: z.ZodOptional<z.ZodString>;
         branch_name: z.ZodOptional<z.ZodString>;
         worktree_path: z.ZodOptional<z.ZodString>;
+        start_commit_sha: z.ZodOptional<z.ZodString>;
+        frontend_impact_status: z.ZodDefault<z.ZodEnum<{
+            unknown: "unknown";
+            none: "none";
+            required: "required";
+        }>>;
+        frontend_impact_reason: z.ZodOptional<z.ZodString>;
+        frontend_impact_declared_at: z.ZodOptional<z.ZodString>;
+        frontend_surface_tokens: z.ZodDefault<z.ZodArray<z.ZodString>>;
         frontend_gap_refs: z.ZodDefault<z.ZodArray<z.ZodString>>;
         spec_refs: z.ZodDefault<z.ZodArray<z.ZodString>>;
         last_sync_at: z.ZodOptional<z.ZodString>;
@@ -671,6 +712,15 @@ export declare const FrontendGapsStateSchema: z.ZodObject<{
             IN_PROGRESS: "IN_PROGRESS";
             DONE: "DONE";
         }>;
+        origin_kind: z.ZodDefault<z.ZodEnum<{
+            manual: "manual";
+            automatic: "automatic";
+        }>>;
+        detection_sources: z.ZodDefault<z.ZodArray<z.ZodEnum<{
+            metadata: "metadata";
+            manual: "manual";
+            diff: "diff";
+        }>>>;
         origin_feature: z.ZodOptional<z.ZodString>;
         backend_refs: z.ZodDefault<z.ZodArray<z.ZodString>>;
         frontend_scope: z.ZodOptional<z.ZodString>;

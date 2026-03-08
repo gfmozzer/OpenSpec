@@ -24,5 +24,8 @@ Este documento e gerado automaticamente a partir dos arquivos em `.sdd/state/`.
 - `.sdd/pendencias/unblocked.md`
 - `.sdd/pendencias/tech-debt.md`
 - `.sdd/core/frontend-map.md`
+- `.sdd/core/frontend-sitemap.md`
 - `.sdd/core/frontend-decisions.md`
 - `.sdd/pendencias/frontend-gaps.md`
+- `.sdd/pendencias/frontend-gaps-resolvidos.md`
+- `.sdd/pendencias/frontend-auditoria.md`

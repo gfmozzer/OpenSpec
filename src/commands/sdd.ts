@@ -10,6 +10,7 @@ import {
   SddDebateCommand,
   SddDecideCommand,
   SddFinalizeCommand,
+  SddFrontendImpactCommand,
   SddFrontendGapCommand,
   SddIngestDepositoCommand,
   SddApproveCommand,
@@ -103,6 +104,16 @@ interface SddFinalizeCliOptions {
   ref?: string;
   allReady?: boolean;
   noAdr?: boolean;
+  forceFrontend?: boolean;
+  json?: boolean;
+  render?: boolean;
+}
+
+interface SddFrontendImpactCliOptions {
+  status?: 'unknown' | 'none' | 'required';
+  reason?: string;
+  routes?: string;
+  surfaces?: string;
   json?: boolean;
   render?: boolean;
 }
@@ -466,12 +477,46 @@ export function registerSddCommand(program: Command): void {
     });
 
   sddCmd
+    .command('frontend-impact <featureId>')
+    .description('Declara impacto de frontend para uma FEAT')
+    .alias('impacto-frontend')
+    .option('--status <status>', 'Status: unknown|none|required')
+    .option('--reason <texto>', 'Justificativa obrigatoria para status=none')
+    .option('--routes <list>', 'Rotas separadas por virgula')
+    .option('--surfaces <list>', 'Superficies de UI separadas por virgula')
+    .option('--json', 'Saida em JSON')
+    .option('--no-render', 'Nao gera views apos atualizar estado')
+    .action(async (featureId: string, options?: SddFrontendImpactCliOptions) => {
+      const status = options?.status;
+      if (!status || !['unknown', 'none', 'required'].includes(status)) {
+        throw new Error('Valor invalido em --status. Use unknown, none ou required.');
+      }
+      const command = new SddFrontendImpactCommand();
+      const result = await command.execute('.', featureId, {
+        status,
+        reason: options?.reason,
+        routes: parseCsvOption(options?.routes),
+        surfaces: parseCsvOption(options?.surfaces),
+        render: options?.render,
+      });
+      if (options?.json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(chalk.green(`Impacto frontend atualizado para ${result.feature_id}`));
+      console.log(`Status: ${result.frontend_impact_status}`);
+      console.log(`Declarado em: ${result.frontend_impact_declared_at || '-'}`);
+      console.log(`Superficies: ${result.frontend_surface_tokens.join(', ') || '-'}`);
+    });
+
+  sddCmd
     .command('finalize')
     .description('Consolida memoria e marca FEAT como DONE')
     .alias('consolidar')
     .option('--ref <featId>', 'Finaliza feature especifica (ex: FEAT-001)')
     .option('--all-ready', 'Finaliza todas as features prontas na fila')
     .option('--no-adr', 'Nao gera ADR automatico nesta execucao')
+    .option('--force-frontend', 'Bypass dos guardrails de frontend com auditoria explicita')
     .option('--json', 'Saida em JSON')
     .option('--no-render', 'Nao gera views apos atualizar estado')
     .action(async (options?: SddFinalizeCliOptions) => {
@@ -480,6 +525,7 @@ export function registerSddCommand(program: Command): void {
         ref: options?.ref,
         allReady: options?.allReady,
         noAdr: options?.noAdr,
+        forceFrontend: options?.forceFrontend,
         render: options?.render,
       });
       if (options?.json) {
@@ -496,6 +542,14 @@ export function registerSddCommand(program: Command): void {
       console.log(`Docs core atualizados: ${result.updated_core_docs?.join(', ') || '-'}`);
       console.log(`README sincronizado: ${result.updated_readme ? 'sim' : 'nao'}`);
       console.log(`Guia do agente sincronizado: ${result.updated_agent_guide ? 'sim' : 'nao'}`);
+      if (result.auto_frontend_gaps?.length) {
+        console.log(`FGAPs automáticos criados: ${result.auto_frontend_gaps.join(', ')}`);
+      }
+      if (result.frontend_guardrails?.length) {
+        const blocked = result.frontend_guardrails.filter((entry: { blocked: boolean }) => entry.blocked).length;
+        const forced = result.frontend_guardrails.filter((entry: { forced: boolean }) => entry.forced).length;
+        console.log(`Guardrails frontend: avaliados=${result.frontend_guardrails.length} bloqueadas=${blocked} forced=${forced}`);
+      }
       if (result.doc_warnings?.length) {
         console.log(`Avisos de docs: ${result.doc_warnings.join(' | ')}`);
       }
@@ -531,6 +585,13 @@ export function registerSddCommand(program: Command): void {
       if ((context as Record<string, unknown>).read_order) {
         const readOrder = context.read_order as string[];
         console.log(`Ordem de leitura: ${readOrder.join(' -> ')}`);
+      }
+      if ((context as Record<string, unknown>).frontend_impact_status) {
+        console.log(
+          `Impacto frontend: ${String(
+            (context as Record<string, unknown>).frontend_impact_status || 'unknown'
+          )}`
+        );
       }
     });
 
@@ -657,8 +718,24 @@ export function registerSddCommand(program: Command): void {
         console.log(`Em conflito de lock: ${report.summary.lock_conflicts}`);
         console.log(`Documentacao sincronizada: ${report.summary.documentation_sync ? 'sim' : 'nao'}`);
         console.log(`Views core desatualizadas: ${report.summary.core_views_stale ? 'sim' : 'nao'}`);
+        console.log(`Cobertura frontend sincronizada: ${report.summary.frontend_coverage_sync ? 'sim' : 'nao'}`);
         if (report.summary.missing_architecture_fields.length > 0) {
           console.log(`Campos canônicos pendentes: ${report.summary.missing_architecture_fields.join(', ')}`);
+        }
+        if (report.summary.features_missing_frontend_declaration.length > 0) {
+          console.log(
+            `Features sem declaracao frontend: ${report.summary.features_missing_frontend_declaration.join(', ')}`
+          );
+        }
+        if (report.summary.features_with_frontend_conflict.length > 0) {
+          console.log(
+            `Features com conflito frontend: ${report.summary.features_with_frontend_conflict.join(', ')}`
+          );
+        }
+        if (report.summary.features_missing_fgap_link.length > 0) {
+          console.log(
+            `Features required sem FGAP: ${report.summary.features_missing_fgap_link.join(', ')}`
+          );
         }
         if (report.summary.progress_by_radar.length > 0) {
           console.log('Progresso por RAD:');
