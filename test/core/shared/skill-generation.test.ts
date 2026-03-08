@@ -8,9 +8,9 @@ import {
 
 describe('skill-generation', () => {
   describe('getSkillTemplates', () => {
-    it('should return all 11 skill templates', () => {
+    it('should return all 12 skill templates', () => {
       const templates = getSkillTemplates();
-      expect(templates).toHaveLength(11);
+      expect(templates).toHaveLength(12);
     });
 
     it('should have unique directory names', () => {
@@ -35,6 +35,7 @@ describe('skill-generation', () => {
       expect(dirNames).toContain('openspec-verify-change');
       expect(dirNames).toContain('openspec-onboard');
       expect(dirNames).toContain('openspec-propose');
+      expect(dirNames).toContain('openspec-sdd');
     });
 
     it('should have valid template structure', () => {
@@ -57,8 +58,9 @@ describe('skill-generation', () => {
     });
 
     it('should filter by workflow IDs when provided', () => {
-      const filtered = getSkillTemplates(['propose', 'explore', 'apply', 'archive']);
-      expect(filtered).toHaveLength(4);
+      const filtered = getSkillTemplates(['sdd', 'propose', 'explore', 'apply', 'archive']);
+      expect(filtered).toHaveLength(5);
+      expect(filtered.map(t => t.workflowId)).toContain('sdd');
       const ids = filtered.map(t => t.workflowId);
       expect(ids).toContain('propose');
       expect(ids).toContain('explore');
@@ -88,9 +90,9 @@ describe('skill-generation', () => {
   });
 
   describe('getCommandTemplates', () => {
-    it('should return all 11 command templates', () => {
+    it('should return all 12 command templates', () => {
       const templates = getCommandTemplates();
-      expect(templates).toHaveLength(11);
+      expect(templates).toHaveLength(12);
     });
 
     it('should have unique IDs', () => {
@@ -115,11 +117,13 @@ describe('skill-generation', () => {
       expect(ids).toContain('verify');
       expect(ids).toContain('onboard');
       expect(ids).toContain('propose');
+      expect(ids).toContain('sdd');
     });
 
     it('should filter by workflow IDs when provided', () => {
-      const filtered = getCommandTemplates(['propose', 'explore', 'apply', 'archive']);
-      expect(filtered).toHaveLength(4);
+      const filtered = getCommandTemplates(['sdd', 'propose', 'explore', 'apply', 'archive']);
+      expect(filtered).toHaveLength(5);
+      expect(filtered.map(t => t.id)).toContain('sdd');
       const ids = filtered.map(t => t.id);
       expect(ids).toContain('propose');
       expect(ids).toContain('explore');
@@ -142,9 +146,9 @@ describe('skill-generation', () => {
   });
 
   describe('getCommandContents', () => {
-    it('should return all 11 command contents', () => {
+    it('should return all 12 command contents', () => {
       const contents = getCommandContents();
-      expect(contents).toHaveLength(11);
+      expect(contents).toHaveLength(12);
     });
 
     it('should have valid content structure', () => {
@@ -221,7 +225,7 @@ describe('skill-generation', () => {
       const content = generateSkillContent(template, '0.24.0');
 
       expect(content).toContain('license: MIT');
-      expect(content).toContain('compatibility: Requires openspec CLI.');
+      expect(content).toContain('compatibility: Requires opensdd CLI.');
       expect(content).toContain('author: openspec');
       expect(content).toContain('version: "1.0"');
       expect(content).toContain('generatedBy: "0.24.0"');
@@ -253,7 +257,8 @@ describe('skill-generation', () => {
 
       const content = generateSkillContent(template, '0.23.0');
 
-      expect(content).toMatch(/---\n\nBody content\n$/);
+      expect(content).toContain('**Idioma obrigatorio:** responda em portugues do Brasil (pt-BR), salvo solicitacao explicita em outro idioma.');
+      expect(content).toMatch(/Body content\n$/);
     });
 
     it('should apply transformInstructions callback when provided', () => {

@@ -72,7 +72,7 @@ describe('FishGenerator', () => {
 
       const script = generator.generate(commands);
 
-      expect(script).toContain("complete -c openspec");
+      expect(script).toContain("complete -c opensdd");
       expect(script).toContain("-a 'init'");
       expect(script).toContain("'Initialize OpenSpec'");
       expect(script).toContain("-a 'validate'");
@@ -308,7 +308,7 @@ describe('FishGenerator', () => {
       const script = generator.generate(commands);
 
       expect(script).toContain('function __fish_openspec_changes');
-      expect(script).toContain('openspec __complete changes 2>/dev/null');
+      expect(script).toContain('opensdd __complete changes 2>/dev/null');
       expect(script).toContain('while read -l id desc');
       expect(script).toContain('printf');
     });
@@ -327,7 +327,7 @@ describe('FishGenerator', () => {
       const script = generator.generate(commands);
 
       expect(script).toContain('function __fish_openspec_specs');
-      expect(script).toContain('openspec __complete specs 2>/dev/null');
+      expect(script).toContain('opensdd __complete specs 2>/dev/null');
     });
 
     it('should generate dynamic completion helper for items', () => {

@@ -39,11 +39,10 @@ describe('validate command enriched human output', () => {
       expect(code).not.toBe(0);
       expect(stderr).toContain('has issues');
       expect(stderr).toContain('Next steps:');
-      expect(stderr).toContain('openspec change show');
+      expect(stderr).toContain('opensdd change show');
     } finally {
       process.chdir(originalCwd);
     }
   });
 });
-
 

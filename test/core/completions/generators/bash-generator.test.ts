@@ -346,7 +346,7 @@ describe('BashGenerator', () => {
       const script = generator.generate(commands);
 
       expect(script).toContain('_openspec_complete_changes() {');
-      expect(script).toContain('openspec __complete changes 2>/dev/null');
+      expect(script).toContain('opensdd __complete changes 2>/dev/null');
       expect(script).toContain('cut -f1');
       expect(script).toContain('COMPREPLY=');
     });
@@ -365,7 +365,7 @@ describe('BashGenerator', () => {
       const script = generator.generate(commands);
 
       expect(script).toContain('_openspec_complete_specs() {');
-      expect(script).toContain('openspec __complete specs 2>/dev/null');
+      expect(script).toContain('opensdd __complete specs 2>/dev/null');
       expect(script).toContain('cut -f1');
     });
 
@@ -383,8 +383,8 @@ describe('BashGenerator', () => {
       const script = generator.generate(commands);
 
       expect(script).toContain('_openspec_complete_items() {');
-      expect(script).toContain('openspec __complete changes 2>/dev/null');
-      expect(script).toContain('openspec __complete specs 2>/dev/null');
+      expect(script).toContain('opensdd __complete changes 2>/dev/null');
+      expect(script).toContain('opensdd __complete specs 2>/dev/null');
     });
 
     it('should handle complex nested subcommands with flags', () => {
