@@ -1328,10 +1328,43 @@ export class SddOnboardCommand {
             if (nextResult.ready.length > 0) {
                 return nextResult.ready.map((item) => item.id);
             }
-            const firstInsight = snapshot.discoveryIndex.records.find((record) => record.type === 'INS');
+            const inProgress = snapshot.backlog.items.find((item) => item.status === 'IN_PROGRESS');
+            if (inProgress) {
+                return [
+                    `${CLI_NAME} sdd context ${inProgress.id}`,
+                    `${CLI_NAME} archive ${inProgress.change_name || '<change-name>'}`,
+                    `${CLI_NAME} sdd finalize --ref ${inProgress.id}`,
+                    `${CLI_NAME} sdd next`,
+                ];
+            }
             const openDebate = snapshot.discoveryIndex.records.find((record) => record.type === 'DEB' && record.status === 'OPEN');
-            const firstRadar = snapshot.discoveryIndex.records.find((record) => record.type === 'RAD');
-            if (!firstInsight) {
+            if (openDebate) {
+                return [
+                    `${CLI_NAME} sdd decide ${openDebate.id} --outcome radar`,
+                    `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
+                    `${CLI_NAME} sdd next`,
+                ];
+            }
+            const activeRadars = snapshot.discoveryIndex.records.filter((record) => record.type === 'RAD' &&
+                ['READY', 'PLANNED', 'SPLIT', 'IN_PROGRESS'].includes(record.status));
+            const firstUnplannedRadar = activeRadars.find((radar) => !snapshot.backlog.items.some((item) => item.origin_type === 'radar' && item.origin_ref === radar.id));
+            if (firstUnplannedRadar) {
+                return [
+                    `${CLI_NAME} sdd breakdown ${firstUnplannedRadar.id} --mode graph --incremental`,
+                    `${CLI_NAME} sdd next`,
+                    `${CLI_NAME} sdd start FEAT-###`,
+                ];
+            }
+            const firstNewInsight = snapshot.discoveryIndex.records.find((record) => record.type === 'INS' && record.status === 'NEW');
+            if (firstNewInsight) {
+                return [
+                    `${CLI_NAME} sdd debate ${firstNewInsight.id}`,
+                    `${CLI_NAME} sdd decide DEB-### --outcome radar`,
+                    `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
+                    `${CLI_NAME} sdd next`,
+                ];
+            }
+            if (snapshot.discoveryIndex.records.length === 0) {
                 return [
                     `${CLI_NAME} sdd insight "Descreva o primeiro objetivo do sistema"`,
                     `${CLI_NAME} sdd debate INS-###`,
@@ -1340,25 +1373,12 @@ export class SddOnboardCommand {
                     `${CLI_NAME} sdd next`,
                 ];
             }
-            if (!openDebate) {
-                return [
-                    `${CLI_NAME} sdd debate ${firstInsight.id}`,
-                    `${CLI_NAME} sdd decide DEB-### --outcome radar`,
-                    `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
-                    `${CLI_NAME} sdd next`,
-                ];
-            }
-            if (!firstRadar) {
-                return [
-                    `${CLI_NAME} sdd decide ${openDebate.id} --outcome radar`,
-                    `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
-                    `${CLI_NAME} sdd next`,
-                ];
-            }
             return [
-                `${CLI_NAME} sdd breakdown ${firstRadar.id} --mode graph --incremental`,
+                `${CLI_NAME} sdd insight "Novo ciclo de melhoria: descreva o objetivo"`,
+                `${CLI_NAME} sdd debate INS-###`,
+                `${CLI_NAME} sdd decide DEB-### --outcome radar`,
+                `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
                 `${CLI_NAME} sdd next`,
-                `${CLI_NAME} sdd start FEAT-###`,
             ];
         };
         if (normalized === 'system') {

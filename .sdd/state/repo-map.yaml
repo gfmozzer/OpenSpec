@@ -20,3 +20,7 @@ items:
     kind: manifest
     service_ref: ""
     notes: Manifesto principal
+  - path: openspec/changes/archive/feat-001-onboard-sugere-proximos-passos-quando-bac
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-001

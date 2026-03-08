@@ -447,6 +447,88 @@ describe('sdd operations', () => {
     expect(Array.isArray(feature.proximos_passos)).toBe(true);
   });
 
+  it('onboard system suggests a new discovery cycle when backlog is done and no active radar exists', async () => {
+    const discoveryPath = path.join(testDir, '.sdd', 'state', 'discovery-index.yaml');
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+
+    const discovery = await readYamlFile<Record<string, any>>(discoveryPath);
+    discovery.records = [
+      {
+        id: 'INS-001',
+        type: 'INS',
+        title: 'Insight antigo',
+        status: 'DEBATED',
+        origin_prompt: '...',
+        related_ids: ['DEB-001'],
+        created_at: '2026-03-08T00:00:00.000Z',
+        updated_at: '2026-03-08T00:00:00.000Z',
+      },
+      {
+        id: 'DEB-001',
+        type: 'DEB',
+        title: 'Debate antigo',
+        status: 'APPROVED',
+        origin_prompt: '...',
+        related_ids: ['INS-001', 'RAD-001'],
+        created_at: '2026-03-08T00:00:00.000Z',
+        updated_at: '2026-03-08T00:00:00.000Z',
+      },
+      {
+        id: 'RAD-001',
+        type: 'RAD',
+        title: 'Radar antigo',
+        status: 'DONE',
+        origin_prompt: '...',
+        related_ids: ['DEB-001'],
+        created_at: '2026-03-08T00:00:00.000Z',
+        updated_at: '2026-03-08T00:00:00.000Z',
+      },
+    ];
+    await writeYamlFile(discoveryPath, discovery);
+
+    const backlog = await readYamlFile<Record<string, any>>(backlogPath);
+    backlog.items = [
+      {
+        id: 'FEAT-001',
+        title: 'Feature antiga',
+        status: 'DONE',
+        origin_type: 'radar',
+        origin_ref: 'RAD-001',
+        scale: 'STANDARD',
+        summary: '',
+        blocked_by: [],
+        touches: [],
+        lock_domains: [],
+        parallel_group: '',
+        execution_kind: 'feature',
+        planning_mode: 'local_plan',
+        acceptance_refs: [],
+        produces: [],
+        consumes: [],
+        priority_score: 0,
+        dependency_count: 0,
+        agent_role: '',
+        recommended_skills: [],
+        change_name: '',
+        branch_name: '',
+        worktree_path: '',
+        frontend_gap_refs: [],
+        spec_refs: [],
+        last_sync_at: '2026-03-08T00:00:00.000Z',
+        archived_at: '',
+        done_at: '2026-03-08T00:00:00.000Z',
+        unblocked_at: '',
+      },
+    ];
+    await writeYamlFile(backlogPath, backlog);
+
+    const onboard = new SddOnboardCommand();
+    const system = await onboard.execute(testDir, 'system');
+    expect(Array.isArray(system.proximos_passos)).toBe(true);
+    const steps = system.proximos_passos as string[];
+    expect(steps[0]).toContain('sdd insight "Novo ciclo de melhoria');
+  });
+
   it('renders source inventory and ships built-in intake skills', async () => {
     const sourceIndexPath = path.join(testDir, '.sdd', 'state', 'source-index.yaml');
     const sourceIndex = await readYamlFile<Record<string, any>>(sourceIndexPath);

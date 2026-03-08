@@ -2,3 +2,4 @@ version: 1
 contracts:
   - distribution:npm
   - interface:cli
+  - capacidade-de-negocio::FEAT-001

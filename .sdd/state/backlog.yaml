@@ -2,7 +2,7 @@ version: 1
 items:
   - id: FEAT-001
     title: Onboard sugere próximos passos quando backlog vazio
-    status: IN_PROGRESS
+    status: DONE
     origin_type: radar
     origin_ref: RAD-001
     scale: STANDARD
@@ -31,7 +31,7 @@ items:
     worktree_path: ""
     frontend_gap_refs: []
     spec_refs: []
-    last_sync_at: 2026-03-08T11:25:27.314Z
+    last_sync_at: 2026-03-08T11:33:23.388Z
     archived_at: ""
-    done_at: ""
+    done_at: 2026-03-08T11:33:23.388Z
     unblocked_at: ""

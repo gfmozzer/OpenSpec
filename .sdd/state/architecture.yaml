@@ -7,3 +7,9 @@ nodes:
     repo_paths:
       - src
     depends_on: []
+  - id: FEAT-001
+    name: Onboard sugere próximos passos quando backlog vazio
+    kind: feature
+    description: ""
+    repo_paths: []
+    depends_on: []

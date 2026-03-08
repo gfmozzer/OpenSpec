@@ -3,9 +3,9 @@
 Documento gerado a partir de `.sdd/state/backlog.yaml`.
 
 ## Global
-- DONE: 0/1 (0%)
+- DONE: 1/1 (100%)
 
 ## Por RAD
 | RAD | DONE | Total | Percentual |
 | --- | --- | --- | --- |
-| RAD-001 | 0 | 1 | 0% |
+| RAD-001 | 1 | 1 | 100% |

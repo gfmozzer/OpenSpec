@@ -8,3 +8,11 @@ services:
       - src
     contracts: []
     external_dependencies: []
+  - id: backend
+    name: backend
+    responsibility: Consolidado por FEAT-001
+    owner_refs:
+      - FEAT-001
+    repo_paths: []
+    contracts: []
+    external_dependencies: []
