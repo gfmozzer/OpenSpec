@@ -2,4 +2,12 @@
 
 Documento gerado a partir de `.sdd/state/backlog.yaml`.
 
-- Sem features no backlog.
+## RAD-001
+- FEAT-001 [IN_PROGRESS] Onboard sugere próximos passos quando backlog vazio
+  - tipo: feature | modo: local_plan | grupo: radar-rad-001
+  - depende de: nenhuma
+  - lock domains: nenhum
+
+## Cross-RAD links
+- Nenhum link cross-RAD encontrado.
+

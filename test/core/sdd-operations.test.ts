@@ -438,6 +438,9 @@ describe('sdd operations', () => {
     const system = await onboard.execute(testDir, 'system');
     expect(system.target).toBe('system');
     expect(Array.isArray(system.read_order)).toBe(true);
+    expect(Array.isArray(system.proximos_passos)).toBe(true);
+    expect((system.proximos_passos as string[]).length).toBeGreaterThan(0);
+    expect((system.proximos_passos as string[])[0]).toContain('sdd');
 
     const feature = await onboard.execute(testDir, start.featureId);
     expect(feature.target).toBe(start.featureId);

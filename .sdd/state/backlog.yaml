@@ -1,2 +1,37 @@
 version: 1
-items: []
+items:
+  - id: FEAT-001
+    title: Onboard sugere próximos passos quando backlog vazio
+    status: IN_PROGRESS
+    origin_type: radar
+    origin_ref: RAD-001
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-rad-001
+    execution_kind: feature
+    planning_mode: local_plan
+    acceptance_refs:
+      - RAD-001
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: feat-001-onboard-sugere-proximos-passos-quando-bac
+    branch_name: ""
+    worktree_path: ""
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-03-08T11:25:27.314Z
+    archived_at: ""
+    done_at: ""
+    unblocked_at: ""

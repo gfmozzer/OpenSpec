@@ -1,7 +1,7 @@
 version: 1
 services:
-  - id: fission-ai-openspec
-    name: "@fission-ai/openspec"
+  - id: gfmozzer-opensdd
+    name: "@gfmozzer/opensdd"
     responsibility: Servico inicial detectado no bootstrap de contexto
     owner_refs: []
     repo_paths:

@@ -1,7 +1,7 @@
 version: 1
 nodes:
-  - id: arch-fission-ai-openspec
-    name: "@fission-ai/openspec"
+  - id: arch-gfmozzer-opensdd
+    name: "@gfmozzer/opensdd"
     kind: service
     description: Servico inicial detectado no bootstrap de contexto
     repo_paths:

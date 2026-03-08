@@ -165,6 +165,8 @@ Fluxo principal:
 opensdd sdd onboard system
 ```
 
+Se nao houver FEAT pronta, o onboarding agora retorna passos guiados (ex.: criar insight, abrir debate, decidir e quebrar RAD) em vez de deixar `proximos_passos` vazio.
+
 2. Ver o que pode comecar agora
 
 ```bash

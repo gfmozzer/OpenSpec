@@ -1324,9 +1324,47 @@ export class SddOnboardCommand {
         if (config.frontend.enabled) {
             baseReadOrder.push(coreDocRef(paths, 'frontend-map.md'), coreDocRef(paths, 'frontend-decisions.md'));
         }
+        const computeGuidedSystemSteps = (nextResult) => {
+            if (nextResult.ready.length > 0) {
+                return nextResult.ready.map((item) => item.id);
+            }
+            const firstInsight = snapshot.discoveryIndex.records.find((record) => record.type === 'INS');
+            const openDebate = snapshot.discoveryIndex.records.find((record) => record.type === 'DEB' && record.status === 'OPEN');
+            const firstRadar = snapshot.discoveryIndex.records.find((record) => record.type === 'RAD');
+            if (!firstInsight) {
+                return [
+                    `${CLI_NAME} sdd insight "Descreva o primeiro objetivo do sistema"`,
+                    `${CLI_NAME} sdd debate INS-###`,
+                    `${CLI_NAME} sdd decide DEB-### --outcome radar`,
+                    `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
+                    `${CLI_NAME} sdd next`,
+                ];
+            }
+            if (!openDebate) {
+                return [
+                    `${CLI_NAME} sdd debate ${firstInsight.id}`,
+                    `${CLI_NAME} sdd decide DEB-### --outcome radar`,
+                    `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
+                    `${CLI_NAME} sdd next`,
+                ];
+            }
+            if (!firstRadar) {
+                return [
+                    `${CLI_NAME} sdd decide ${openDebate.id} --outcome radar`,
+                    `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
+                    `${CLI_NAME} sdd next`,
+                ];
+            }
+            return [
+                `${CLI_NAME} sdd breakdown ${firstRadar.id} --mode graph --incremental`,
+                `${CLI_NAME} sdd next`,
+                `${CLI_NAME} sdd start FEAT-###`,
+            ];
+        };
         if (normalized === 'system') {
             const next = await new SddNextCommand().execute(projectRoot, { rank: 'impact', limit: 5 });
             const systemSkills = Array.from(new Set(next.ready.flatMap((item) => item.recommended_skills))).slice(0, 10);
+            const guidedSteps = computeGuidedSystemSteps(next);
             const payload = {
                 target: 'system',
                 summary: 'Onboarding global do sistema',
@@ -1340,7 +1378,7 @@ export class SddOnboardCommand {
                     skills: systemSkills,
                     bundles: bundlesForSkills(snapshot.skillCatalog, systemSkills),
                 },
-                proximos_passos: next.ready.map((item) => item.id),
+                proximos_passos: guidedSteps,
             };
             if (options?.compact) {
                 return {

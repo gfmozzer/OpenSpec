@@ -665,6 +665,8 @@ Observacao:
 | `opensdd sdd skills suggest ...` | Sugere skills |
 | `opensdd sdd skills sync --all` | Sincroniza skills curadas |
 
+Observacao: quando o backlog ainda nao tiver FEAT pronta, `onboard system` retorna `proximos_passos` guiados com comandos acionaveis para o usuario nao ficar travado.
+
 ## 8.1 Fluxo rapido para PRD e documentos consolidados
 
 1. Copie o material para `.sdd/deposito/`.
