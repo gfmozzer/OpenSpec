@@ -1,7 +1,22 @@
 version: 1
 items:
+  - feature_id: FEAT-0002
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0002"
+    created_at: 2026-04-11T08:12:20.724Z
+    completed_at: 2026-04-11T08:12:20.724Z
+  - feature_id: FEAT-0003
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0003"
+    created_at: 2026-04-11T08:12:46.885Z
+    completed_at: 2026-04-11T08:12:46.885Z
   - feature_id: FEAT-001
     status: DONE
     summary: "Finalizado manualmente: FEAT-001"
     created_at: 2026-03-08T11:33:23.388Z
     completed_at: 2026-03-08T11:33:23.388Z
+  - feature_id: FEAT-0004
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0004"
+    created_at: 2026-04-11T08:13:21.419Z
+    completed_at: 2026-04-11T08:13:21.419Z

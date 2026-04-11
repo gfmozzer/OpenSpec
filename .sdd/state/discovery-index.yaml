@@ -1,9 +1,10 @@
 version: 1
 counters:
-  INS: 1
-  DEB: 1
+  INS: 4
+  DEB: 4
   RAD: 1
-  FEAT: 1
+  EPIC: 3
+  FEAT: 4
   FGAP: 0
   TD: 0
 records:
@@ -39,3 +40,102 @@ records:
       - FEAT-001
     created_at: 2026-03-08T11:25:19.530Z
     updated_at: 2026-03-08T11:33:23.388Z
+  - id: INS-002
+    type: INS
+    title: RADAR deve virar EPIC
+    status: DEBATED
+    origin_prompt: Renomear a entidade de discovery aprovada de RADAR/RAD-### para
+      EPIC/EPIC-###, preservando o papel atual no fluxo e avaliando
+      compatibilidade, migração de estado, aliases de CLI, documentação e
+      impactos em backlog/origin_ref.
+    related_ids:
+      - DEB-002
+    created_at: 2026-04-09T20:27:06.277Z
+    updated_at: 2026-04-09T20:27:16.296Z
+  - id: DEB-002
+    type: DEB
+    title: Impacto de renomear RADAR para EPIC
+    status: APPROVED
+    origin_prompt: Debate originado de INS-002 por codex
+    related_ids:
+      - INS-002
+      - EPIC-0001
+    created_at: 2026-04-09T20:27:16.296Z
+    updated_at: 2026-04-11T08:10:04.930Z
+  - id: INS-003
+    type: INS
+    title: EPIC e IDs SDD com quatro dígitos
+    status: DEBATED
+    origin_prompt: Ampliar a proposta de renomeacao de RADAR para EPIC para incluir
+      padronizacao global dos identificadores SDD em quatro digitos, com formato
+      [INS,DEB,EPIC,FEAT]-####, avaliando impacto em CLI, serializacao,
+      compatibilidade, migracao de estado, templates, docs, aliases e projetos
+      ja inicializados.
+    related_ids:
+      - DEB-003
+    created_at: 2026-04-09T20:31:18.659Z
+    updated_at: 2026-04-09T20:31:34.181Z
+  - id: DEB-003
+    type: DEB
+    title: EPIC com IDs SDD em quatro dígitos
+    status: APPROVED
+    origin_prompt: Debate originado de INS-003 por codex
+    related_ids:
+      - INS-003
+      - EPIC-0002
+    created_at: 2026-04-09T20:31:34.181Z
+    updated_at: 2026-04-11T08:10:41.417Z
+  - id: INS-004
+    type: INS
+    title: Guardrails estruturais e qualidade rígida do SDD
+    status: DEBATED
+    origin_prompt: Definir guardrails estruturais do SDD para evitar IDs repetidos,
+      impor protocolo fixo de diretórios por estado do artefato, separar FEATs
+      em desenvolvimento em active e FEATs concluídas em archived ou nome
+      equivalente, adicionar lentes/validators estruturais por tipo de artefato
+      para garantir formato exato na geração por LLM, e impedir avanço de estado
+      sem 100% de validação das regras obrigatórias.
+    related_ids:
+      - DEB-004
+    created_at: 2026-04-09T20:43:11.299Z
+    updated_at: 2026-04-09T20:43:25.833Z
+  - id: DEB-004
+    type: DEB
+    title: Guardrails de estrutura, diretórios e qualidade do SDD
+    status: APPROVED
+    origin_prompt: Debate originado de INS-004 por codex
+    related_ids:
+      - INS-004
+      - EPIC-0003
+    created_at: 2026-04-09T20:43:25.833Z
+    updated_at: 2026-04-11T08:10:54.708Z
+  - id: EPIC-0001
+    type: EPIC
+    title: Impacto de renomear RADAR para EPIC
+    status: DONE
+    related_ids:
+      - DEB-002
+      - INS-002
+      - FEAT-0002
+    created_at: 2026-04-11T08:10:04.930Z
+    updated_at: 2026-04-11T08:12:20.724Z
+  - id: EPIC-0002
+    type: EPIC
+    title: EPIC com IDs SDD em quatro dígitos
+    status: DONE
+    related_ids:
+      - DEB-003
+      - INS-003
+      - FEAT-0003
+    created_at: 2026-04-11T08:10:41.417Z
+    updated_at: 2026-04-11T08:12:46.885Z
+  - id: EPIC-0003
+    type: EPIC
+    title: Guardrails de estrutura, diretórios e qualidade do SDD
+    status: DONE
+    related_ids:
+      - DEB-004
+      - INS-004
+      - FEAT-0004
+    created_at: 2026-04-11T08:10:54.708Z
+    updated_at: 2026-04-11T08:13:21.419Z

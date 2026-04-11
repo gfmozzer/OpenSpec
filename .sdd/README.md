@@ -32,6 +32,7 @@ Este diretorio guarda a memoria operacional do projeto.
 - `templates/`: modelos base de spec, plano, tasks e changelog.
 - `prompts/`: prompts recomendados para workflows comuns.
 - `active/`: workspaces ativos por FEAT.
+- `archived/`: workspaces finalizados e congelados.
 - `deposito/`: documentos brutos, PRDs, wireframes e referencias externas.
 
 ## Regra operacional

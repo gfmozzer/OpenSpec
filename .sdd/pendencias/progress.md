@@ -3,9 +3,12 @@
 Documento gerado a partir de `.sdd/state/backlog.yaml`.
 
 ## Global
-- DONE: 1/1 (100%)
+- DONE: 4/4 (100%)
 
-## Por RAD
-| RAD | DONE | Total | Percentual |
+## Por EPIC/RAD
+| EPIC/RAD | DONE | Total | Percentual |
 | --- | --- | --- | --- |
+| EPIC-0001 | 1 | 1 | 100% |
+| EPIC-0002 | 1 | 1 | 100% |
+| EPIC-0003 | 1 | 1 | 100% |
 | RAD-001 | 1 | 1 | 100% |

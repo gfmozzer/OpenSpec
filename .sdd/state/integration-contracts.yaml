@@ -3,3 +3,6 @@ contracts:
   - distribution:npm
   - interface:cli
   - capacidade-de-negocio::FEAT-001
+  - capacidade-de-negocio::FEAT-0002
+  - capacidade-de-negocio::FEAT-0003
+  - capacidade-de-negocio::FEAT-0004

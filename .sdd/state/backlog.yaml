@@ -14,6 +14,15 @@ items:
     parallel_group: radar-rad-001
     execution_kind: feature
     planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: proposta
+    gates:
+      proposta:
+        status: rascunho
+      planejamento:
+        status: rascunho
+      tarefas:
+        status: rascunho
     acceptance_refs:
       - RAD-001
     produces:
@@ -29,9 +38,188 @@ items:
     change_name: feat-001-onboard-sugere-proximos-passos-quando-bac
     branch_name: ""
     worktree_path: ""
+    frontend_impact_status: unknown
+    frontend_surface_tokens: []
     frontend_gap_refs: []
     spec_refs: []
     last_sync_at: 2026-03-08T11:33:23.388Z
     archived_at: ""
     done_at: 2026-03-08T11:33:23.388Z
+    unblocked_at: ""
+  - id: FEAT-0002
+    title: Impacto de renomear RADAR para EPIC
+    status: DONE
+    origin_type: radar
+    origin_ref: EPIC-0001
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0001
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0001
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: feat-0002-impacto-de-renomear-radar-para-epic
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: 569a078ac0d44f886e6c46c1d8c4f293febfc84f
+    frontend_impact_status: none
+    frontend_impact_reason: Regularizacao historica de mudanca backend e sem
+      artefato de interface novo.
+    frontend_impact_declared_at: 2026-04-11T08:12:03.028Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-11T08:12:20.724Z
+    archived_at: ""
+    done_at: 2026-04-11T08:12:20.724Z
+    unblocked_at: ""
+  - id: FEAT-0003
+    title: EPIC com IDs SDD em quatro dígitos
+    status: DONE
+    origin_type: radar
+    origin_ref: EPIC-0002
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0002
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0002
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: feat-0003-epic-com-ids-sdd-em-quatro-digitos
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: 569a078ac0d44f886e6c46c1d8c4f293febfc84f
+    frontend_impact_status: none
+    frontend_impact_reason: Regularizacao historica de mudanca backend e sem
+      artefato de interface novo.
+    frontend_impact_declared_at: 2026-04-11T08:12:41.273Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-11T08:12:46.885Z
+    archived_at: ""
+    done_at: 2026-04-11T08:12:46.885Z
+    unblocked_at: ""
+  - id: FEAT-0004
+    title: Guardrails de estrutura, diretórios e qualidade do SDD
+    status: DONE
+    origin_type: radar
+    origin_ref: EPIC-0003
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0003
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0003
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: feat-0004-guardrails-de-estrutura-diretorios-e-qua
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: 569a078ac0d44f886e6c46c1d8c4f293febfc84f
+    frontend_impact_status: none
+    frontend_impact_reason: Regularizacao historica de mudanca backend e sem
+      artefato de interface novo.
+    frontend_impact_declared_at: 2026-04-11T08:13:08.514Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-11T08:13:21.419Z
+    archived_at: ""
+    done_at: 2026-04-11T08:13:21.419Z
     unblocked_at: ""

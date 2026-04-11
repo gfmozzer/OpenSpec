@@ -13,3 +13,21 @@ nodes:
     description: ""
     repo_paths: []
     depends_on: []
+  - id: FEAT-0002
+    name: Impacto de renomear RADAR para EPIC
+    kind: feature
+    description: ""
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0003
+    name: EPIC com IDs SDD em quatro dígitos
+    kind: feature
+    description: ""
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0004
+    name: Guardrails de estrutura, diretórios e qualidade do SDD
+    kind: feature
+    description: ""
+    repo_paths: []
+    depends_on: []

@@ -24,3 +24,15 @@ items:
     kind: change-archive
     service_ref: backend
     notes: Consolidado no finalize FEAT-001
+  - path: openspec/changes/archive/feat-0002-impacto-de-renomear-radar-para-epic
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0002
+  - path: openspec/changes/archive/feat-0003-epic-com-ids-sdd-em-quatro-digitos
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0003
+  - path: openspec/changes/archive/feat-0004-guardrails-de-estrutura-diretorios-e-qua
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0004

@@ -726,16 +726,18 @@ skills:
       - architecture-backend
     priority: 9
   - id: mobile-design
-    source_repo: https://github.com/sickn33/antigravity-awesome-skills
-    source_path: skills/mobile-design/SKILL.md
-    title: Design mobile
-    description: Diretrizes mobile-first para interface.
+    source_repo: local://opensdd/sdd
+    source_path: .sdd/skills/curated/sdd-curated-mobile-design/SKILL.md
+    title: Mobile design e engenharia Flutter
+    description: Padrao canonico para apps Flutter com arquitetura, dados, UX, testes e performance.
     phases:
       - plan
       - execute
+      - verify
     domains:
       - frontend
       - mobile
+      - flutter
     tools:
       - codex
       - cursor
