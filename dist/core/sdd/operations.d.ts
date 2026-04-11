@@ -21,7 +21,7 @@ export declare class SddDebateCommand {
     }>;
 }
 export declare class SddDecideCommand {
-    execute(projectRoot: string, debateId: string, outcome: 'radar' | 'discard', options?: {
+    execute(projectRoot: string, debateId: string, outcome: 'radar' | 'epic' | 'discard', options?: {
         title?: string;
         rationale?: string;
         render?: boolean;
@@ -32,7 +32,7 @@ export declare class SddDecideCommand {
         radarId?: undefined;
         radarPath?: undefined;
     } | {
-        outcome: "radar";
+        outcome: "radar" | "epic";
         debateId: string;
         radarId: string;
         radarPath: string;
@@ -151,7 +151,7 @@ export declare class SddContextCommand {
         target_type: "FEAT";
         summary: string;
         origin: {
-            type: "radar" | "direct" | "fast_track" | "frontend_gap" | "tech_debt";
+            type: "radar" | "epic" | "direct" | "fast_track" | "frontend_gap" | "tech_debt";
             ref: string;
         };
         related_discovery: string[];
@@ -228,7 +228,7 @@ export declare class SddContextCommand {
     } | {
         context_pack_version: number;
         target_id: string;
-        target_type: "RAD";
+        target_type: "RAD" | "EPIC";
         summary: string;
         related_features: string[];
         related_debates: string[];

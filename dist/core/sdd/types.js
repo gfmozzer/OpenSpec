@@ -4,12 +4,16 @@ export const ID_PATTERNS = {
     insight: /^INS-\d{3,}$/,
     debate: /^DEB-\d{3,}$/,
     radar: /^RAD-\d{3,}$/,
+    epic: /^EPIC-\d{3,}$/,
+    /** Matches both RAD-### (legacy) and EPIC-#### (canonical) */
+    epicOrRadar: /^(?:RAD|EPIC)-\d{3,}$/,
     feature: /^FEAT-\d{3,}$/,
     frontendGap: /^FGAP-\d{3,}$/,
     techDebt: /^TD-\d{3,}$/,
 };
 export const OriginTypeSchema = z.enum([
     'radar',
+    'epic',
     'direct',
     'fast_track',
     'frontend_gap',
@@ -47,7 +51,7 @@ export const SourceDocumentStatusSchema = z.enum([
     'PLANNED',
     'ARCHIVED',
 ]);
-export const DiscoveryTypeSchema = z.enum(['INS', 'DEB', 'RAD']);
+export const DiscoveryTypeSchema = z.enum(['INS', 'DEB', 'RAD', 'EPIC']);
 export const DiscoveryStatusSchema = z.enum([
     'NEW',
     'DEBATED',
@@ -116,11 +120,14 @@ export const DiscoveryRecordSchema = z
     updated_at: NullableStringSchema,
 })
     .superRefine((record, ctx) => {
-    const expectedPrefix = `${record.type}-`;
-    if (!record.id.startsWith(expectedPrefix)) {
+    // EPIC and RAD are interchangeable during transition; both prefixes are valid for type EPIC or RAD
+    const validPrefixes = record.type === 'EPIC' || record.type === 'RAD'
+        ? ['RAD-', 'EPIC-']
+        : [`${record.type}-`];
+    if (!validPrefixes.some((prefix) => record.id.startsWith(prefix))) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Discovery record id "${record.id}" must start with "${expectedPrefix}"`,
+            message: `Discovery record id "${record.id}" must start with one of: ${validPrefixes.join(', ')}`,
         });
     }
 });
@@ -296,11 +303,12 @@ export const DiscoveryIndexStateSchema = z.object({
         INS: z.number().int().nonnegative().default(0),
         DEB: z.number().int().nonnegative().default(0),
         RAD: z.number().int().nonnegative().default(0),
+        EPIC: z.number().int().nonnegative().default(0),
         FEAT: z.number().int().nonnegative().default(0),
         FGAP: z.number().int().nonnegative().default(0),
         TD: z.number().int().nonnegative().default(0),
     })
-        .default({ INS: 0, DEB: 0, RAD: 0, FEAT: 0, FGAP: 0, TD: 0 }),
+        .default({ INS: 0, DEB: 0, RAD: 0, EPIC: 0, FEAT: 0, FGAP: 0, TD: 0 }),
     records: z.array(DiscoveryRecordSchema).default([]),
 });
 export const BacklogStateSchema = z.object({

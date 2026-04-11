@@ -11,12 +11,13 @@ interface CuratedBundleSeed {
 
 const DEFAULT_TOOLS = ['codex', 'cursor', 'claude', 'gemini'];
 const DEFAULT_SOURCE_REPO = 'https://github.com/sickn33/antigravity-awesome-skills';
-const LOCAL_SDD_SKILL_IDS = new Set([
-  'source-intake-sdd',
-  'business-extractor-sdd',
-  'frontend-extractor-sdd',
-  'planning-normalizer-sdd',
-]);
+const LOCAL_SDD_SKILL_PATHS: Record<string, string> = {
+  'source-intake-sdd': '.sdd/skills/curated/source-intake-sdd/SKILL.md',
+  'business-extractor-sdd': '.sdd/skills/curated/business-extractor-sdd/SKILL.md',
+  'frontend-extractor-sdd': '.sdd/skills/curated/frontend-extractor-sdd/SKILL.md',
+  'planning-normalizer-sdd': '.sdd/skills/curated/planning-normalizer-sdd/SKILL.md',
+  'mobile-design': '.sdd/skills/curated/sdd-curated-mobile-design/SKILL.md',
+};
 
 const CURATED_BUNDLES: CuratedBundleSeed[] = [
   {
@@ -154,11 +155,12 @@ function priorityForIndex(index: number): number {
 }
 
 function buildSkillEntry(bundle: CuratedBundleSeed, skillId: string, index: number): SkillCatalogEntry {
-  const isLocalSkill = LOCAL_SDD_SKILL_IDS.has(skillId);
+  const localSourcePath = LOCAL_SDD_SKILL_PATHS[skillId];
+  const isLocalSkill = Boolean(localSourcePath);
   return {
     id: skillId,
     source_repo: isLocalSkill ? 'local://opensdd/sdd' : DEFAULT_SOURCE_REPO,
-    source_path: isLocalSkill ? `.sdd/skills/curated/${skillId}/SKILL.md` : `skills/${skillId}/SKILL.md`,
+    source_path: isLocalSkill ? localSourcePath : `skills/${skillId}/SKILL.md`,
     title: titleFromSkillId(skillId),
     description: isLocalSkill
       ? `Skill nativa do SDD para ${bundle.title.toLowerCase()}.`

@@ -11,6 +11,7 @@ export interface SddRuntimeConfig {
         templates: string;
         deposito: string;
         active: string;
+        archived: string;
     };
     frontend: {
         enabled: boolean;
@@ -36,9 +37,11 @@ export interface SddPaths {
     promptsDir: string;
     depositoDir: string;
     activeDir: string;
+    archivedDir: string;
     discoveryInsightsDir: string;
     discoveryDebatesDir: string;
     discoveryRadarDir: string;
+    discoveryEpicDir: string;
     discoveryDiscardedDir: string;
     stateFiles: {
         discoveryIndex: string;
@@ -86,7 +89,7 @@ export declare function ensureBaseStructure(paths: SddPaths): Promise<void>;
 export declare function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig): Promise<void>;
 export declare function loadStateSnapshot(paths: SddPaths, config: SddRuntimeConfig): Promise<SddStateSnapshot>;
 export declare function loadSkillCatalogState(paths: SddPaths): Promise<SkillCatalogState>;
-export type SddCounterType = 'INS' | 'DEB' | 'RAD' | 'FEAT' | 'FGAP' | 'TD';
+export type SddCounterType = 'INS' | 'DEB' | 'RAD' | 'EPIC' | 'FEAT' | 'FGAP' | 'TD';
 export declare function nowIso(): string;
 export declare function saveDiscoveryIndexState(paths: SddPaths, state: DiscoveryIndexState): Promise<void>;
 export declare function saveBacklogState(paths: SddPaths, state: BacklogState): Promise<void>;
@@ -103,5 +106,15 @@ export declare function saveIntegrationContractsState(paths: SddPaths, state: In
 export declare function saveFrontendDecisionsState(paths: SddPaths, state: FrontendDecisionsState): Promise<void>;
 export declare function saveRepoMapState(paths: SddPaths, state: RepoMapState): Promise<void>;
 export declare function saveSourceIndexState(paths: SddPaths, state: SourceIndexState): Promise<void>;
+/**
+ * Allocates a new entity ID with atomic reservation and collision detection.
+ * Verifies that the generated ID does not already exist in the discovery index
+ * records before persisting. Retries with the next counter value if collision
+ * is detected (defensive against manual edits or stale counters).
+ *
+ * @param paths - SDD directory paths
+ * @param type - Counter type (INS, DEB, RAD, EPIC, FEAT, FGAP, TD)
+ * @returns The reserved ID string
+ */
 export declare function allocateEntityId(paths: SddPaths, type: SddCounterType): Promise<string>;
 //# sourceMappingURL=state.d.ts.map

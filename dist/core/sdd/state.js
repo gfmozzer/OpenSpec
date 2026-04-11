@@ -12,6 +12,7 @@ const LEGACY_LAYOUT_FOLDERS = {
     templates: 'templates',
     deposito: 'deposito',
     active: 'active',
+    archived: 'archived',
 };
 const PT_BR_LAYOUT_FOLDERS = {
     discovery: 'descoberta',
@@ -20,6 +21,7 @@ const PT_BR_LAYOUT_FOLDERS = {
     templates: 'modelos',
     deposito: 'deposito',
     active: 'execucao',
+    archived: 'arquivados',
 };
 function skillSubfoldersForLayout(layout) {
     if (layout === 'pt-BR') {
@@ -94,6 +96,9 @@ function mergeRuntimeConfig(raw) {
             active: typeof rawFolders.active === 'string' && rawFolders.active.trim().length > 0
                 ? rawFolders.active.trim()
                 : folderDefaults.active,
+            archived: typeof rawFolders.archived === 'string' && rawFolders.archived.trim().length > 0
+                ? rawFolders.archived.trim()
+                : folderDefaults.archived,
         },
         frontend: {
             enabled: typeof frontend.enabled === 'boolean'
@@ -188,9 +193,11 @@ export function resolveSddPaths(projectRoot, config) {
     const promptsDir = path.join(memoryRoot, 'prompts');
     const depositoDir = path.join(memoryRoot, config.folders.deposito);
     const activeDir = path.join(memoryRoot, config.folders.active);
+    const archivedDir = path.join(memoryRoot, config.folders.archived);
     const discoveryInsightsDir = path.join(discoveryDir, '1-insights');
     const discoveryDebatesDir = path.join(discoveryDir, '2-debates');
     const discoveryRadarDir = path.join(discoveryDir, '3-radar');
+    const discoveryEpicDir = path.join(discoveryDir, '3-epic');
     const discoveryDiscardedDir = path.join(discoveryDir, '4-discarded');
     return {
         projectRoot,
@@ -209,9 +216,11 @@ export function resolveSddPaths(projectRoot, config) {
         promptsDir,
         depositoDir,
         activeDir,
+        archivedDir,
         discoveryInsightsDir,
         discoveryDebatesDir,
         discoveryRadarDir,
+        discoveryEpicDir,
         discoveryDiscardedDir,
         stateFiles: {
             discoveryIndex: path.join(stateDir, 'discovery-index.yaml'),
@@ -248,6 +257,7 @@ export async function ensureBaseStructure(paths) {
         ensureDir(paths.discoveryInsightsDir),
         ensureDir(paths.discoveryDebatesDir),
         ensureDir(paths.discoveryRadarDir),
+        ensureDir(paths.discoveryEpicDir),
         ensureDir(paths.discoveryDiscardedDir),
         ensureDir(path.join(paths.coreDir, 'dados')),
         ensureDir(path.join(paths.coreDir, 'integracoes')),
@@ -337,7 +347,7 @@ export async function ensureBaseFiles(paths, config) {
     });
     await writeYamlIfMissing(paths.stateFiles.discoveryIndex, {
         version: 1,
-        counters: { INS: 0, DEB: 0, RAD: 0, FEAT: 0, FGAP: 0, TD: 0 },
+        counters: { INS: 0, DEB: 0, RAD: 0, EPIC: 0, FEAT: 0, FGAP: 0, TD: 0 },
         records: [],
     });
     await writeYamlIfMissing(paths.stateFiles.backlog, { version: 1, items: [] });
@@ -438,7 +448,7 @@ export async function loadSkillCatalogState(paths) {
     return SkillCatalogStateSchema.parse(await readYaml(paths.stateFiles.skillCatalog));
 }
 function formatCounterId(prefix, value) {
-    return `${prefix}-${String(value).padStart(3, '0')}`;
+    return `${prefix}-${String(value).padStart(4, '0')}`;
 }
 export function nowIso() {
     return new Date().toISOString();
@@ -488,12 +498,51 @@ export async function saveRepoMapState(paths, state) {
 export async function saveSourceIndexState(paths, state) {
     await writeYaml(paths.stateFiles.sourceIndex, state);
 }
+/**
+ * Allocates a new entity ID with atomic reservation and collision detection.
+ * Verifies that the generated ID does not already exist in the discovery index
+ * records before persisting. Retries with the next counter value if collision
+ * is detected (defensive against manual edits or stale counters).
+ *
+ * @param paths - SDD directory paths
+ * @param type - Counter type (INS, DEB, RAD, EPIC, FEAT, FGAP, TD)
+ * @returns The reserved ID string
+ */
 export async function allocateEntityId(paths, type) {
     const discoveryIndex = DiscoveryIndexStateSchema.parse(await readYaml(paths.stateFiles.discoveryIndex));
-    const current = discoveryIndex.counters[type] ?? 0;
-    const next = current + 1;
-    discoveryIndex.counters[type] = next;
+    // Build a set of all existing IDs for fast collision check
+    const existingIds = new Set();
+    for (const record of discoveryIndex.records) {
+        existingIds.add(record.id);
+    }
+    // Also check backlog items for FEAT collision
+    if (type === 'FEAT') {
+        try {
+            const backlog = BacklogStateSchema.parse(await readYaml(paths.stateFiles.backlog));
+            for (const item of backlog.items) {
+                existingIds.add(item.id);
+            }
+        }
+        catch {
+            // If backlog can't be read, proceed with discovery-only check
+        }
+    }
+    let candidate = (discoveryIndex.counters[type] ?? 0) + 1;
+    let candidateId = formatCounterId(type, candidate);
+    // Retry loop: advance counter until no collision
+    const maxRetries = 100;
+    let retries = 0;
+    while (existingIds.has(candidateId) && retries < maxRetries) {
+        candidate++;
+        candidateId = formatCounterId(type, candidate);
+        retries++;
+    }
+    if (retries >= maxRetries) {
+        throw new Error(`Falha ao alocar ID para ${type}: ${maxRetries} colisoes consecutivas detectadas. Verifique o estado do discovery-index.`);
+    }
+    // Persist the updated counter
+    discoveryIndex.counters[type] = candidate;
     await saveDiscoveryIndexState(paths, discoveryIndex);
-    return formatCounterId(type, next);
+    return candidateId;
 }
 //# sourceMappingURL=state.js.map

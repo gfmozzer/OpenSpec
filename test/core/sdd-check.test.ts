@@ -78,6 +78,6 @@ describe('SddCheckCommand', () => {
 
     const report = await new SddCheckCommand().execute(testDir, { render: true });
     expect(report.summary.frontend_coverage_sync).toBe(false);
-    expect(report.summary.features_missing_frontend_declaration).toContain('FEAT-001');
+    expect(report.summary.features_missing_frontend_declaration).toContain('FEAT-0001');
   });
 });

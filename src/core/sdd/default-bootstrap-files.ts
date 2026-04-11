@@ -6,6 +6,7 @@ export interface SddReadmeFolders {
   skills?: string;
   templates?: string;
   active?: string;
+  archived?: string;
   deposito?: string;
   prompts?: string;
 }
@@ -19,6 +20,7 @@ export function buildSddInternalReadme(
   const skills = folders.skills || 'skills';
   const templates = folders.templates || 'templates';
   const active = folders.active || 'active';
+  const archived = folders.archived || 'archived';
   const deposito = folders.deposito || 'deposito';
   const prompts = folders.prompts || 'prompts';
   return `# SDD README
@@ -55,6 +57,7 @@ Este diretorio guarda a memoria operacional do projeto.
 - \`${templates}/\`: modelos base de spec, plano, tasks e changelog.
 - \`${prompts}/\`: prompts recomendados para workflows comuns.
 - \`${active}/\`: workspaces ativos por FEAT.
+- \`${archived}/\`: workspaces finalizados e congelados.
 - \`${deposito}/\`: documentos brutos, PRDs, wireframes e referencias externas.
 
 ## Regra operacional
@@ -99,6 +102,7 @@ opensdd sdd onboard system
 - \`.sdd/core/\`: visao humana gerada automaticamente.
 - \`.sdd/planejamento/\` ou \`.sdd/pendencias/\`: backlog, progresso, fila de finalize.
 - \`.sdd/execucao/\` ou \`.sdd/active/\`: pacote de trabalho por FEAT.
+- \`.sdd/arquivados/\` ou \`.sdd/archived/\`: workspaces finalizados.
 
 ## 3) Tenho PRD/wireframe/historias. E agora?
 
@@ -118,7 +122,7 @@ opensdd sdd next
 
 Resultado esperado:
 - fontes indexadas em \`.sdd/state/source-index.yaml\`
-- RAD criado/reaproveitado
+- EPIC (ou RAD legado) criado/reaproveitado
 - FEATs geradas no backlog
 - primeira FEAT pronta iniciada automaticamente (quando possivel)
 
@@ -151,10 +155,10 @@ Regra de ouro:
 ## 6) Historia de uso curta (Marina)
 
 Marina colocou PRD + wireframe em \`.sdd/deposito/\`.
-Ela rodou \`opensdd sdd ingest-deposito\` e recebeu RAD + FEATs prontas para iniciar.
-Comecou pela FEAT prioritaria com \`opensdd sdd start FEAT-001\`.
-Antes de codar, rodou \`opensdd sdd context FEAT-001\`.
-Ao terminar, arquivou a change e executou \`opensdd sdd finalize --ref FEAT-001\`.
+Ela rodou \`opensdd sdd ingest-deposito\` e recebeu um EPIC (RAD) + FEATs prontas para iniciar.
+Comecou pela FEAT prioritaria com \`opensdd sdd start FEAT-0001\`.
+Antes de codar, rodou \`opensdd sdd context FEAT-0001\`.
+Ao terminar, arquivou a change e executou \`opensdd sdd finalize --ref FEAT-0001\`.
 Resultado: backlog atualizado, docs sincronizadas e proxima FEAT liberada sem adivinhacao.
 
 ## 7) Comandos essenciais (resumo)
@@ -180,7 +184,7 @@ Objetivo:
 1. Varrer \`.sdd/deposito/\`.
 2. Atualizar \`.sdd/state/source-index.yaml\`.
 3. Consolidar contexto canônico (\`architecture\`, \`service-catalog\`, \`tech-stack\`, \`integration-contracts\`, frontend quando habilitado).
-4. Gerar trilha executável (RAD + FEATs) com rastreabilidade de origem.
+4. Gerar trilha executável (EPIC/RAD + FEATs) com rastreabilidade de origem.
 
 Saida obrigatoria:
 - resumo das fontes lidas;
@@ -195,7 +199,7 @@ Transformar material consolidado em plano executável com dependências claras.
 
 Instrucoes:
 1. Parta de \`.sdd/state/source-index.yaml\` e \`.sdd/core/*.md\`.
-2. Proponha RADs e FEATs com nomes claros em portugues.
+2. Proponha EPICs (ou RADs) e FEATs com nomes claros em portugues.
 3. Defina dependencias (\`blocked_by\`) e conflitos (\`lock_domains\`).
 4. Liste onde pode paralelizar.
 5. Termine com checklist de consolidacao documental por feature.
@@ -270,7 +274,7 @@ Descreva o resultado esperado para usuario ou sistema.
 
 ## Referencias
 - FEAT:
-- RAD:
+- EPIC (antigo RAD):
 - FGAP:
 - ADR:
 `;

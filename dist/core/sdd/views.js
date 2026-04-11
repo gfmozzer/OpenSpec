@@ -117,9 +117,9 @@ function renderBacklogGraph(state) {
             crossRadLinks.push(`- ${item.id} (${itemOrigin}) depende de ${dep.id} (${depOrigin})`);
         }
     }
-    lines.push('## Cross-RAD links');
+    lines.push('## Cross-EPIC links');
     if (crossRadLinks.length === 0) {
-        lines.push('- Nenhum link cross-RAD encontrado.');
+        lines.push('- Nenhum link cross-EPIC encontrado.');
     }
     else {
         lines.push(...crossRadLinks.sort());
@@ -186,7 +186,7 @@ function renderProgress(state) {
     const globalPercent = roundPercent(done, total);
     const byRadar = new Map();
     for (const item of active) {
-        if (item.origin_type !== 'radar' || !item.origin_ref)
+        if ((item.origin_type !== 'radar' && item.origin_type !== 'epic') || !item.origin_ref)
             continue;
         const current = byRadar.get(item.origin_ref) || { done: 0, total: 0 };
         current.total += 1;
@@ -207,8 +207,8 @@ Documento gerado a partir de \`.sdd/state/backlog.yaml\`.
 ## Global
 - DONE: ${done}/${total} (${globalPercent}%)
 
-## Por RAD
-| RAD | DONE | Total | Percentual |
+## Por EPIC/RAD
+| EPIC/RAD | DONE | Total | Percentual |
 | --- | --- | --- | --- |
 ${rows.length > 0 ? rows.join('\n') : '| - | 0 | 0 | 0% |'}
 `;

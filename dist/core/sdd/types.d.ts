@@ -3,12 +3,16 @@ export declare const ID_PATTERNS: {
     readonly insight: RegExp;
     readonly debate: RegExp;
     readonly radar: RegExp;
+    readonly epic: RegExp;
+    /** Matches both RAD-### (legacy) and EPIC-#### (canonical) */
+    readonly epicOrRadar: RegExp;
     readonly feature: RegExp;
     readonly frontendGap: RegExp;
     readonly techDebt: RegExp;
 };
 export declare const OriginTypeSchema: z.ZodEnum<{
     radar: "radar";
+    epic: "epic";
     direct: "direct";
     fast_track: "fast_track";
     frontend_gap: "frontend_gap";
@@ -72,6 +76,7 @@ export declare const DiscoveryTypeSchema: z.ZodEnum<{
     INS: "INS";
     DEB: "DEB";
     RAD: "RAD";
+    EPIC: "EPIC";
 }>;
 export declare const DiscoveryStatusSchema: z.ZodEnum<{
     PLANNED: "PLANNED";
@@ -137,6 +142,7 @@ export declare const DiscoveryRecordSchema: z.ZodObject<{
         INS: "INS";
         DEB: "DEB";
         RAD: "RAD";
+        EPIC: "EPIC";
     }>;
     title: z.ZodString;
     status: z.ZodEnum<{
@@ -174,6 +180,7 @@ export declare const BacklogItemSchema: z.ZodObject<{
     }>;
     origin_type: z.ZodEnum<{
         radar: "radar";
+        epic: "epic";
         direct: "direct";
         fast_track: "fast_track";
         frontend_gap: "frontend_gap";
@@ -454,6 +461,7 @@ export declare const DiscoveryIndexStateSchema: z.ZodObject<{
         INS: z.ZodDefault<z.ZodNumber>;
         DEB: z.ZodDefault<z.ZodNumber>;
         RAD: z.ZodDefault<z.ZodNumber>;
+        EPIC: z.ZodDefault<z.ZodNumber>;
         FEAT: z.ZodDefault<z.ZodNumber>;
         FGAP: z.ZodDefault<z.ZodNumber>;
         TD: z.ZodDefault<z.ZodNumber>;
@@ -464,6 +472,7 @@ export declare const DiscoveryIndexStateSchema: z.ZodObject<{
             INS: "INS";
             DEB: "DEB";
             RAD: "RAD";
+            EPIC: "EPIC";
         }>;
         title: z.ZodString;
         status: z.ZodEnum<{
@@ -504,6 +513,7 @@ export declare const BacklogStateSchema: z.ZodObject<{
         }>;
         origin_type: z.ZodEnum<{
             radar: "radar";
+            epic: "epic";
             direct: "direct";
             fast_track: "fast_track";
             frontend_gap: "frontend_gap";

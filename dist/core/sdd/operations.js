@@ -5,6 +5,8 @@ import { promisify } from 'node:util';
 import { createChange } from '../../utils/change-utils.js';
 import { AI_TOOLS } from '../config.js';
 import { CLI_NAME } from '../branding.js';
+import { LENSES, validateDocumentAgainstLens } from './lenses.js';
+import { TransitionEngine } from './transition-engine.js';
 import { suggestSkills } from './skills.js';
 import { allocateEntityId, loadProjectSddConfig, loadStateSnapshot, loadSkillCatalogState, nowIso, resolveSddPaths, saveArchitectureState, saveBacklogState, saveDiscoveryIndexState, saveFinalizeQueueState, saveFrontendDecisionsState, saveFrontendGapsState, saveFrontendMapState, saveIntegrationContractsState, saveRepoMapState, saveServiceCatalogState, saveSourceIndexState, saveTechStackState, saveUnblockEventsState, } from './state.js';
 import { BUILT_IN_SDD_SKILLS } from './default-skills.js';
@@ -98,7 +100,7 @@ Decidir ____ em vez de ____ para resolver ____.
 - Condicoes de reversao:
 
 ## 8) Saida
-- APPROVED -> RAD-###
+- APPROVED -> EPIC-####
 - DISCARDED -> Registro em discarded
 
 ## Metadados
@@ -119,7 +121,7 @@ ${text}
 `;
 }
 function markdownRadarTemplate(debate, radarId, rationale) {
-    return `# Radar ${radarId}
+    return `# Epic ${radarId}
 
 ## Origem
 - Debate: ${debate.id}
@@ -133,7 +135,7 @@ READY
 `;
 }
 function markdownRadarFromDepositoTemplate(radarId, title, sourceCount, rationale) {
-    return `# Radar ${radarId}
+    return `# Epic ${radarId}
 
 ## Origem
 - Origem: ingestao de deposito
@@ -189,7 +191,7 @@ function defaultConsolidationTargets(type) {
         case 'prd':
         case 'briefing':
         case 'historia':
-            return ['contexto', 'radar', 'backlog'];
+            return ['contexto', 'epic', 'backlog'];
         case 'wireframe':
         case 'html_mock':
         case 'referencia_visual':
@@ -199,7 +201,7 @@ function defaultConsolidationTargets(type) {
         case 'legado':
             return ['repo-map', 'arquitetura', 'backlog'];
         case 'entrevista':
-            return ['insights', 'radar'];
+            return ['insights', 'epic'];
         default:
             return ['contexto'];
     }
@@ -301,19 +303,7 @@ async function findDebateFile(paths, debateId) {
     return path.join(debateDir, found.name);
 }
 function validateDebateDocument(content) {
-    const requiredSections = [
-        '## 1) Pergunta de decisao (obrigatorio)',
-        '## 2) Criterios de decisao (obrigatorio)',
-        '## 3) Opcoes consideradas (minimo 2)',
-        '### Opcao A',
-        '### Opcao B',
-        '## 6) Matriz de pontuacao (0-5)',
-        '## 7) Decisao do mediador (obrigatorio)',
-        '- Escolha (A/B/C):',
-        '- Justificativa:',
-        '## 8) Saida',
-    ];
-    const missing = requiredSections.filter((section) => !content.includes(section));
+    const missing = validateDocumentAgainstLens(content, LENSES.debate);
     if (content.includes('Decidir ____ em vez de ____ para resolver ____.')) {
         missing.push('Preencher a pergunta de decisao com contexto real');
     }
@@ -340,7 +330,7 @@ function syncCounterFromId(discoveryIndex, id) {
     const [prefix, numeric] = id.split('-');
     if (!prefix || !numeric)
         return;
-    if (!['INS', 'DEB', 'RAD', 'FEAT', 'FGAP', 'TD'].includes(prefix))
+    if (!['INS', 'DEB', 'RAD', 'EPIC', 'FEAT', 'FGAP', 'TD'].includes(prefix))
         return;
     const value = Number(numeric);
     if (!Number.isFinite(value))
@@ -606,7 +596,9 @@ export class SddDecideCommand {
             throw new Error(`Debate ${debateId} incompleto. Preencha secoes obrigatorias antes de decidir:\n- ${missingSections.join('\n- ')}`);
         }
         const now = nowIso();
-        debate.status = outcome === 'radar' ? 'APPROVED' : 'DISCARDED';
+        const targetStatus = outcome === 'radar' || outcome === 'epic' ? 'APPROVED' : 'DISCARDED';
+        TransitionEngine.assertValid(debate.type, debate.status, targetStatus);
+        debate.status = targetStatus;
         debate.updated_at = now;
         if (outcome === 'discard') {
             const discardPath = path.join(paths.discoveryDiscardedDir, `${debate.id}-${slugify(debate.title)}.md`);
@@ -615,12 +607,12 @@ export class SddDecideCommand {
             await persistAndRender(paths, config, options?.render);
             return { outcome, debateId, discardPath };
         }
-        const radarId = await allocateEntityId(paths, 'RAD');
+        const radarId = await allocateEntityId(paths, 'EPIC');
         syncCounterFromId(snapshot.discoveryIndex, radarId);
         const radarTitle = (options?.title || debate.title).slice(0, 120);
         const radarRecord = {
             id: radarId,
-            type: 'RAD',
+            type: 'EPIC',
             title: radarTitle,
             status: 'READY',
             origin_prompt: options?.rationale,
@@ -631,15 +623,15 @@ export class SddDecideCommand {
         debate.related_ids = Array.from(new Set([...debate.related_ids, radarId]));
         snapshot.discoveryIndex.records.push(radarRecord);
         await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
-        const radarPath = path.join(paths.discoveryRadarDir, `${radarId}-${slugify(radarTitle)}.md`);
+        const radarPath = path.join(paths.discoveryEpicDir, `${radarId}-${slugify(radarTitle)}.md`);
         await fs.writeFile(radarPath, markdownRadarTemplate(debate, radarId, options?.rationale), 'utf-8');
         await persistAndRender(paths, config, options?.render);
         return { outcome, debateId, radarId, radarPath };
     }
 }
 function resolveRadar(record) {
-    if (!record || record.type !== 'RAD') {
-        throw new Error('Referencia RAD invalida.');
+    if (!record || (record.type !== 'RAD' && record.type !== 'EPIC')) {
+        throw new Error('Referencia EPIC/RAD invalida.');
     }
 }
 function resolveFeat(items, id) {
@@ -1182,14 +1174,14 @@ export class SddIngestDepositoCommand {
         }
         let radarId = options?.radarId || '';
         let radar = radarId
-            ? snapshot.discoveryIndex.records.find((record) => record.id === radarId && record.type === 'RAD')
+            ? snapshot.discoveryIndex.records.find((record) => record.id === radarId && (record.type === 'RAD' || record.type === 'EPIC'))
             : undefined;
         if (!radar) {
-            radarId = await allocateEntityId(paths, 'RAD');
+            radarId = await allocateEntityId(paths, 'EPIC');
             syncCounterFromId(snapshot.discoveryIndex, radarId);
             radar = {
                 id: radarId,
-                type: 'RAD',
+                type: 'EPIC',
                 title: (options?.title || 'Planejamento inicial a partir do deposito').slice(0, 120),
                 status: 'READY',
                 origin_prompt: `Gerado por ingestao de deposito em ${now}`,
@@ -1198,7 +1190,7 @@ export class SddIngestDepositoCommand {
                 updated_at: now,
             };
             snapshot.discoveryIndex.records.push(radar);
-            const radarPath = path.join(paths.discoveryRadarDir, `${radarId}-${slugify(radar.title)}.md`);
+            const radarPath = path.join(paths.discoveryEpicDir, `${radarId}-${slugify(radar.title)}.md`);
             await fs.writeFile(radarPath, markdownRadarFromDepositoTemplate(radarId, radar.title, scannedFiles.length, options?.title), 'utf-8');
         }
         await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
@@ -1276,8 +1268,8 @@ export class SddIngestDepositoCommand {
     }
 }
 function inferOriginType(input) {
-    if (/^RAD-\d{3,}$/.test(input))
-        return 'radar';
+    if (/^(?:RAD|EPIC)-\d{3,}$/.test(input))
+        return 'epic';
     if (/^FGAP-\d{3,}$/.test(input))
         return 'frontend_gap';
     if (/^TD-\d{3,}$/.test(input))
@@ -1300,8 +1292,8 @@ export class SddStartCommand {
         if (/^FEAT-\d{3,}$/.test(value)) {
             feature = resolveFeat(snapshot.backlog.items, value);
         }
-        else if (/^RAD-\d{3,}$/.test(value)) {
-            const existing = snapshot.backlog.items.find((item) => item.origin_type === 'radar' && item.origin_ref === value);
+        else if (/^(?:RAD|EPIC)-\d{3,}$/.test(value)) {
+            const existing = snapshot.backlog.items.find((item) => (item.origin_type === 'radar' || item.origin_type === 'epic') && item.origin_ref === value);
             if (existing) {
                 feature = existing;
             }
@@ -1312,8 +1304,8 @@ export class SddStartCommand {
                 resolveRadar(radar);
                 const title = radar.title || `Feature de ${value}`;
                 const shape = classifyFeatureShape(title);
-                feature = buildBacklogItem(id, title, 'radar', value, options?.scale || 'STANDARD', recommended, {
-                    parallelGroup: `radar-${value.toLowerCase()}`,
+                feature = buildBacklogItem(id, title, 'epic', value, options?.scale || 'STANDARD', recommended, {
+                    parallelGroup: `epic-${value.toLowerCase()}`,
                     executionKind: shape.executionKind,
                     planningMode: shape.planningMode,
                     acceptanceRefs: [value],
@@ -1390,9 +1382,9 @@ export class SddStartCommand {
             ].filter(Boolean);
             feature.summary = [feature.summary || '', ...notes].filter(Boolean).join('\n');
         }
-        if (feature.origin_type === 'radar' && feature.origin_ref) {
+        if ((feature.origin_type === 'radar' || feature.origin_type === 'epic') && feature.origin_ref) {
             const radar = findDiscoveryRecord(snapshot.discoveryIndex.records, feature.origin_ref);
-            if (radar && radar.type === 'RAD') {
+            if (radar && (radar.type === 'RAD' || radar.type === 'EPIC')) {
                 radar.status = 'IN_PROGRESS';
                 radar.updated_at = now;
             }
@@ -1606,11 +1598,11 @@ export class SddFinalizeCommand {
                     completed_at: now,
                 });
             }
-            if (feature.origin_type === 'radar' && feature.origin_ref) {
-                const siblings = snapshot.backlog.items.filter((item) => item.origin_type === 'radar' && item.origin_ref === feature.origin_ref);
+            if ((feature.origin_type === 'radar' || feature.origin_type === 'epic') && feature.origin_ref) {
+                const siblings = snapshot.backlog.items.filter((item) => (item.origin_type === 'radar' || item.origin_type === 'epic') && item.origin_ref === feature.origin_ref);
                 if (siblings.every((item) => item.status === 'DONE')) {
                     const radar = snapshot.discoveryIndex.records.find((r) => r.id === feature.origin_ref);
-                    if (radar && radar.type === 'RAD') {
+                    if (radar && (radar.type === 'RAD' || radar.type === 'EPIC')) {
                         radar.status = RADAR_TO_DISCOVERY_STATUS.DONE;
                         radar.updated_at = now;
                     }
@@ -1709,6 +1701,18 @@ export class SddFinalizeCommand {
                 const adrPath = path.join(paths.coreDir, 'adrs', `ADR-${feature.id}.md`);
                 await fs.writeFile(adrPath, buildAdrMarkdown(feature, unlockedByFeature, now), 'utf-8');
             }
+            const activePath = path.join(paths.activeDir, feature.id);
+            const archivedPath = path.join(paths.archivedDir, feature.id);
+            try {
+                const stat = await fs.stat(activePath);
+                if (stat.isDirectory()) {
+                    await fs.mkdir(paths.archivedDir, { recursive: true });
+                    await fs.rename(activePath, archivedPath);
+                }
+            }
+            catch (err) {
+                // Ignore if active directory doesn't exist
+            }
             finalized.push(featureId);
         }
         updateDependencyMetadata(snapshot.backlog.items);
@@ -1752,6 +1756,8 @@ export class SddFinalizeCommand {
 function detectContextType(ref) {
     if (/^FEAT-\d{3,}$/.test(ref))
         return 'FEAT';
+    if (/^EPIC-\d{3,}$/.test(ref))
+        return 'EPIC';
     if (/^RAD-\d{3,}$/.test(ref))
         return 'RAD';
     if (/^FGAP-\d{3,}$/.test(ref))
@@ -1785,7 +1791,7 @@ export class SddContextCommand {
         const snapshot = await loadStateSnapshot(paths, config);
         const type = detectContextType(ref);
         if (!type) {
-            throw new Error(`Referencia ${ref} invalida. Use FEAT/RAD/FGAP/TD.`);
+            throw new Error(`Referencia ${ref} invalida. Use FEAT/EPIC/RAD/FGAP/TD.`);
         }
         const coreDocs = [
             coreDocRef(paths, 'index.md'),
@@ -1901,11 +1907,11 @@ export class SddContextCommand {
                 core_docs: coreDocs,
             };
         }
-        if (type === 'RAD') {
-            const radar = snapshot.discoveryIndex.records.find((record) => record.id === ref && record.type === 'RAD');
+        if (type === 'RAD' || type === 'EPIC') {
+            const radar = snapshot.discoveryIndex.records.find((record) => record.id === ref && (record.type === 'RAD' || record.type === 'EPIC'));
             if (!radar)
-                throw new Error(`Radar ${ref} nao encontrado.`);
-            const relatedFeatures = snapshot.backlog.items.filter((item) => item.origin_type === 'radar' && item.origin_ref === ref);
+                throw new Error(`Epic/Radar ${ref} nao encontrado.`);
+            const relatedFeatures = snapshot.backlog.items.filter((item) => (item.origin_type === 'radar' || item.origin_type === 'epic') && item.origin_ref === ref);
             return {
                 context_pack_version: 1,
                 target_id: ref,
@@ -1997,44 +2003,44 @@ export class SddOnboardCommand {
             const openDebate = snapshot.discoveryIndex.records.find((record) => record.type === 'DEB' && record.status === 'OPEN');
             if (openDebate) {
                 return [
-                    `${CLI_NAME} sdd decide ${openDebate.id} --outcome radar`,
-                    `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
+                    `${CLI_NAME} sdd decide ${openDebate.id} --outcome epic`,
+                    `${CLI_NAME} sdd breakdown EPIC-#### --mode graph --incremental`,
                     `${CLI_NAME} sdd next`,
                 ];
             }
-            const activeRadars = snapshot.discoveryIndex.records.filter((record) => record.type === 'RAD' &&
+            const activeRadars = snapshot.discoveryIndex.records.filter((record) => (record.type === 'RAD' || record.type === 'EPIC') &&
                 ['READY', 'PLANNED', 'SPLIT', 'IN_PROGRESS'].includes(record.status));
-            const firstUnplannedRadar = activeRadars.find((radar) => !snapshot.backlog.items.some((item) => item.origin_type === 'radar' && item.origin_ref === radar.id));
+            const firstUnplannedRadar = activeRadars.find((radar) => !snapshot.backlog.items.some((item) => (item.origin_type === 'radar' || item.origin_type === 'epic') && item.origin_ref === radar.id));
             if (firstUnplannedRadar) {
                 return [
                     `${CLI_NAME} sdd breakdown ${firstUnplannedRadar.id} --mode graph --incremental`,
                     `${CLI_NAME} sdd next`,
-                    `${CLI_NAME} sdd start FEAT-###`,
+                    `${CLI_NAME} sdd start FEAT-####`,
                 ];
             }
             const firstNewInsight = snapshot.discoveryIndex.records.find((record) => record.type === 'INS' && record.status === 'NEW');
             if (firstNewInsight) {
                 return [
                     `${CLI_NAME} sdd debate ${firstNewInsight.id}`,
-                    `${CLI_NAME} sdd decide DEB-### --outcome radar`,
-                    `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
+                    `${CLI_NAME} sdd decide DEB-#### --outcome epic`,
+                    `${CLI_NAME} sdd breakdown EPIC-#### --mode graph --incremental`,
                     `${CLI_NAME} sdd next`,
                 ];
             }
             if (snapshot.discoveryIndex.records.length === 0) {
                 return [
                     `${CLI_NAME} sdd insight "Descreva o primeiro objetivo do sistema"`,
-                    `${CLI_NAME} sdd debate INS-###`,
-                    `${CLI_NAME} sdd decide DEB-### --outcome radar`,
-                    `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
+                    `${CLI_NAME} sdd debate INS-####`,
+                    `${CLI_NAME} sdd decide DEB-#### --outcome epic`,
+                    `${CLI_NAME} sdd breakdown EPIC-#### --mode graph --incremental`,
                     `${CLI_NAME} sdd next`,
                 ];
             }
             return [
                 `${CLI_NAME} sdd insight "Novo ciclo de melhoria: descreva o objetivo"`,
-                `${CLI_NAME} sdd debate INS-###`,
-                `${CLI_NAME} sdd decide DEB-### --outcome radar`,
-                `${CLI_NAME} sdd breakdown RAD-### --mode graph --incremental`,
+                `${CLI_NAME} sdd debate INS-####`,
+                `${CLI_NAME} sdd decide DEB-#### --outcome epic`,
+                `${CLI_NAME} sdd breakdown EPIC-#### --mode graph --incremental`,
                 `${CLI_NAME} sdd next`,
             ];
         };

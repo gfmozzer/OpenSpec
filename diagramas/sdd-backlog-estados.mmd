@@ -1,0 +1,16 @@
+stateDiagram-v2
+    [*] --> READY
+
+    READY --> IN_PROGRESS: sdd start
+    READY --> BLOCKED: dependencia pendente
+    READY --> VERIFY_FAILED: falha de validacao
+    READY --> SYNC_REQUIRED: docs ou contexto desatualizados
+
+    BLOCKED --> READY: desbloqueio por outra FEAT
+    IN_PROGRESS --> SYNC_REQUIRED: contexto mudou
+    IN_PROGRESS --> VERIFY_FAILED: guardrail falhou
+    IN_PROGRESS --> DONE: archive + finalize
+
+    SYNC_REQUIRED --> IN_PROGRESS: sincronizacao concluida
+    VERIFY_FAILED --> IN_PROGRESS: correcao aplicada
+    DONE --> ARCHIVED: consolidacao historica

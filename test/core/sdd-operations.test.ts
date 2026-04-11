@@ -65,27 +65,27 @@ describe('sdd operations', () => {
 
   it('executes discovery flow and creates backlog from radar', async () => {
     const insight = await new SddInsightCommand().execute(testDir, 'Nova estrategia de autorizacao');
-    expect(insight.id).toBe('INS-001');
+    expect(insight.id).toBe('INS-0001');
 
     const debate = await new SddDebateCommand().execute(testDir, insight.id, { agent: 'agente-a' });
-    expect(debate.id).toBe('DEB-001');
+    expect(debate.id).toBe('DEB-0001');
     await completeDebateTemplate(testDir, debate.id);
 
     const decision = await new SddDecideCommand().execute(testDir, debate.id, 'radar', {
       rationale: 'Aprovado para planejamento',
     });
-    expect(decision.radarId).toBe('RAD-001');
+    expect(decision.radarId).toBe('EPIC-0001');
 
-    const breakdown = await new SddBreakdownCommand().execute(testDir, 'RAD-001', {
+    const breakdown = await new SddBreakdownCommand().execute(testDir, 'EPIC-0001', {
       titles: ['API de autorizacao', 'Politicas por workspace'],
       mode: 'graph',
     });
-    expect(breakdown.created).toEqual(['FEAT-001', 'FEAT-002']);
+    expect(breakdown.created).toEqual(['FEAT-0001', 'FEAT-0002']);
 
     const backlogRaw = parseYaml(
       await fs.readFile(path.join(testDir, '.sdd', 'state', 'backlog.yaml'), 'utf-8')
     ) as Record<string, any>;
-    const feat2 = backlogRaw.items.find((item: any) => item.id === 'FEAT-002');
+    const feat2 = backlogRaw.items.find((item: any) => item.id === 'FEAT-0002');
     expect(feat2).toBeDefined();
     expect(feat2.execution_kind).toBeDefined();
     expect(feat2.planning_mode).toBeDefined();
@@ -108,23 +108,23 @@ describe('sdd operations', () => {
     await completeDebateTemplate(testDir, debate.id);
     await new SddDecideCommand().execute(testDir, debate.id, 'radar');
 
-    await new SddBreakdownCommand().execute(testDir, 'RAD-001', {
+    await new SddBreakdownCommand().execute(testDir, 'EPIC-0001', {
       mode: 'graph',
       titles: ['Modelo de permissao', 'API de autorizacao', 'Tela de permissoes'],
     });
 
     const next = await new SddNextCommand().execute(testDir);
-    expect(next.ready.some((item) => item.id === 'FEAT-001')).toBe(true);
-    expect(next.blocked.some((item) => item.id === 'FEAT-003')).toBe(true);
+    expect(next.ready.some((item) => item.id === 'FEAT-0001')).toBe(true);
+    expect(next.blocked.some((item) => item.id === 'FEAT-0003')).toBe(true);
   });
 
   it('starts feature execution, creates change and finalizes', async () => {
     const start = await new SddStartCommand().execute(testDir, 'Implementar endpoint de auditoria');
-    expect(start.featureId).toBe('FEAT-001');
+    expect(start.featureId).toBe('FEAT-0001');
     expect(start.changeName.length).toBeGreaterThan(0);
-    expect(start.active_path).toContain('.sdd/active/FEAT-001');
+    expect(start.active_path).toContain('.sdd/active/FEAT-0001');
     expect(start.generated_docs).toHaveLength(4);
-    const tasksPath = path.join(testDir, '.sdd', 'active', 'FEAT-001', '3-tasks.md');
+    const tasksPath = path.join(testDir, '.sdd', 'active', 'FEAT-0001', '3-tasks.md');
     const tasksContent = await fs.readFile(tasksPath, 'utf-8');
     expect(tasksContent).toContain('AGENTS.md');
     expect(tasksContent).toContain('README.md');
@@ -133,15 +133,15 @@ describe('sdd operations', () => {
     await fs.mkdir(archiveDir, { recursive: true });
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
     feat1.frontend_impact_status = 'none';
     feat1.frontend_impact_reason = 'Mudanca interna sem impacto de interface para o usuario final.';
     await writeYamlFile(backlogPath, backlog);
 
     const finalize = await new SddFinalizeCommand().execute(testDir, { allReady: true });
-    expect(finalize.finalized).toContain('FEAT-001');
+    expect(finalize.finalized).toContain('FEAT-0001');
 
-    const context = await new SddContextCommand().execute(testDir, 'FEAT-001');
+    const context = await new SddContextCommand().execute(testDir, 'FEAT-0001');
     expect(context.target_type).toBe('FEAT');
   });
 
@@ -162,20 +162,20 @@ describe('sdd operations', () => {
     expect(blockedFinalize.finalized).toHaveLength(0);
     expect(blockedFinalize.doc_warnings.some((warning) => warning.includes('modo rigoroso'))).toBe(true);
 
-    await approveCmd.execute(testDir, 'FEAT-001', 'proposta', { by: 'marina' });
-    await approveCmd.execute(testDir, 'FEAT-001', 'planejamento', { by: 'marina' });
-    await approveCmd.execute(testDir, 'FEAT-001', 'tarefas', { by: 'marina' });
+    await approveCmd.execute(testDir, 'FEAT-0001', 'proposta', { by: 'marina' });
+    await approveCmd.execute(testDir, 'FEAT-0001', 'planejamento', { by: 'marina' });
+    await approveCmd.execute(testDir, 'FEAT-0001', 'tarefas', { by: 'marina' });
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
     feat1.frontend_impact_status = 'none';
     feat1.frontend_impact_reason = 'Entrega sem impacto visual no frontend, somente regra interna.';
     await writeYamlFile(backlogPath, backlog);
 
     const finalized = await finalizeCmd.execute(testDir, { allReady: true });
-    expect(finalized.finalized).toContain('FEAT-001');
+    expect(finalized.finalized).toContain('FEAT-0001');
 
-    const context = await new SddContextCommand().execute(testDir, 'FEAT-001');
+    const context = await new SddContextCommand().execute(testDir, 'FEAT-0001');
     expect((context as any).flow_mode).toBe('rigoroso');
     expect((context as any).gates.proposta.status).toBe('aprovada');
   });
@@ -244,12 +244,12 @@ describe('sdd operations', () => {
     const gapCommand = new SddFrontendGapCommand();
     const created = await gapCommand.add(testDir, 'Tela de auditoria faltando', {
       routes: ['/auditoria'],
-      originFeature: 'FEAT-777',
+      originFeature: 'FEAT-0777',
     });
-    expect(created.id).toBe('FGAP-001');
+    expect(created.id).toBe('FGAP-0001');
 
-    const resolved = await gapCommand.resolve(testDir, 'FGAP-001', {
-      feature: 'FEAT-002',
+    const resolved = await gapCommand.resolve(testDir, 'FGAP-0001', {
+      feature: 'FEAT-0002',
       files: ['src/pages/auditoria.tsx'],
       routes: ['/auditoria'],
     });
@@ -263,19 +263,19 @@ describe('sdd operations', () => {
 
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
-    const feat2 = backlog.items.find((item: any) => item.id === 'FEAT-002');
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
+    const feat2 = backlog.items.find((item: any) => item.id === 'FEAT-0002');
     feat1.status = 'READY';
     feat2.status = 'BLOCKED';
-    feat2.blocked_by = ['FEAT-001'];
+    feat2.blocked_by = ['FEAT-0001'];
     await writeYamlFile(backlogPath, backlog);
 
-    await expect(startCmd.execute(testDir, 'FEAT-002')).rejects.toThrow(/blocked_by pendente/i);
+    await expect(startCmd.execute(testDir, 'FEAT-0002')).rejects.toThrow(/blocked_by pendente/i);
 
-    const forced = await startCmd.execute(testDir, 'FEAT-002', { force: true });
+    const forced = await startCmd.execute(testDir, 'FEAT-0002', { force: true });
     expect(forced.start_guardrails.forced).toBe(true);
     expect(forced.start_guardrails.blocked_check.ok).toBe(false);
-    expect(forced.start_guardrails.blocked_check.unresolved).toContain('FEAT-001');
+    expect(forced.start_guardrails.blocked_check.unresolved).toContain('FEAT-0001');
   });
 
   it('enforces start guardrails for lock conflicts and supports --force', async () => {
@@ -287,7 +287,7 @@ describe('sdd operations', () => {
     const forced = await startCmd.execute(testDir, 'Auth policy fallback', { force: true });
     expect(forced.start_guardrails.forced).toBe(true);
     expect(forced.start_guardrails.lock_check.ok).toBe(false);
-    expect(forced.start_guardrails.lock_check.conflicts).toContain('FEAT-001');
+    expect(forced.start_guardrails.lock_check.conflicts).toContain('FEAT-0001');
   });
 
   it('returns context payload with graph constraints and readiness', async () => {
@@ -297,9 +297,9 @@ describe('sdd operations', () => {
 
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const feat2 = backlog.items.find((item: any) => item.id === 'FEAT-002');
+    const feat2 = backlog.items.find((item: any) => item.id === 'FEAT-0002');
     feat2.status = 'BLOCKED';
-    feat2.blocked_by = ['FEAT-001'];
+    feat2.blocked_by = ['FEAT-0001'];
     feat2.parallel_group = 'radar-rad-001';
     feat2.planning_mode = 'direct_tasks';
     feat2.execution_kind = 'feature';
@@ -308,9 +308,9 @@ describe('sdd operations', () => {
     feat2.consumes = ['modelo-de-dominio'];
     await writeYamlFile(backlogPath, backlog);
 
-    const context = await new SddContextCommand().execute(testDir, 'FEAT-002');
+    const context = await new SddContextCommand().execute(testDir, 'FEAT-0002');
     expect((context as any).context_pack_version).toBe(1);
-    expect((context as any).blocked_by).toEqual(['FEAT-001']);
+    expect((context as any).blocked_by).toEqual(['FEAT-0001']);
     expect((context as any).lock_domains).toEqual(['auth-rules']);
     expect((context as any).parallel_group).toBe('radar-rad-001');
     expect((context as any).planning_mode).toBe('direct_tasks');
@@ -327,7 +327,7 @@ describe('sdd operations', () => {
     const archiveDir = path.join(testDir, 'openspec', 'changes', 'archive', start.changeName);
     await fs.mkdir(archiveDir, { recursive: true });
 
-    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-001' });
+    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-0001' });
     expect(result.finalized).toHaveLength(0);
     expect(result.frontend_guardrails[0].blocked).toBe(true);
     expect(result.frontend_guardrails[0].declared_status).toBe('unknown');
@@ -341,12 +341,12 @@ describe('sdd operations', () => {
 
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
     feat1.frontend_impact_status = 'none';
     feat1.frontend_impact_reason = 'curta';
     await writeYamlFile(backlogPath, backlog);
 
-    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-001' });
+    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-0001' });
     expect(result.finalized).toHaveLength(0);
     expect(result.frontend_guardrails[0].reasons.some((reason: string) => reason.includes('justificativa'))).toBe(true);
   });
@@ -354,7 +354,7 @@ describe('sdd operations', () => {
   it('blocks finalize when frontend_impact=none conflicts with metadata evidence', async () => {
     await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
     const start = await new SddStartCommand().execute(testDir, 'Criar API de pedidos');
-    await new SddFrontendImpactCommand().execute(testDir, 'FEAT-001', {
+    await new SddFrontendImpactCommand().execute(testDir, 'FEAT-0001', {
       status: 'none',
       reason: 'Mudanca puramente interna sem alteracao de interface para usuarios.',
     });
@@ -363,11 +363,11 @@ describe('sdd operations', () => {
 
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
     feat1.produces = ['route:/pedidos'];
     await writeYamlFile(backlogPath, backlog);
 
-    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-001' });
+    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-0001' });
     expect(result.finalized).toHaveLength(0);
     expect(result.frontend_guardrails[0].reasons.some((reason: string) => reason.includes('contradiz'))).toBe(true);
   });
@@ -375,7 +375,7 @@ describe('sdd operations', () => {
   it('allows finalize with --force-frontend and records audit warning', async () => {
     await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
     const start = await new SddStartCommand().execute(testDir, 'Criar API de pedidos');
-    await new SddFrontendImpactCommand().execute(testDir, 'FEAT-001', {
+    await new SddFrontendImpactCommand().execute(testDir, 'FEAT-0001', {
       status: 'none',
       reason: 'Mudanca puramente interna sem alteracao de interface para usuarios.',
     });
@@ -384,15 +384,15 @@ describe('sdd operations', () => {
 
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
     feat1.produces = ['route:/pedidos'];
     await writeYamlFile(backlogPath, backlog);
 
     const result = await new SddFinalizeCommand().execute(testDir, {
-      ref: 'FEAT-001',
+      ref: 'FEAT-0001',
       forceFrontend: true,
     });
-    expect(result.finalized).toContain('FEAT-001');
+    expect(result.finalized).toContain('FEAT-0001');
     expect(result.frontend_guardrails[0].forced).toBe(true);
   });
 
@@ -400,7 +400,7 @@ describe('sdd operations', () => {
     await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
     await new SddStartCommand().execute(testDir, 'Criar API de pedidos');
     const command = new SddFrontendImpactCommand();
-    const updated = await command.execute(testDir, 'FEAT-001', {
+    const updated = await command.execute(testDir, 'FEAT-0001', {
       status: 'required',
       reason: 'Entrega adiciona novas superficies de atendimento no frontend.',
       routes: ['/pedidos'],
@@ -410,7 +410,7 @@ describe('sdd operations', () => {
     expect(updated.frontend_surface_tokens).toContain('route:/pedidos');
     expect(updated.frontend_surface_tokens).toContain('menu:pedidos');
 
-    const context = await new SddContextCommand().execute(testDir, 'FEAT-001');
+    const context = await new SddContextCommand().execute(testDir, 'FEAT-0001');
     expect((context as any).frontend_impact_status).toBe('required');
     expect((context as any).frontend_surface_tokens).toContain('route:/pedidos');
   });
@@ -419,11 +419,11 @@ describe('sdd operations', () => {
     await new SddStartCommand().execute(testDir, 'API de estoque');
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const seed = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    const seed = backlog.items.find((item: any) => item.id === 'FEAT-0001');
     seed.status = 'READY';
     seed.produces = ['api-ou-contrato'];
     seed.origin_type = 'radar';
-    seed.origin_ref = 'RAD-000';
+    seed.origin_ref = 'EPIC-0000';
     await writeYamlFile(backlogPath, backlog);
 
     const insight = await new SddInsightCommand().execute(testDir, 'Novo frontend de estoque');
@@ -431,19 +431,19 @@ describe('sdd operations', () => {
     await completeDebateTemplate(testDir, debate.id);
     await new SddDecideCommand().execute(testDir, debate.id, 'radar');
 
-    const result = await new SddBreakdownCommand().execute(testDir, 'RAD-001', {
+    const result = await new SddBreakdownCommand().execute(testDir, 'EPIC-0001', {
       mode: 'graph',
       incremental: true,
       dedupe: 'normal',
       titles: ['Tela de estoque'],
     });
 
-    expect(result.created).toContain('FEAT-002');
-    expect(result.rewired_dependencies.some((entry) => entry.feature_id === 'FEAT-002')).toBe(true);
+    expect(result.created).toContain('FEAT-0002');
+    expect(result.rewired_dependencies.some((entry) => entry.feature_id === 'FEAT-0002')).toBe(true);
 
     const updatedBacklog = await readYamlFile<Record<string, any>>(backlogPath);
-    const created = updatedBacklog.items.find((item: any) => item.id === 'FEAT-002');
-    expect(created.blocked_by).toContain('FEAT-001');
+    const created = updatedBacklog.items.find((item: any) => item.id === 'FEAT-0002');
+    expect(created.blocked_by).toContain('FEAT-0001');
   });
 
   it('deduplicates breakdown by strict/normal and allows duplicates with off', async () => {
@@ -452,35 +452,35 @@ describe('sdd operations', () => {
     await completeDebateTemplate(testDir, debate.id);
     await new SddDecideCommand().execute(testDir, debate.id, 'radar');
 
-    const first = await new SddBreakdownCommand().execute(testDir, 'RAD-001', {
+    const first = await new SddBreakdownCommand().execute(testDir, 'EPIC-0001', {
       mode: 'flat',
       dedupe: 'strict',
       titles: ['API de usuarios'],
     });
-    expect(first.created).toEqual(['FEAT-001']);
+    expect(first.created).toEqual(['FEAT-0001']);
 
-    const strictDuplicate = await new SddBreakdownCommand().execute(testDir, 'RAD-001', {
+    const strictDuplicate = await new SddBreakdownCommand().execute(testDir, 'EPIC-0001', {
       mode: 'flat',
       dedupe: 'strict',
       titles: ['API de usuarios'],
     });
     expect(strictDuplicate.created).toHaveLength(0);
-    expect(strictDuplicate.linked_existing).toContain('FEAT-001');
+    expect(strictDuplicate.linked_existing).toContain('FEAT-0001');
 
-    const normalDuplicate = await new SddBreakdownCommand().execute(testDir, 'RAD-001', {
+    const normalDuplicate = await new SddBreakdownCommand().execute(testDir, 'EPIC-0001', {
       mode: 'flat',
       dedupe: 'normal',
       titles: ['Api usuarios'],
     });
     expect(normalDuplicate.created).toHaveLength(0);
-    expect(normalDuplicate.linked_existing).toContain('FEAT-001');
+    expect(normalDuplicate.linked_existing).toContain('FEAT-0001');
 
-    const offDuplicate = await new SddBreakdownCommand().execute(testDir, 'RAD-001', {
+    const offDuplicate = await new SddBreakdownCommand().execute(testDir, 'EPIC-0001', {
       mode: 'flat',
       dedupe: 'off',
       titles: ['API de usuarios'],
     });
-    expect(offDuplicate.created).toContain('FEAT-002');
+    expect(offDuplicate.created).toContain('FEAT-0002');
   });
 
   it('ranks next features by impact using dependent graph', async () => {
@@ -493,23 +493,23 @@ describe('sdd operations', () => {
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
 
-    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
-    const feat2 = backlog.items.find((item: any) => item.id === 'FEAT-002');
-    const feat3 = backlog.items.find((item: any) => item.id === 'FEAT-003');
-    const feat4 = backlog.items.find((item: any) => item.id === 'FEAT-004');
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
+    const feat2 = backlog.items.find((item: any) => item.id === 'FEAT-0002');
+    const feat3 = backlog.items.find((item: any) => item.id === 'FEAT-0003');
+    const feat4 = backlog.items.find((item: any) => item.id === 'FEAT-0004');
     feat1.status = 'READY';
     feat1.lock_domains = ['schema-change'];
     feat2.status = 'BLOCKED';
-    feat2.blocked_by = ['FEAT-001'];
+    feat2.blocked_by = ['FEAT-0001'];
     feat3.status = 'BLOCKED';
-    feat3.blocked_by = ['FEAT-002'];
+    feat3.blocked_by = ['FEAT-0002'];
     feat4.status = 'READY';
     feat4.lock_domains = [];
     await writeYamlFile(backlogPath, backlog);
 
     const next = await new SddNextCommand().execute(testDir, { rank: 'impact', limit: 2 });
     expect(next.rank).toBe('impact');
-    expect(next.ready[0].id).toBe('FEAT-001');
+    expect(next.ready[0].id).toBe('FEAT-0001');
     expect(next.ready[0].score).toBeGreaterThan(next.ready[1].score);
   });
 
@@ -518,21 +518,21 @@ describe('sdd operations', () => {
     const debate = await new SddDebateCommand().execute(testDir, insight.id);
     await completeDebateTemplate(testDir, debate.id);
     await new SddDecideCommand().execute(testDir, debate.id, 'radar');
-    await new SddBreakdownCommand().execute(testDir, 'RAD-001', {
+    await new SddBreakdownCommand().execute(testDir, 'EPIC-0001', {
       mode: 'flat',
       titles: ['API principal', 'Tela principal'],
     });
 
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
     feat1.status = 'DONE';
     await writeYamlFile(backlogPath, backlog);
 
     const report = await new SddCheckCommand().execute(testDir, { render: true });
     expect(report.summary.progress_global.percent).toBe(50);
     expect(report.summary.progress_by_radar[0]).toMatchObject({
-      radar_id: 'RAD-001',
+      radar_id: 'EPIC-0001',
       done: 1,
       total: 2,
       percent: 50,
@@ -540,7 +540,7 @@ describe('sdd operations', () => {
 
     const progressPath = path.join(testDir, '.sdd', 'pendencias', 'progress.md');
     const progressContent = await fs.readFile(progressPath, 'utf-8');
-    expect(progressContent).toContain('RAD-001');
+    expect(progressContent).toContain('EPIC-0001');
   });
 
   it('finalize generates ADR, unlock events and unblocked view', async () => {
@@ -550,42 +550,42 @@ describe('sdd operations', () => {
 
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
-    const feat2 = backlog.items.find((item: any) => item.id === 'FEAT-002');
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
+    const feat2 = backlog.items.find((item: any) => item.id === 'FEAT-0002');
     feat1.status = 'IN_PROGRESS';
     feat2.status = 'BLOCKED';
-    feat2.blocked_by = ['FEAT-001'];
+    feat2.blocked_by = ['FEAT-0001'];
     feat1.frontend_impact_status = 'none';
     feat1.frontend_impact_reason = 'Entrega interna no backend sem alteracao de interface visual.';
     await writeYamlFile(backlogPath, backlog);
 
-    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-001' });
-    expect(result.finalized).toContain('FEAT-001');
-    expect(result.unblocked).toContain('FEAT-002');
+    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-0001' });
+    expect(result.finalized).toContain('FEAT-0001');
+    expect(result.unblocked).toContain('FEAT-0002');
     expect(Array.isArray(result.updated_core_docs)).toBe(true);
 
-    const adrPath = path.join(testDir, '.sdd', 'core', 'adrs', 'ADR-FEAT-001.md');
+    const adrPath = path.join(testDir, '.sdd', 'core', 'adrs', 'ADR-FEAT-0001.md');
     const adrContent = await fs.readFile(adrPath, 'utf-8');
     expect(adrContent).toContain('Dependentes liberados');
 
     const unblockPath = path.join(testDir, '.sdd', 'state', 'unblock-events.yaml');
     const unblock = await readYamlFile<Record<string, any>>(unblockPath);
-    expect(unblock.events.some((event: any) => event.feature_id === 'FEAT-002')).toBe(true);
+    expect(unblock.events.some((event: any) => event.feature_id === 'FEAT-0002')).toBe(true);
 
     const updatedBacklog = await readYamlFile<Record<string, any>>(backlogPath);
-    const unlocked = updatedBacklog.items.find((item: any) => item.id === 'FEAT-002');
+    const unlocked = updatedBacklog.items.find((item: any) => item.id === 'FEAT-0002');
     expect(unlocked.status).toBe('READY');
 
     const unblockedViewPath = path.join(testDir, '.sdd', 'pendencias', 'unblocked.md');
     const unblockedView = await fs.readFile(unblockedViewPath, 'utf-8');
-    expect(unblockedView).toContain('FEAT-002');
+    expect(unblockedView).toContain('FEAT-0002');
   });
 
   it('finalize auto-creates frontend gap for backend change without explicit coverage', async () => {
     await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
     const startCmd = new SddStartCommand();
     await startCmd.execute(testDir, 'Criar API de clientes');
-    await new SddFrontendImpactCommand().execute(testDir, 'FEAT-001', {
+    await new SddFrontendImpactCommand().execute(testDir, 'FEAT-0001', {
       status: 'required',
       reason: 'Nova rota de clientes exige cobertura de frontend posterior.',
       routes: ['/clientes'],
@@ -593,11 +593,11 @@ describe('sdd operations', () => {
 
     const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
-    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-001');
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
     feat1.produces = ['route:/clientes'];
     await writeYamlFile(backlogPath, backlog);
 
-    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-001', render: true });
+    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-0001', render: true });
     expect(result.finalized).toHaveLength(0);
     expect(Array.isArray(result.auto_frontend_gaps)).toBe(true);
     expect(result.auto_frontend_gaps.length).toBe(1);
@@ -607,12 +607,12 @@ describe('sdd operations', () => {
     const frontendGaps = await readYamlFile<Record<string, any>>(frontendGapsPath);
     const createdGap = frontendGaps.items.find((item: any) => item.id === result.auto_frontend_gaps[0]);
     expect(createdGap).toBeDefined();
-    expect(createdGap.origin_feature).toBe('FEAT-001');
+    expect(createdGap.origin_feature).toBe('FEAT-0001');
     expect(createdGap.route_targets).toContain('/clientes');
     expect(createdGap.origin_kind).toBe('automatic');
 
     const updatedBacklog = await readYamlFile<Record<string, any>>(backlogPath);
-    const finalizedFeat = updatedBacklog.items.find((item: any) => item.id === 'FEAT-001');
+    const finalizedFeat = updatedBacklog.items.find((item: any) => item.id === 'FEAT-0001');
     expect(finalizedFeat.frontend_gap_refs).toContain(result.auto_frontend_gaps[0]);
 
     const sitemapPath = path.join(testDir, '.sdd', 'core', 'frontend-sitemap.md');
@@ -647,32 +647,32 @@ describe('sdd operations', () => {
     const discovery = await readYamlFile<Record<string, any>>(discoveryPath);
     discovery.records = [
       {
-        id: 'INS-001',
+        id: 'INS-0001',
         type: 'INS',
         title: 'Insight antigo',
         status: 'DEBATED',
         origin_prompt: '...',
-        related_ids: ['DEB-001'],
+        related_ids: ['DEB-0001'],
         created_at: '2026-03-08T00:00:00.000Z',
         updated_at: '2026-03-08T00:00:00.000Z',
       },
       {
-        id: 'DEB-001',
+        id: 'DEB-0001',
         type: 'DEB',
         title: 'Debate antigo',
         status: 'APPROVED',
         origin_prompt: '...',
-        related_ids: ['INS-001', 'RAD-001'],
+        related_ids: ['INS-0001', 'EPIC-0001'],
         created_at: '2026-03-08T00:00:00.000Z',
         updated_at: '2026-03-08T00:00:00.000Z',
       },
       {
-        id: 'RAD-001',
+        id: 'EPIC-0001',
         type: 'RAD',
         title: 'Radar antigo',
         status: 'DONE',
         origin_prompt: '...',
-        related_ids: ['DEB-001'],
+        related_ids: ['DEB-0001'],
         created_at: '2026-03-08T00:00:00.000Z',
         updated_at: '2026-03-08T00:00:00.000Z',
       },
@@ -682,11 +682,11 @@ describe('sdd operations', () => {
     const backlog = await readYamlFile<Record<string, any>>(backlogPath);
     backlog.items = [
       {
-        id: 'FEAT-001',
+        id: 'FEAT-0001',
         title: 'Feature antiga',
         status: 'DONE',
         origin_type: 'radar',
-        origin_ref: 'RAD-001',
+        origin_ref: 'EPIC-0001',
         scale: 'STANDARD',
         summary: '',
         blocked_by: [],
@@ -734,7 +734,7 @@ describe('sdd operations', () => {
       summary: 'Escopo inicial do produto',
       imported_at: '2026-03-07T12:00:00.000Z',
       updated_at: '2026-03-07T12:00:00.000Z',
-      used_by: ['RAD-001'],
+      used_by: ['EPIC-0001'],
       notes: ['fonte consolidada'],
       consolidation_targets: ['contexto', 'radar'],
     });
@@ -773,7 +773,7 @@ describe('sdd operations', () => {
     });
 
     expect(result.scanned_files).toBeGreaterThanOrEqual(2);
-    expect(result.radar_id).toMatch(/^RAD-\d{3,}$/);
+    expect(result.radar_id).toMatch(/^(?:EPIC|RAD)-\d{4,}$/);
     expect(result.created_features.length).toBeGreaterThan(0);
     expect(result.recommended_prompt).toContain('.sdd/prompts/01-ingestao-deposito.md');
 
@@ -798,13 +798,13 @@ describe('sdd operations', () => {
     const result = await new SddSkillsInvokeCommand().execute(testDir, {
       ids: ['source-intake-sdd', 'planning-normalizer-sdd'],
       objective: 'Transformar documentos brutos em backlog executavel',
-      ref: 'RAD-001',
+      ref: 'EPIC-0001',
     });
 
     expect(result.selected_skills).toHaveLength(2);
     expect(result.selected_skills[0].path).toContain('.sdd/skills');
     expect(result.prompt).toContain('Use as skills abaixo nesta ordem');
     expect(result.prompt).toContain('Transformar documentos brutos em backlog executavel');
-    expect(result.prompt).toContain('RAD-001');
+    expect(result.prompt).toContain('EPIC-0001');
   });
 });

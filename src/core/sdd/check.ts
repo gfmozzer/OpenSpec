@@ -80,8 +80,11 @@ function validateDiscoveryRecords(records: DiscoveryRecord[], errors: string[]):
     if (record.type === 'DEB' && !ID_PATTERNS.debate.test(record.id)) {
       errors.push(`Registro de discovery ${record.id} e DEB, mas nao segue DEB-###`);
     }
-    if (record.type === 'RAD' && !ID_PATTERNS.radar.test(record.id)) {
-      errors.push(`Registro de discovery ${record.id} e RAD, mas nao segue RAD-###`);
+    if (record.type === 'RAD' && !ID_PATTERNS.epicOrRadar.test(record.id)) {
+      errors.push(`Registro de discovery ${record.id} e RAD, mas nao segue RAD-###/EPIC-####`);
+    }
+    if (record.type === 'EPIC' && !ID_PATTERNS.epicOrRadar.test(record.id)) {
+      errors.push(`Registro de discovery ${record.id} e EPIC, mas nao segue EPIC-####/RAD-###`);
     }
   }
 }
@@ -193,7 +196,7 @@ function computeProgress(
 
   const byRadar = new Map<string, { done: number; total: number }>();
   for (const item of activeItems) {
-    if (item.origin_type !== 'radar' || !item.origin_ref) continue;
+    if ((item.origin_type !== 'radar' && item.origin_type !== 'epic') || !item.origin_ref) continue;
     const current = byRadar.get(item.origin_ref) || { done: 0, total: 0 };
     current.total += 1;
     if (item.status === 'DONE') current.done += 1;

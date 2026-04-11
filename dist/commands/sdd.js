@@ -112,8 +112,9 @@ export function registerSddCommand(program) {
         .alias('ingestao-deposito')
         .alias('ingest')
         .option('--source-dir <path>', 'Diretorio fonte (padrao: .sdd/deposito)')
-        .option('--title <title>', 'Titulo do RAD inicial (quando nao houver --radar)')
-        .option('--radar <radarId>', 'Reaproveita RAD existente (RAD-###)')
+        .option('--title <title>', 'Titulo do EPIC inicial (quando nao houver --epic/--radar)')
+        .option('--epic <epicId>', 'Reaproveita EPIC existente (EPIC-####)')
+        .option('--radar <radarId>', 'Reaproveita RAD legado (RAD-###)')
         .option('--titles <list>', 'Titulos de FEAT separados por virgula')
         .option('--scale <scale>', 'Escala QUICK|STANDARD|LARGE')
         .option('--flow-mode <flowMode>', 'Fluxo da FEAT iniciada: direto|padrao|rigoroso')
@@ -126,14 +127,15 @@ export function registerSddCommand(program) {
         if (flow && !['direto', 'padrao', 'rigoroso'].includes(flow)) {
             throw new Error('Valor invalido em --flow-mode/--fluxo. Use direto, padrao ou rigoroso.');
         }
-        if (options?.radar && !/^RAD-\d{3,}$/.test(options.radar)) {
-            throw new Error('Valor invalido em --radar. Use RAD-###.');
+        const epicRef = options?.epic || options?.radar;
+        if (epicRef && !/^(?:RAD|EPIC)-\d{3,}$/.test(epicRef)) {
+            throw new Error('Valor invalido em --epic/--radar. Use EPIC-#### ou RAD-###.');
         }
         const command = new SddIngestDepositoCommand();
         const result = await command.execute('.', {
             sourceDir: options?.sourceDir,
             title: options?.title,
-            radarId: options?.radar,
+            radarId: epicRef,
             titles: parseCsvOption(options?.titles),
             scale: options?.scale,
             flowMode: flow,
@@ -149,7 +151,7 @@ export function registerSddCommand(program) {
         console.log(`Arquivos lidos: ${result.scanned_files}`);
         console.log(`Fontes criadas: ${result.indexed_created}`);
         console.log(`Fontes atualizadas: ${result.indexed_updated}`);
-        console.log(`RAD: ${result.radar_id}`);
+        console.log(`EPIC: ${result.radar_id}`);
         console.log(`FEATs criadas: ${result.created_features.join(', ') || '-'}`);
         console.log(`FEATs reaproveitadas: ${result.linked_existing.join(', ') || '-'}`);
         console.log(`FEAT iniciada: ${result.started_feature_id || '-'}`);
@@ -185,25 +187,26 @@ export function registerSddCommand(program) {
     });
     sddCmd
         .command('decide <debateId>')
-        .description('Decide o resultado de um debate: radar ou descarte')
+        .description('Decide o resultado de um debate: epic ou descarte')
         .alias('decidir')
-        .requiredOption('--outcome <result>', 'Resultado: radar|discard')
-        .option('--title <title>', 'Titulo do radar (quando outcome=radar)')
+        .requiredOption('--outcome <result>', 'Resultado: epic|radar|discard')
+        .option('--title <title>', 'Titulo do epic (quando outcome=epic/radar)')
         .option('--rationale <text>', 'Racional da decisao')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (debateId, options) => {
         const outcome = options?.outcome;
-        if (outcome !== 'radar' && outcome !== 'discard') {
-            throw new Error('Valor invalido em --outcome. Use radar ou discard.');
+        if (outcome !== 'radar' && outcome !== 'epic' && outcome !== 'discard') {
+            throw new Error('Valor invalido em --outcome. Use epic, radar ou discard.');
         }
+        const normalizedOutcome = outcome === 'epic' ? 'radar' : outcome;
         const command = new SddDecideCommand();
-        const result = await command.execute('.', debateId, outcome, {
+        const result = await command.execute('.', debateId, normalizedOutcome, {
             title: options?.title,
             rationale: options?.rationale,
             render: options?.render,
         });
         if (result.outcome === 'radar') {
-            console.log(chalk.green(`Debate ${debateId} aprovado para radar ${result.radarId}`));
+            console.log(chalk.green(`Debate ${debateId} aprovado para epic ${result.radarId}`));
             console.log(`Arquivo: ${result.radarPath}`);
         }
         else {
@@ -213,7 +216,7 @@ export function registerSddCommand(program) {
     });
     sddCmd
         .command('breakdown <radarId>')
-        .description('Quebra um item RAD em uma ou mais features FEAT')
+        .description('Quebra um EPIC/RAD em uma ou mais features FEAT')
         .alias('quebrar')
         .alias('desdobrar')
         .option('--titles <list>', 'Titulos separados por virgula para gerar varias FEAT')
@@ -251,7 +254,7 @@ export function registerSddCommand(program) {
     });
     sddCmd
         .command('start <refOrText>')
-        .description('Inicia execucao de FEAT/RAD/FGAP/TD ou cria FEAT direta')
+        .description('Inicia execucao de FEAT/EPIC/RAD/FGAP/TD ou cria FEAT direta')
         .alias('iniciar-execucao')
         .option('--scale <scale>', 'Escala QUICK|STANDARD|LARGE')
         .option('--schema <schema>', 'Schema para criar change em openspec/changes')
@@ -366,7 +369,7 @@ export function registerSddCommand(program) {
     });
     sddCmd
         .command('context <ref>')
-        .description('Gera contexto objetivo para FEAT/RAD/FGAP/TD')
+        .description('Gera contexto objetivo para FEAT/EPIC/RAD/FGAP/TD')
         .alias('contexto')
         .option('--json', 'Saida em JSON')
         .action(async (ref, options) => {
@@ -401,7 +404,7 @@ export function registerSddCommand(program) {
     });
     sddCmd
         .command('onboard [target]')
-        .description('Gera onboarding estruturado para system, RAD-### ou FEAT-###')
+        .description('Gera onboarding estruturado para system, EPIC-#### ou FEAT-####')
         .alias('integrar')
         .alias('orientar')
         .option('--json', 'Saida em JSON')
@@ -529,7 +532,7 @@ export function registerSddCommand(program) {
                 console.log(`Features required sem FGAP: ${report.summary.features_missing_fgap_link.join(', ')}`);
             }
             if (report.summary.progress_by_radar.length > 0) {
-                console.log('Progresso por RAD:');
+                console.log('Progresso por EPIC/RAD:');
                 for (const radar of report.summary.progress_by_radar) {
                     console.log(`- ${radar.radar_id}: ${radar.percent}% (${radar.done}/${radar.total})`);
                 }

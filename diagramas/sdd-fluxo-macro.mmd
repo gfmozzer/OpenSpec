@@ -1,0 +1,40 @@
+stateDiagram-v2
+    [*] --> Bootstrap
+
+    Bootstrap --> ContextoInicial: install / sdd init
+    ContextoInicial --> SistemaMapeado: sdd init-context
+    SistemaMapeado --> Onboarding: sdd onboard system
+
+    Onboarding --> Insight: nova ideia
+    Insight --> Debate: sdd debate INS-###
+    Debate --> Radar: sdd decide --outcome radar
+    Debate --> Descartado: sdd decide --outcome discard
+
+    Radar --> Breakdown: sdd breakdown RAD-###
+    Breakdown --> FeatReady: FEAT criada e pronta
+    Breakdown --> FeatBlocked: FEAT criada mas bloqueada
+
+    FeatBlocked --> FeatReady: dependencias resolvidas
+    FeatReady --> EmExecucao: sdd start FEAT-###
+
+    EmExecucao --> ContextoFeat: sdd context FEAT-###
+    ContextoFeat --> Implementacao: codar / alterar change / specs
+
+    Implementacao --> Aprovacao: fluxo rigoroso exige gates
+    Aprovacao --> ImpactoFrontend: sdd frontend-impact FEAT-###
+    Implementacao --> ImpactoFrontend: fluxo direto ou padrao
+
+    ImpactoFrontend --> GapFrontend: frontend requerido sem cobertura
+    GapFrontend --> EmExecucao: FGAP aberto e resolvido
+    ImpactoFrontend --> ProntaParaArchive: frontend ok ou none justificado
+
+    ProntaParaArchive --> Arquivada: opensdd archive <change>
+    Arquivada --> FilaFinalize: aguardando consolidacao
+    FilaFinalize --> Finalizada: sdd finalize --ref FEAT-###
+
+    Finalizada --> ADRGerado: ADR + docs + core views
+    ADRGerado --> DependentesLiberados: unblock events
+    DependentesLiberados --> Onboarding: sistema atualizado
+
+    Descartado --> [*]
+    Finalizada --> [*]
