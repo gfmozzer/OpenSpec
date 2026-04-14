@@ -11,7 +11,6 @@ function resolveMaxWorkers(): number | undefined {
     }
   }
 
-  // Vitest v3 defaults to `pool: "forks"` and scales worker processes with CPU.
   // This repo's tests can spawn many Node processes (CLI invocations, temp FS),
   // so cap parallelism to avoid runaway CPU/memory usage in automation.
   const cpuCount = typeof os.availableParallelism === 'function'

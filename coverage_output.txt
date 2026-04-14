@@ -1,0 +1,206 @@
+
+ RUN  v3.2.4 /Volumes/WORKSPACE/DEVTRACK_TOOLS/repos-tools/devtrack-tools-opensdd
+      Coverage enabled with v8
+
+ ✓ test/core/parsers/change-parser.test.ts (2 tests) 8ms
+ ✓ test/commands/completion.test.ts (19 tests) 16ms
+ ✓ test/utils/match.test.ts (2 tests) 46ms
+ ✓ test/commands/validate.test.ts (6 tests) 1903ms
+   ✓ top-level validate command > prints a helpful hint when no args in non-interactive mode  356ms
+   ✓ top-level validate command > validates only specs with --specs and respects --concurrency  476ms
+   ✓ top-level validate command > errors on ambiguous item names and suggests type override  376ms
+ ✓ test/commands/spec.test.ts (15 tests) 4066ms
+   ✓ spec command > spec show > should display spec in text format  363ms
+   ✓ spec command > spec show > should filter to show only requirements with --requirements flag (JSON only)  447ms
+   ✓ spec command > spec show > should exclude scenarios with --no-scenarios flag (JSON only)  389ms
+
+ Test Files  5 passed (5)
+      Tests  44 passed (44)
+   Start at  00:51:03
+   Duration  4.74s (transform 195ms, setup 0ms, collect 387ms, tests 6.04s, environment 1ms, prepare 382ms)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |    5.91 |    73.63 |   51.39 |    5.91 |                   
+ ...-tools-opensdd |       0 |        0 |       0 |       0 |                   
+  eslint.config.js |       0 |        0 |       0 |       0 | 1-42              
+  vitest.setup.ts  |       0 |        0 |       0 |       0 | 1-15              
+ ...pensdd/scripts |       0 |        0 |       0 |       0 |                   
+  cleanup.mjs      |       0 |        0 |       0 |       0 | 1-128             
+  ...ion-check.mjs |       0 |        0 |       0 |       0 | 1-111             
+  postinstall.js   |       0 |        0 |       0 |       0 | 1-147             
+ ...ls-opensdd/src |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-2               
+ ...pensdd/src/cli |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 | 1-602             
+ ...d/src/commands |    3.31 |    77.77 |   78.94 |    3.31 |                   
+  change.ts        |       0 |        0 |       0 |       0 | 1-293             
+  completion.ts    |    55.2 |    80.43 |    90.9 |    55.2 | ...52-255,265-299 
+  config.ts        |       0 |      100 |     100 |       0 | 2-645             
+  feedback.ts      |       0 |        0 |       0 |       0 | 1-209             
+  schema.ts        |       0 |      100 |     100 |       0 | 2-1005            
+  sdd.ts           |       0 |      100 |     100 |       0 | 2-1038            
+  show.ts          |       0 |      100 |     100 |       0 | 2-139             
+  spec.ts          |       0 |      100 |     100 |       0 | 2-252             
+  validate.ts      |       0 |        0 |       0 |       0 | 1-327             
+ ...mands/workflow |       0 |      100 |     100 |       0 |                   
+  index.ts         |       0 |      100 |     100 |       0 | 7-22              
+  instructions.ts  |       0 |      100 |     100 |       0 | 8-482             
+  new-change.ts    |       0 |      100 |     100 |       0 | 7-62              
+  schemas.ts       |       0 |      100 |     100 |       0 | 7-46              
+  shared.ts        |       0 |      100 |     100 |       0 | 8-165             
+  status.ts        |       0 |      100 |     100 |       0 | 7-113             
+  templates.ts     |       0 |      100 |     100 |       0 | 7-98              
+ ...ensdd/src/core |    0.22 |    52.94 |   52.94 |    0.22 |                   
+  archive.ts       |       0 |        0 |       0 |       0 | 1-340             
+  ...able-tools.ts |       0 |      100 |     100 |       0 | 8-29              
+  branding.ts      |     100 |      100 |     100 |     100 |                   
+  ...ig-prompts.ts |       0 |      100 |     100 |       0 | 9-39              
+  config-schema.ts |       0 |        0 |       0 |       0 | 1-243             
+  config.ts        |       0 |        0 |       0 |       0 | 1-46              
+  global-config.ts |       0 |        0 |       0 |       0 | 1-155             
+  index.ts         |       0 |      100 |     100 |       0 | 2                 
+  init.ts          |       0 |      100 |     100 |       0 | 8-811             
+  ...cy-cleanup.ts |       0 |      100 |     100 |       0 | 7-650             
+  list.ts          |       0 |        0 |       0 |       0 | 1-195             
+  migration.ts     |       0 |      100 |     100 |       0 | 9-131             
+  ...sync-drift.ts |       0 |        0 |       0 |       0 | 1-241             
+  profiles.ts      |       0 |      100 |     100 |       0 | 14-51             
+  ...ect-config.ts |       0 |        0 |       0 |       0 | 1-264             
+  specs-apply.ts   |       0 |      100 |     100 |       0 | 8-483             
+  update.ts        |       0 |      100 |     100 |       0 | 8-703             
+  view.ts          |       0 |        0 |       0 |       0 | 1-220             
+ ...artifact-graph |       0 |    28.57 |   28.57 |       0 |                   
+  graph.ts         |       0 |      100 |     100 |       0 | 2-167             
+  index.ts         |       0 |      100 |     100 |       0 | 2-33              
+  ...ion-loader.ts |       0 |        0 |       0 |       0 | 1-363             
+  resolver.ts      |       0 |        0 |       0 |       0 | 1-302             
+  schema.ts        |       0 |        0 |       0 |       0 | 1-124             
+  state.ts         |       0 |        0 |       0 |       0 | 1-64              
+  types.ts         |       0 |        0 |       0 |       0 | 1-52              
+ ...and-generation |       0 |      100 |     100 |       0 |                   
+  generator.ts     |       0 |      100 |     100 |       0 | 15-36             
+  index.ts         |       0 |      100 |     100 |       0 | 27-33             
+  registry.ts      |       0 |      100 |     100 |       0 | 9-99              
+  types.ts         |       0 |        0 |       0 |       0 |                   
+ ...ation/adapters |       0 |      100 |     100 |       0 |                   
+  amazon-q.ts      |       0 |      100 |     100 |       0 | 7-30              
+  antigravity.ts   |       0 |      100 |     100 |       0 | 7-30              
+  auggie.ts        |       0 |      100 |     100 |       0 | 7-31              
+  claude.ts        |       0 |      100 |     100 |       0 | 7-56              
+  cline.ts         |       0 |      100 |     100 |       0 | 8-31              
+  codebuddy.ts     |       0 |      100 |     100 |       0 | 7-32              
+  codex.ts         |       0 |      100 |     100 |       0 | 10-44             
+  continue.ts      |       0 |      100 |     100 |       0 | 7-32              
+  costrict.ts      |       0 |      100 |     100 |       0 | 7-31              
+  crush.ts         |       0 |      100 |     100 |       0 | 7-34              
+  cursor.ts        |       0 |      100 |     100 |       0 | 8-49              
+  factory.ts       |       0 |      100 |     100 |       0 | 7-31              
+  gemini.ts        |       0 |      100 |     100 |       0 | 7-30              
+  ...ub-copilot.ts |       0 |      100 |     100 |       0 | 7-30              
+  iflow.ts         |       0 |      100 |     100 |       0 | 7-33              
+  index.ts         |       0 |      100 |     100 |       0 | 7-29              
+  kilocode.ts      |       0 |      100 |     100 |       0 | 8-27              
+  kiro.ts          |       0 |      100 |     100 |       0 | 7-30              
+  opencode.ts      |       0 |      100 |     100 |       0 | 7-34              
+  pi.ts            |       0 |      100 |     100 |       0 | 8-46              
+  qoder.ts         |       0 |      100 |     100 |       0 | 7-34              
+  qwen.ts          |       0 |      100 |     100 |       0 | 7-30              
+  roocode.ts       |       0 |      100 |     100 |       0 | 8-31              
+  windsurf.ts      |       0 |      100 |     100 |       0 | 8-57              
+ ...re/completions |   90.69 |    46.66 |   58.33 |   90.69 |                   
+  ...d-registry.ts |     100 |      100 |     100 |     100 |                   
+  ...n-provider.ts |   27.86 |      100 |   16.66 |   27.86 | ...02-104,114-127 
+  factory.ts       |   82.22 |    38.46 |     100 |   82.22 | ...62,78,80,82,84 
+  types.ts         |       0 |        0 |       0 |       0 |                   
+ ...ons/generators |    35.9 |    92.85 |   32.14 |    35.9 |                   
+  ...-generator.ts |       9 |        0 |       0 |       9 | ...59-181,189-190 
+  ...-generator.ts |     7.2 |        0 |       0 |     7.2 | ...54-175,182-187 
+  ...-generator.ts |    6.94 |        0 |       0 |    6.94 | ...81-212,218-222 
+  zsh-generator.ts |     100 |      100 |     100 |     100 |                   
+ ...ons/installers |    5.46 |        0 |       0 |    5.46 |                   
+  ...-installer.ts |    8.14 |        0 |       0 |    8.14 | ...10-326,336-365 
+  ...-installer.ts |   11.45 |        0 |       0 |   11.45 | ...53-115,125-151 
+  ...-installer.ts |    7.87 |        0 |       0 |    7.87 | ...04-318,328-357 
+  zsh-installer.ts |       0 |        0 |       0 |       0 | 1-498             
+ ...ions/templates |     100 |      100 |     100 |     100 |                   
+  ...-templates.ts |     100 |      100 |     100 |     100 |                   
+  ...-templates.ts |     100 |      100 |     100 |     100 |                   
+  ...-templates.ts |     100 |      100 |     100 |     100 |                   
+  zsh-templates.ts |     100 |      100 |     100 |     100 |                   
+ ...ore/converters |       0 |        0 |       0 |       0 |                   
+  ...-converter.ts |       0 |        0 |       0 |       0 | 1-62              
+ ...c/core/parsers |   45.54 |    78.12 |      85 |   45.54 |                   
+  change-parser.ts |    64.4 |    62.06 |    87.5 |    64.4 | ...02-203,226-227 
+  ...own-parser.ts |   72.41 |    91.17 |   81.81 |   72.41 | ...63-164,169-173 
+  ...ent-blocks.ts |       0 |      100 |     100 |       0 | 15-234            
+ ...c/core/schemas |       0 |        0 |       0 |       0 |                   
+  base.schema.ts   |       0 |        0 |       0 |       0 | 1-17              
+  change.schema.ts |       0 |        0 |       0 |       0 | 1-38              
+  index.ts         |       0 |        0 |       0 |       0 | 1-13              
+  spec.schema.ts   |       0 |        0 |       0 |       0 | 1-15              
+ ...d/src/core/sdd |       0 |    21.42 |   21.42 |       0 |                   
+  bootstrap.ts     |       0 |        0 |       0 |       0 | 1-494             
+  check.ts         |       0 |        0 |       0 |       0 | 1-609             
+  ...trap-files.ts |       0 |        0 |       0 |       0 | 1-349             
+  ...ult-skills.ts |       0 |        0 |       0 |       0 | 1-417             
+  docs-sync.ts     |       0 |        0 |       0 |       0 | 1-281             
+  init.ts          |       0 |        0 |       0 |       0 | 1-110             
+  lenses.ts        |       0 |      100 |     100 |       0 | 8-72              
+  migrate.ts       |       0 |        0 |       0 |       0 | 1-420             
+  operations.ts    |       0 |        0 |       0 |       0 | 1-3284            
+  skills.ts        |       0 |      100 |     100 |       0 | 16-70             
+  state.ts         |       0 |        0 |       0 |       0 | 1-837             
+  ...ion-engine.ts |       0 |      100 |     100 |       0 | 5-69              
+  types.ts         |       0 |        0 |       0 |       0 | 1-409             
+  views.ts         |       0 |        0 |       0 |       0 | 1-549             
+ ...rc/core/shared |       0 |      100 |     100 |       0 |                   
+  index.ts         |       0 |      100 |     100 |       0 | 7-23              
+  ...generation.ts |       0 |      100 |     100 |       0 | 7-163             
+  ...-detection.ts |       0 |      100 |     100 |       0 | 7-220             
+ ...rc/core/styles |       0 |        0 |       0 |       0 |                   
+  palette.ts       |       0 |        0 |       0 |       0 | 1-8               
+ ...core/templates |       0 |      100 |     100 |       0 |                   
+  index.ts         |       0 |      100 |     100 |       0 | 9                 
+  ...-templates.ts |       0 |      100 |     100 |       0 | 9-21              
+  types.ts         |       0 |        0 |       0 |       0 |                   
+ ...ates/workflows |       0 |      100 |     100 |       0 |                   
+  apply-change.ts  |       0 |      100 |     100 |       0 | 9-316             
+  ...ive-change.ts |       0 |      100 |     100 |       0 | 9-279             
+  ...ive-change.ts |       0 |      100 |     100 |       0 | 9-496             
+  ...nue-change.ts |       0 |      100 |     100 |       0 | 9-240             
+  explore.ts       |       0 |      100 |     100 |       0 | 9-469             
+  feedback.ts      |       0 |      100 |     100 |       0 | 9-115             
+  ff-change.ts     |       0 |      100 |     100 |       0 | 9-206             
+  new-change.ts    |       0 |      100 |     100 |       0 | 9-151             
+  onboard.ts       |       0 |      100 |     100 |       0 | 9-574             
+  propose.ts       |       0 |      100 |     100 |       0 | 9-224             
+  sdd.ts           |       0 |      100 |     100 |       0 | 9-109             
+  sync-specs.ts    |       0 |      100 |     100 |       0 | 9-280             
+  verify-change.ts |       0 |      100 |     100 |       0 | 9-340             
+ ...ore/validation |       0 |      100 |     100 |       0 |                   
+  constants.ts     |       0 |      100 |     100 |       0 | 6-48              
+  types.ts         |       0 |        0 |       0 |       0 |                   
+  validator.ts     |       0 |      100 |     100 |       0 | 2-449             
+ ...dd/src/prompts |       0 |        0 |       0 |       0 |                   
+  ...lti-select.ts |       0 |        0 |       0 |       0 | 1-220             
+ .../src/telemetry |       0 |      100 |     100 |       0 |                   
+  config.ts        |       0 |      100 |     100 |       0 | 5-85              
+  index.ts         |       0 |      100 |     100 |       0 | 11-172            
+ ...opensdd/src/ui |       0 |      100 |     100 |       0 |                   
+  ...i-patterns.ts |       0 |      100 |     100 |       0 | 7-137             
+  ...ome-screen.ts |       0 |      100 |     100 |       0 | 6-177             
+ ...nsdd/src/utils |    7.19 |    84.21 |   21.42 |    7.19 |                   
+  ...e-metadata.ts |       0 |        0 |       0 |       0 | 1-196             
+  change-utils.ts  |       0 |        0 |       0 |       0 | 1-160             
+  ...references.ts |       0 |      100 |     100 |       0 | 18-20             
+  file-system.ts   |     7.4 |      100 |       0 |     7.4 | ...33-269,283-325 
+  index.ts         |       0 |      100 |     100 |       0 | 2-18              
+  interactive.ts   |       0 |      100 |     100 |       0 | 17-28             
+  ...-discovery.ts |    3.44 |      100 |       0 |    3.44 | 4-65              
+  match.ts         |     100 |      100 |     100 |     100 |                   
+  ...-detection.ts |       0 |      100 |     100 |       0 | 21-62             
+  task-progress.ts |       0 |        0 |       0 |       0 | 1-41              
+-------------------|---------|----------|---------|---------|-------------------
