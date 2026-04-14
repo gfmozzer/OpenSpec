@@ -1,5 +1,10 @@
 version: 1
 items:
+  - feature_id: FEAT-0001
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0001"
+    created_at: 2026-03-08T11:33:23.388Z
+    completed_at: 2026-03-08T11:33:23.388Z
   - feature_id: FEAT-0002
     status: DONE
     summary: "Finalizado manualmente: FEAT-0002"
@@ -10,13 +15,63 @@ items:
     summary: "Finalizado manualmente: FEAT-0003"
     created_at: 2026-04-11T08:12:46.885Z
     completed_at: 2026-04-11T08:12:46.885Z
-  - feature_id: FEAT-001
-    status: DONE
-    summary: "Finalizado manualmente: FEAT-001"
-    created_at: 2026-03-08T11:33:23.388Z
-    completed_at: 2026-03-08T11:33:23.388Z
   - feature_id: FEAT-0004
     status: DONE
     summary: "Finalizado manualmente: FEAT-0004"
     created_at: 2026-04-11T08:13:21.419Z
     completed_at: 2026-04-11T08:13:21.419Z
+  - feature_id: FEAT-0005
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0005"
+    created_at: 2026-04-12T08:14:28.555Z
+    completed_at: 2026-04-12T08:14:28.555Z
+  - feature_id: FEAT-0006
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0006"
+    created_at: 2026-04-12T08:16:57.000Z
+    completed_at: 2026-04-12T08:16:57.000Z
+  - feature_id: FEAT-0007
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0007"
+    created_at: 2026-04-12T08:15:02.437Z
+    completed_at: 2026-04-12T08:15:02.437Z
+  - feature_id: FEAT-0008
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0008"
+    created_at: 2026-04-12T08:16:57.000Z
+    completed_at: 2026-04-12T08:16:57.000Z
+  - feature_id: FEAT-0009
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0009"
+    created_at: 2026-04-13T02:32:30.319Z
+    completed_at: 2026-04-13T02:32:30.319Z
+  - feature_id: FEAT-0010
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0010"
+    created_at: 2026-04-13T04:00:24.026Z
+    completed_at: 2026-04-13T04:00:24.026Z
+  - feature_id: FEAT-0011
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0011"
+    created_at: 2026-04-14T03:55:17.129Z
+    completed_at: 2026-04-14T03:55:17.129Z
+  - feature_id: FEAT-0012
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0012"
+    created_at: 2026-04-14T05:40:40.333Z
+    completed_at: 2026-04-14T05:40:40.333Z
+  - feature_id: FEAT-0013
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0013"
+    created_at: 2026-04-14T06:03:26.870Z
+    completed_at: 2026-04-14T06:03:26.870Z
+  - feature_id: FEAT-0018
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0018"
+    created_at: 2026-04-14T02:35:00.320Z
+    completed_at: 2026-04-14T02:35:00.320Z
+  - feature_id: FEAT-0014
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0014"
+    created_at: 2026-04-14T06:21:40.402Z
+    completed_at: 2026-04-14T06:21:40.402Z

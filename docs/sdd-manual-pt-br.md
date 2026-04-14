@@ -11,16 +11,17 @@ Objetivo do SDD:
 
 ## 1. O que é cada coisa
 
-- `INSIGHT (INS-###)`: uma ideia bruta.
-- `DEBATE (DEB-###)`: a discussão estruturada sobre uma ideia.
-- `RADAR (RAD-###)`: uma ideia aprovada para possível implementação.
-- `FEATURE (FEAT-###)`: um pedaço executável de trabalho.
+- `INSIGHT (INS-0001)`: uma ideia bruta.
+- `DEBATE (DEB-0001)`: a discussão estruturada sobre uma ideia.
+- `EPIC (EPIC-0001)`: uma ideia aprovada para possível implementação.
+- `RAD (RAD-001)`: alias legado compatível para um EPIC.
+- `FEATURE (FEAT-0001)`: um pedaço executável de trabalho.
 - `FGAP (FGAP-###)`: um gap de frontend.
-- `TASKS`: checklist interno da execução de uma FEAT, dentro de `.sdd/active/FEAT-###/3-tasks.md`.
+- `TASKS`: checklist interno da execução de uma FEAT, dentro de `.sdd/active/FEAT-0001/3-tasks.md`.
 
 Regra prática:
 - ideia nasce como `INS`;
-- decisão aprovada vira `RAD`;
+- decisão aprovada vira `EPIC`;
 - trabalho executável vira `FEAT`;
 - checklist operacional nasce quando você faz `start`.
 
@@ -33,7 +34,7 @@ flowchart LR
   C --> D[opensdd sdd init-context]
   D --> E[INSIGHT]
   E --> F[DEBATE]
-  F -->|Aprovado| G[RADAR]
+  F -->|Aprovado| G[EPIC]
   F -->|Reprovado| H[DISCARDED]
   G --> I[BREAKDOWN]
   I --> J[FEATs no backlog]
@@ -107,7 +108,7 @@ README.md                                 # Entrada principal para humano e agen
 │   ├── anexos/                           # Material complementar
 │   └── legado/                           # Documentos herdados
 ├── active/                               # Execução viva por FEAT
-│   └── FEAT-###/
+│   └── FEAT-0001/
 │      ├── 1-spec.md                      # O que a FEAT precisa entregar (layout legacy)
 │      ├── 2-plan.md                      # Plano técnico (layout legacy)
 │      ├── 3-tasks.md                     # Checklist da execução (layout legacy)
@@ -402,7 +403,7 @@ Fluxo recomendado:
 1. colocar os documentos no deposito;
 2. rodar `opensdd sdd ingest-deposito`;
 3. validar o resultado com `opensdd sdd check --render`;
-4. continuar por `opensdd sdd next` e `opensdd sdd context FEAT-###`.
+4. continuar por `opensdd sdd next` e `opensdd sdd context FEAT-0001`.
 
 Comando principal:
 
@@ -418,7 +419,7 @@ O que ele faz:
 - atualiza `.sdd/state/source-index.yaml`;
 - cria (ou reaproveita) RAD;
 - desdobra em FEATs com `breakdown` incremental;
-- tenta iniciar automaticamente a primeira FEAT pronta e gerar workspace em `.sdd/active/FEAT-###/`;
+- tenta iniciar automaticamente a primeira FEAT pronta e gerar workspace em `.sdd/active/FEAT-0001/`;
 - aponta skills e prompt recomendado em `.sdd/prompts/01-ingestao-deposito.md`.
 
 Flags úteis:
@@ -439,18 +440,18 @@ opensdd sdd insight "Clientes precisam marcar banho online"
 ```
 
 O que isso faz:
-- cria um `INS-###`;
+- cria um `INS-0001`;
 - grava no índice canônico;
 - cria o arquivo em `.sdd/discovery/1-insights/`.
 
 ### 7.2 Como iniciar um debate
 
 ```bash
-opensdd sdd debate INS-001
+opensdd sdd debate INS-0001
 ```
 
 O que isso faz:
-- cria `DEB-001`;
+- cria `DEB-0001`;
 - vincula o debate ao insight;
 - gera um documento de debate com template formal.
 
@@ -459,7 +460,7 @@ O que isso faz:
 Depois de preencher o arquivo do debate:
 
 ```bash
-opensdd sdd decide DEB-001 --outcome radar --rationale "Dor principal do negócio"
+opensdd sdd decide DEB-0001 --outcome epic --rationale "Dor principal do negócio"
 ```
 
 O que isso faz:
@@ -470,7 +471,7 @@ O que isso faz:
 ### 7.4 Como reprovar um debate
 
 ```bash
-opensdd sdd decide DEB-001 --outcome discard --rationale "Não é prioridade agora"
+opensdd sdd decide DEB-0001 --outcome discard --rationale "Não é prioridade agora"
 ```
 
 O que isso faz:
@@ -480,10 +481,10 @@ O que isso faz:
 
 ### 7.5 Como iniciar um planejamento
 
-Planejamento começa no `RAD`.
+Planejamento começa no `EPIC`.
 
 ```bash
-opensdd sdd breakdown RAD-001 --mode graph --incremental --titles "API de agendamento,Calendário por loja,Tela do cliente"
+opensdd sdd breakdown EPIC-0001 --mode graph --incremental --titles "API de agendamento,Calendário por loja,Tela do cliente"
 ```
 
 O que isso faz:
@@ -510,21 +511,21 @@ opensdd sdd start "Criar endpoint de healthcheck" --fluxo padrao
 - isso acontece automaticamente quando você roda `start`.
 
 O comando gera:
-- `.sdd/active/FEAT-###/1-spec.md`
-- `.sdd/active/FEAT-###/2-plan.md`
-- `.sdd/active/FEAT-###/3-tasks.md`
-- `.sdd/active/FEAT-###/4-changelog.md`
+- `.sdd/active/FEAT-0001/1-spec.md`
+- `.sdd/active/FEAT-0001/2-plan.md`
+- `.sdd/active/FEAT-0001/3-tasks.md`
+- `.sdd/active/FEAT-0001/4-changelog.md`
 
 No layout `pt-BR`, os nomes gerados sao:
-- `.sdd/execucao/FEAT-###/1-especificacao.md`
-- `.sdd/execucao/FEAT-###/2-planejamento.md`
-- `.sdd/execucao/FEAT-###/3-tarefas.md`
-- `.sdd/execucao/FEAT-###/4-historico.md`
+- `.sdd/execucao/FEAT-0001/1-especificacao.md`
+- `.sdd/execucao/FEAT-0001/2-planejamento.md`
+- `.sdd/execucao/FEAT-0001/3-tarefas.md`
+- `.sdd/execucao/FEAT-0001/4-historico.md`
 
 ### 7.7 Como iniciar a execução de uma FEAT
 
 ```bash
-opensdd sdd start FEAT-001
+opensdd sdd start FEAT-0001
 ```
 
 O que isso faz:
@@ -549,7 +550,7 @@ O que isso faz:
 ### 7.9 Como gerar contexto para um agente
 
 ```bash
-opensdd sdd context FEAT-001 --json
+opensdd sdd context FEAT-0001 --json
 ```
 
 O que isso faz:
@@ -572,8 +573,8 @@ opensdd sdd onboard system
 Ou:
 
 ```bash
-opensdd sdd onboard RAD-001
-opensdd sdd onboard FEAT-001
+opensdd sdd onboard EPIC-0001
+opensdd sdd onboard FEAT-0001
 ```
 
 Use:
@@ -597,7 +598,7 @@ opensdd archive <change-name>
 Passo 2:
 
 ```bash
-opensdd sdd finalize --ref FEAT-001
+opensdd sdd finalize --ref FEAT-0001
 ```
 
 Resumo:
@@ -607,7 +608,7 @@ Resumo:
 ### 7.12 Como declarar impacto de frontend (obrigatório)
 
 ```bash
-opensdd sdd frontend-impact FEAT-001 --status required --reason "Nova rota e interface de cadastro"
+opensdd sdd frontend-impact FEAT-0001 --status required --reason "Nova rota e interface de cadastro"
 ```
 
 Sem isso, o `finalize` bloqueia por padrão.
@@ -615,7 +616,7 @@ Sem isso, o `finalize` bloqueia por padrão.
 Para caso sem impacto:
 
 ```bash
-opensdd sdd frontend-impact FEAT-001 --status none --reason "Mudança interna de backend sem alteração de UI"
+opensdd sdd frontend-impact FEAT-0001 --status none --reason "Mudança interna de backend sem alteração de UI"
 ```
 
 A justificativa para `none` precisa ter no mínimo 20 caracteres.
@@ -623,7 +624,7 @@ A justificativa para `none` precisa ter no mínimo 20 caracteres.
 ### 7.13 Como finalizar uma execução
 
 ```bash
-opensdd sdd finalize --ref FEAT-001
+opensdd sdd finalize --ref FEAT-0001
 ```
 
 O que isso faz:
@@ -639,13 +640,13 @@ O que isso faz:
 Abrir um gap:
 
 ```bash
-opensdd sdd fgap add "Tela de prontuário ainda não existe" --origin FEAT-005 --routes /prontuario
+opensdd sdd fgap add "Tela de prontuário ainda não existe" --origin FEAT-0005 --routes /prontuario
 ```
 
 Marcar como resolvido:
 
 ```bash
-opensdd sdd fgap done FGAP-001 --feature FEAT-008 --files src/pages/prontuario.tsx --routes /prontuario
+opensdd sdd fgap done FGAP-001 --feature FEAT-0008 --files src/pages/prontuario.tsx --routes /prontuario
 ```
 
 Automacao nova:
@@ -702,32 +703,32 @@ Observacao:
 | `opensdd sdd ingest` | Alias curto para `opensdd sdd ingest-deposito` |
 | `opensdd sdd insight "<texto>"` | Cria um insight |
 | `opensdd sdd ideia "<texto>"` | Alias em portugues para `opensdd sdd insight` |
-| `opensdd sdd debate INS-###` | Abre debate |
-| `opensdd sdd debater INS-###` | Alias em portugues para `opensdd sdd debate` |
-| `opensdd sdd decide DEB-### --outcome radar` | Aprova debate |
-| `opensdd sdd decide DEB-### --outcome discard` | Reprova debate |
-| `opensdd sdd decidir DEB-### --outcome ...` | Alias em portugues para `opensdd sdd decide` |
-| `opensdd sdd breakdown RAD-### --mode graph` | Planeja um RAD em FEATs |
+| `opensdd sdd debate INS-0001` | Abre debate |
+| `opensdd sdd debater INS-0001` | Alias em portugues para `opensdd sdd debate` |
+| `opensdd sdd decide DEB-0001 --outcome epic` | Aprova debate |
+| `opensdd sdd decide DEB-0001 --outcome discard` | Reprova debate |
+| `opensdd sdd decidir DEB-0001 --outcome ...` | Alias em portugues para `opensdd sdd decide` |
+| `opensdd sdd breakdown EPIC-0001 --mode graph` | Planeja um EPIC em FEATs |
 | `opensdd sdd quebrar RAD-### --mode graph` | Alias em portugues para `opensdd sdd breakdown` |
-| `opensdd sdd desdobrar RAD-### --mode graph` | Alias em portugues para `opensdd sdd breakdown` |
-| `opensdd sdd start FEAT-###` | Inicia execução |
+| `opensdd sdd desdobrar EPIC-0001 --mode graph` | Alias em portugues para `opensdd sdd breakdown` |
+| `opensdd sdd start FEAT-0001` | Inicia execução |
 | `opensdd sdd start "texto livre"` | Cria FEAT direta e já inicia |
 | `opensdd sdd start ... --fluxo direto|padrao|rigoroso` | Define o nivel de rigor sem burocracia excessiva |
-| `opensdd sdd iniciar-execucao FEAT-###` | Alias em portugues para `opensdd sdd start` |
-| `opensdd sdd aprovar FEAT-### --etapa proposta|planejamento|tarefas` | Aprova gate de etapa para a FEAT |
+| `opensdd sdd iniciar-execucao FEAT-0001` | Alias em portugues para `opensdd sdd start` |
+| `opensdd sdd aprovar FEAT-0001 --etapa proposta|planejamento|tarefas` | Aprova gate de etapa para a FEAT |
 | `opensdd sdd next` | Diz o que começar agora |
 | `opensdd sdd proximo` | Alias em portugues para `opensdd sdd next` |
-| `opensdd sdd context FEAT-###` | Gera contexto da FEAT |
-| `opensdd sdd contexto FEAT-###` | Alias em portugues para `opensdd sdd context` |
-| `opensdd sdd frontend-impact FEAT-### --status required\|none --reason "..."` | Declara impacto frontend obrigatório antes do finalize |
-| `opensdd sdd impacto-frontend FEAT-### ...` | Alias em portugues para `opensdd sdd frontend-impact` |
+| `opensdd sdd context FEAT-0001` | Gera contexto da FEAT |
+| `opensdd sdd contexto FEAT-0001` | Alias em portugues para `opensdd sdd context` |
+| `opensdd sdd frontend-impact FEAT-0001 --status required\|none --reason "..."` | Declara impacto frontend obrigatório antes do finalize |
+| `opensdd sdd impacto-frontend FEAT-0001 ...` | Alias em portugues para `opensdd sdd frontend-impact` |
 | `opensdd sdd onboard system` | Gera onboarding global |
 | `opensdd sdd integrar system` | Alias em portugues para `opensdd sdd onboard` |
 | `opensdd sdd orientar system` | Alias em portugues para `opensdd sdd onboard` |
 | `opensdd archive <change-name>` | Arquiva a mudança técnica |
 | `opensdd arquivar <change-name>` | Alias em portugues para `opensdd archive` |
-| `opensdd sdd finalize --ref FEAT-###` | Consolida memória e conclui FEAT |
-| `opensdd sdd consolidar --ref FEAT-###` | Alias em portugues para `opensdd sdd finalize` |
+| `opensdd sdd finalize --ref FEAT-0001` | Consolida memória e conclui FEAT |
+| `opensdd sdd consolidar --ref FEAT-0001` | Alias em portugues para `opensdd sdd finalize` |
 | `opensdd sdd fgap add ...` | Registra gap de frontend |
 | `opensdd sdd fgap done ...` | Marca gap resolvido |
 | `opensdd sdd skills bundles` | Lista bundles |
@@ -743,7 +744,7 @@ Observacao: quando o backlog ainda nao tiver FEAT pronta, `onboard system` retor
 1. Copie o material para `.sdd/deposito/`.
 2. Rode `opensdd sdd ingest-deposito`.
 3. Use `opensdd sdd check --render` para revisar.
-4. Continue por `opensdd sdd next` e `opensdd sdd start FEAT-###`.
+4. Continue por `opensdd sdd next` e `opensdd sdd start FEAT-0001`.
 5. So use `insight/debate` para excecoes e ambiguidades.
 
 ## 9. Exemplo completo: como a Marina usaria
@@ -773,39 +774,39 @@ opensdd sdd insight "Quero programa de fidelidade"
 ### 9.3 Marina debate e aprova
 
 ```bash
-opensdd sdd debate INS-001
-opensdd sdd decide DEB-001 --outcome radar --rationale "Dor principal"
+opensdd sdd debate INS-0001
+opensdd sdd decide DEB-0001 --outcome epic --rationale "Dor principal"
 ```
 
 ### 9.4 Marina quebra em trabalho executável
 
 ```bash
-opensdd sdd breakdown RAD-001 --mode graph --incremental --titles "API de agendamento,Calendario por loja,Tela de agendamento"
+opensdd sdd breakdown EPIC-0001 --mode graph --incremental --titles "API de agendamento,Calendario por loja,Tela de agendamento"
 ```
 
 ### 9.5 Marina inicia execução
 
 ```bash
 opensdd sdd next
-opensdd sdd start FEAT-001
-opensdd sdd context FEAT-001
-opensdd sdd frontend-impact FEAT-001 --status required --reason "Nova rota e nova tela de agendamento"
+opensdd sdd start FEAT-0001
+opensdd sdd context FEAT-0001
+opensdd sdd frontend-impact FEAT-0001 --status required --reason "Nova rota e nova tela de agendamento"
 ```
 
 ### 9.6 Marina aparece com insight no meio do caminho
 
 ```bash
 opensdd sdd insight "Cada loja tem catalogo diferente de servicos"
-opensdd sdd debate INS-009
-opensdd sdd decide DEB-009 --outcome radar --rationale "Impacta agendamento"
-opensdd sdd breakdown RAD-006 --mode graph --incremental --titles "Catalogo de servicos por loja"
+opensdd sdd debate INS-0009
+opensdd sdd decide DEB-0009 --outcome epic --rationale "Impacta agendamento"
+opensdd sdd breakdown EPIC-0006 --mode graph --incremental --titles "Catalogo de servicos por loja"
 ```
 
 ### 9.7 Marina arquiva e consolida
 
 ```bash
 opensdd archive <change-name>
-opensdd sdd finalize --ref FEAT-001
+opensdd sdd finalize --ref FEAT-0001
 opensdd sdd check --render
 opensdd sdd onboard system
 ```
@@ -827,7 +828,7 @@ Você está usando certo quando:
 - novas ideias viram `INS`;
 - decisões aprovadas viram `RAD`;
 - trabalho executável vira `FEAT`;
-- toda FEAT em execução tem `.sdd/active/FEAT-###/`;
+- toda FEAT em execução tem `.sdd/active/FEAT-0001/`;
 - toda consolidação roda `archive` e depois `finalize`;
 - a documentação central cresce junto com o projeto.
 

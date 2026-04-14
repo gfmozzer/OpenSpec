@@ -2,7 +2,7 @@
 
 ## Resumo
 - Titulo: Onboard sugere próximos passos quando backlog vazio
-- Origem: radar (RAD-001)
+- Origem: epic (RAD-001)
 - Tipo: feature
 - Modo: local_plan
 

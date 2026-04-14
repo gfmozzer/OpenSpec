@@ -2,7 +2,7 @@
 
 ## Contexto
 - Feature: FEAT-0002 - Impacto de renomear RADAR para EPIC
-- Origem: radar (EPIC-0001)
+- Origem: epic (EPIC-0005)
 - Finalizado em: 2026-04-11T08:12:20.724Z
 
 ## Decisao
@@ -21,4 +21,4 @@ Consolidar a implementacao da feature FEAT-0002 e oficializar o resultado na mem
 - Nenhum
 
 ## Refs
-- FEAT-0002, EPIC-0001
+- FEAT-0002, EPIC-0005

@@ -2,7 +2,7 @@
 
 ## Contexto
 - Feature: FEAT-001 - Onboard sugere próximos passos quando backlog vazio
-- Origem: radar (RAD-001)
+- Origem: epic (RAD-001)
 - Finalizado em: 2026-03-08T11:33:23.388Z
 
 ## Decisao

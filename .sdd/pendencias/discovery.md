@@ -4,15 +4,27 @@ Documento gerado a partir de `.sdd/state/discovery-index.yaml`.
 
 | ID | Tipo | Status | Titulo | Relacionados |
 | --- | --- | --- | --- | --- |
-| DEB-001 | DEB | APPROVED | Guia automático quando não há backlog | INS-001, RAD-001 |
-| DEB-002 | DEB | APPROVED | Impacto de renomear RADAR para EPIC | INS-002, EPIC-0001 |
-| DEB-003 | DEB | APPROVED | EPIC com IDs SDD em quatro dígitos | INS-003, EPIC-0002 |
-| DEB-004 | DEB | APPROVED | Guardrails de estrutura, diretórios e qualidade do SDD | INS-004, EPIC-0003 |
-| EPIC-0001 | EPIC | DONE | Impacto de renomear RADAR para EPIC | DEB-002, INS-002, FEAT-0002 |
-| EPIC-0002 | EPIC | DONE | EPIC com IDs SDD em quatro dígitos | DEB-003, INS-003, FEAT-0003 |
-| EPIC-0003 | EPIC | DONE | Guardrails de estrutura, diretórios e qualidade do SDD | DEB-004, INS-004, FEAT-0004 |
-| INS-001 | INS | DEBATED | Onboard vazio deve orientar próximos passos | DEB-001 |
-| INS-002 | INS | DEBATED | RADAR deve virar EPIC | DEB-002 |
-| INS-003 | INS | DEBATED | EPIC e IDs SDD com quatro dígitos | DEB-003 |
-| INS-004 | INS | DEBATED | Guardrails estruturais e qualidade rígida do SDD | DEB-004 |
-| RAD-001 | RAD | DONE | Onboard com próximos passos guiados | DEB-001, INS-001, FEAT-001 |
+| DEB-0001 | DEB | APPROVED | Guia automático quando não há backlog | INS-0001, EPIC-0001 |
+| DEB-0002 | DEB | APPROVED | Impacto de renomear RADAR para EPIC | INS-0002, EPIC-0005 |
+| DEB-0003 | DEB | APPROVED | EPIC com IDs SDD em quatro dígitos | INS-0003, EPIC-0002 |
+| DEB-0004 | DEB | APPROVED | Guardrails de estrutura, diretórios e qualidade do SDD | INS-0004, EPIC-0003 |
+| DEB-0005 | DEB | APPROVED | Maturidade e completude da migração mandatória do SDD | INS-0005, EPIC-0004 |
+| DEB-0006 | DEB | APPROVED | Debate: Elevar a qualidade automatizada do projeto com foco em cobertura unitária máxima viável, definição de cobertura  | INS-0006, EPIC-0006 |
+| DEB-0007 | DEB | APPROVED | Debate: Mapear sistematicamente as lacunas de cobertura automatizada da ferramenta, com foco em command wrappers, CLI en | INS-0007, EPIC-0007 |
+| DEB-0008 | DEB | APPROVED | Maturidade estrutural e evolução do SDD como sistema de gestão de estado de projetos | INS-0008, EPIC-0008 |
+| EPIC-0001 | EPIC | DONE | Onboard com próximos passos guiados | DEB-0001, INS-0001, FEAT-0001 |
+| EPIC-0002 | EPIC | DONE | EPIC com IDs SDD em quatro dígitos | DEB-0003, INS-0003, FEAT-0003, FEAT-0007 |
+| EPIC-0003 | EPIC | SPLIT | Guardrails de estrutura, diretórios e qualidade do SDD | DEB-0004, INS-0004, FEAT-0004, FEAT-0005, FEAT-0006 |
+| EPIC-0004 | EPIC | DONE | Migração mandatória de estado SDD | DEB-0005, INS-0005, FEAT-0009 |
+| EPIC-0005 | EPIC | SPLIT | Impacto de renomear RADAR para EPIC | DEB-0002, INS-0002, FEAT-0002, FEAT-0008 |
+| EPIC-0006 | EPIC | DONE | Debate: Elevar a qualidade automatizada do projeto com foco em cobertura unitária máxima viável, definição de cobertura  | DEB-0006, INS-0006, FEAT-0010 |
+| EPIC-0007 | EPIC | DONE | Debate: Mapear sistematicamente as lacunas de cobertura automatizada da ferramenta, com foco em command wrappers, CLI en | DEB-0007, INS-0007, FEAT-0011 |
+| EPIC-0008 | EPIC | SPLIT | Hardening estrutural do SDD — modo dual, lentes reais e meta-evolução | DEB-0008, INS-0008, FEAT-0012, FEAT-0013, FEAT-0014, FEAT-0015, FEAT-0016, FEAT-0017 |
+| INS-0001 | INS | DEBATED | Onboard vazio deve orientar próximos passos | DEB-0001 |
+| INS-0002 | INS | DEBATED | RADAR deve virar EPIC | DEB-0002 |
+| INS-0003 | INS | DEBATED | EPIC e IDs SDD com quatro dígitos | DEB-0003 |
+| INS-0004 | INS | DEBATED | Guardrails estruturais e qualidade rígida do SDD | DEB-0004 |
+| INS-0005 | INS | DEBATED | Maturidade da migração mandatória do SDD | DEB-0005 |
+| INS-0006 | INS | DEBATED | Elevar a qualidade automatizada do projeto com foco em cobertura unitária máxima viável, definição de cobertura e2e mens | DEB-0006 |
+| INS-0007 | INS | DEBATED | Mapear sistematicamente as lacunas de cobertura automatizada da ferramenta, com foco em command wrappers, CLI entrypoint | DEB-0007 |
+| INS-0008 | INS | DEBATED | Análise meta-crítica do SDD como sistema de gestão de estado de projetos | DEB-0008 |

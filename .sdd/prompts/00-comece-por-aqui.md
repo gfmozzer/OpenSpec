@@ -40,16 +40,16 @@ opensdd sdd next
 
 Resultado esperado:
 - fontes indexadas em `.sdd/state/source-index.yaml`
-- RAD criado/reaproveitado
+- EPIC criado/reaproveitado (`RAD` permanece apenas como alias legado)
 - FEATs geradas no backlog
 - primeira FEAT pronta iniciada automaticamente (quando possivel)
 
 ## 4) Como executar uma feature
 
 ```bash
-opensdd sdd start FEAT-001 --fluxo padrao
-opensdd sdd context FEAT-001
-opensdd sdd frontend-impact FEAT-001 --status required --reason "Nova rota e elementos de interface"
+opensdd sdd start FEAT-0001 --fluxo padrao
+opensdd sdd context FEAT-0001
+opensdd sdd frontend-impact FEAT-0001 --status required --reason "Nova rota e elementos de interface"
 ```
 
 Implemente e atualize o pacote da FEAT:
@@ -62,7 +62,7 @@ Implemente e atualize o pacote da FEAT:
 
 ```bash
 opensdd archive <change-name>
-opensdd sdd finalize --ref FEAT-001
+opensdd sdd finalize --ref FEAT-0001
 opensdd sdd check --render
 opensdd sdd onboard system
 ```
@@ -73,10 +73,10 @@ Regra de ouro:
 ## 6) Historia de uso curta (Marina)
 
 Marina colocou PRD + wireframe em `.sdd/deposito/`.
-Ela rodou `opensdd sdd ingest-deposito` e recebeu RAD + FEATs prontas para iniciar.
-Comecou pela FEAT prioritaria com `opensdd sdd start FEAT-001`.
-Antes de codar, rodou `opensdd sdd context FEAT-001`.
-Ao terminar, arquivou a change e executou `opensdd sdd finalize --ref FEAT-001`.
+Ela rodou `opensdd sdd ingest-deposito` e recebeu um EPIC + FEATs prontas para iniciar.
+Comecou pela FEAT prioritaria com `opensdd sdd start FEAT-0001`.
+Antes de codar, rodou `opensdd sdd context FEAT-0001`.
+Ao terminar, arquivou a change e executou `opensdd sdd finalize --ref FEAT-0001`.
 Resultado: backlog atualizado, docs sincronizadas e proxima FEAT liberada sem adivinhacao.
 
 ## 7) Comandos essenciais (resumo)
@@ -84,7 +84,7 @@ Resultado: backlog atualizado, docs sincronizadas e proxima FEAT liberada sem ad
 - `opensdd sdd onboard system`: entender o estado atual.
 - `opensdd sdd ingest-deposito`: transformar material bruto em trilha executavel.
 - `opensdd sdd next`: ver o que pode comecar agora.
-- `opensdd sdd start FEAT-###`: abrir execucao da feature.
-- `opensdd sdd context FEAT-###`: gerar contexto focado.
-- `opensdd sdd frontend-impact FEAT-### --status required|none --reason "...":` declarar impacto frontend.
-- `opensdd sdd finalize --ref FEAT-###`: consolidar memoria e concluir.
+- `opensdd sdd start FEAT-0001`: abrir execucao da feature.
+- `opensdd sdd context FEAT-0001`: gerar contexto focado.
+- `opensdd sdd frontend-impact FEAT-0001 --status required|none --reason "...":` declarar impacto frontend.
+- `opensdd sdd finalize --ref FEAT-0001`: consolidar memoria e concluir.

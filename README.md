@@ -16,22 +16,30 @@ O OpenSDD organiza o desenvolvimento em 4 camadas:
 1. Descoberta
 - `INSIGHT`: ideia bruta
 - `DEBATE`: discussao estruturada
-- `RADAR`: ideia aprovada para futuro planejamento
+- `EPIC`: ideia aprovada para futuro planejamento
 - `DISCARDED`: ideia rejeitada com motivo registrado
 
 2. Planejamento
-- `RAD` pode ser quebrado em `FEATs`
+- `EPIC` pode ser quebrado em `FEATs` (`RAD` segue como alias legado)
 - `FEAT` vira unidade executavel
 - o backlog registra dependencias, bloqueios e paralelizacao
 
 3. Execucao
-- cada `FEAT` ganha um workspace proprio em `.sdd/active/FEAT-###/`
+- cada `FEAT` ganha um workspace proprio em `.sdd/active/FEAT-0001/`
 - esse workspace tem `spec`, `plan`, `tasks` e `changelog`
 
 4. Memoria operacional
 - `.sdd/state/*.yaml` e a fonte canonica
 - `.sdd/core/*.md` sao views operacionais geradas a partir do estado
 - `README.md`, `AGENTS.md`, `AGENT.md` e `.sdd/AGENT.md` orientam humanos e agentes
+
+## Fronteira com a DevTrack Foundation API
+
+Para o backend padrao oficial, o OpenSDD deve operar com uma fronteira clara:
+
+- `devtrack-foundation-api` e a fonte canonica de arquitetura backend, bundles/skills `foundation-*` e eventual starter backend.
+- `devtrack-tools-opensdd` e a camada de distribuicao que instala runtime SDD, perfis, templates e materializacao controlada dessa referencia em projetos derivados.
+- Este repositorio nao deve passar a manter um backend canonico paralelo; quando houver adocao da Foundation, ela deve acontecer por profile/bootstrap/distribuicao.
 
 ## O que fica instalado no projeto
 
@@ -56,7 +64,7 @@ Dentro de `.sdd/` ficam:
 
 - memoria operacional do projeto
 - backlog executavel
-- debates e radar
+- debates e epics
 - gaps e decisoes de frontend
 - skills curadas
 - documentacao viva do sistema
@@ -87,6 +95,16 @@ pnpm install
 pnpm run build
 npm install -g .
 ```
+
+Atalhos uteis de manutencao local:
+
+```bash
+pnpm run cleanup
+pnpm run cleanup:install
+```
+
+- `cleanup`: remove artefatos de build e cache local, como `dist/`, `coverage/`, `.cache/`, `.vite/`, `.vitest/`, `*.tsbuildinfo` e logs de falha de compilacao/execucao.
+- `cleanup:install`: faz a limpeza acima e tambem remove `node_modules/` e lockfiles locais (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lock*`) para recomeçar uma instalacao do zero.
 
 ## Como iniciar em um projeto novo
 
@@ -168,6 +186,10 @@ Fluxo principal:
 opensdd sdd onboard system
 ```
 
+Antes de executar comandos operacionais do SDD, a CLI verifica se existe estado legado em `.sdd/state/`.
+Quando detecta migracao pendente, ela executa a conversao mandatória para o formato canonico atual antes de seguir.
+Isso normaliza principalmente IDs antigos (`RAD-*`, `FEAT-*` sem padding) e persiste `state_version: 2` em `.sdd/config.yaml`.
+
 Se nao houver FEAT pronta, o onboarding agora retorna passos guiados (ex.: criar insight, abrir debate, decidir e quebrar RAD) em vez de deixar `proximos_passos` vazio.
 
 2. Ver o que pode comecar agora
@@ -179,13 +201,13 @@ opensdd sdd next
 3. Iniciar uma feature
 
 ```bash
-opensdd sdd start FEAT-001 --fluxo padrao
+opensdd sdd start FEAT-0001 --fluxo padrao
 ```
 
 4. Ler o contexto da feature
 
 ```bash
-opensdd sdd context FEAT-001
+opensdd sdd context FEAT-0001
 ```
 
 5. Implementar
@@ -193,7 +215,7 @@ opensdd sdd context FEAT-001
 6. Consolidar memoria ao final
 
 ```bash
-opensdd sdd finalize --ref FEAT-001
+opensdd sdd finalize --ref FEAT-0001
 ```
 
 Regra operacional central:
@@ -216,9 +238,9 @@ Quando surgir uma ideia no meio do desenvolvimento:
 
 ```bash
 opensdd sdd insight "descricao da ideia"
-opensdd sdd debate INS-001
-opensdd sdd decide DEB-001 --outcome radar
-opensdd sdd breakdown RAD-001 --mode graph --incremental
+opensdd sdd debate INS-0001
+opensdd sdd decide DEB-0001 --outcome epic
+opensdd sdd breakdown EPIC-0001 --mode graph --incremental
 ```
 
 Esse fluxo serve para nao enfiar no backlog algo que ainda nao foi pensado.
@@ -329,17 +351,17 @@ Onboarding e operacao:
 - `opensdd sdd onboard system`
 - `opensdd sdd orientar system`
 - `opensdd sdd next`
-- `opensdd sdd start FEAT-### --fluxo direto|padrao|rigoroso`
-- `opensdd sdd aprovar FEAT-### --etapa proposta|planejamento|tarefas`
-- `opensdd sdd context FEAT-###`
-- `opensdd sdd finalize --ref FEAT-###`
+- `opensdd sdd start FEAT-0001 --fluxo direto|padrao|rigoroso`
+- `opensdd sdd aprovar FEAT-0001 --etapa proposta|planejamento|tarefas`
+- `opensdd sdd context FEAT-0001`
+- `opensdd sdd finalize --ref FEAT-0001`
 
 Descoberta:
 
 - `opensdd sdd insight "..."`
-- `opensdd sdd debate INS-###`
-- `opensdd sdd decide DEB-### --outcome radar|discard`
-- `opensdd sdd desdobrar RAD-### --mode graph --incremental`
+- `opensdd sdd debate INS-0001`
+- `opensdd sdd decide DEB-0001 --outcome epic|discard`
+- `opensdd sdd desdobrar EPIC-0001 --mode graph --incremental`
 
 ## Documentacao
 
@@ -408,7 +430,7 @@ Ordem de leitura para qualquer agente novo:
 Comandos essenciais:
 - `opensdd sdd onboard system`
 - `opensdd sdd next`
-- `opensdd sdd context FEAT-###`
-- `opensdd sdd frontend-impact FEAT-### --status required|none --reason "..."`
-- `opensdd sdd finalize --ref FEAT-###`
+- `opensdd sdd context FEAT-0001`
+- `opensdd sdd frontend-impact FEAT-0001 --status required|none --reason "..."`
+- `opensdd sdd finalize --ref FEAT-0001`
 <!-- SDD:ONBOARDING:END -->

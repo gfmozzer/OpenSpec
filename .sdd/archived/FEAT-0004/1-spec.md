@@ -2,7 +2,7 @@
 
 ## Resumo
 - Titulo: Guardrails de estrutura, diretórios e qualidade do SDD
-- Origem: radar (EPIC-0003)
+- Origem: epic (EPIC-0003)
 - Tipo: feature
 - Modo: local_plan
 - Fluxo: padrao

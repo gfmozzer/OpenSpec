@@ -2,7 +2,19 @@ version: 1
 contracts:
   - distribution:npm
   - interface:cli
-  - capacidade-de-negocio::FEAT-001
+  - capacidade-de-negocio::FEAT-0001
   - capacidade-de-negocio::FEAT-0002
   - capacidade-de-negocio::FEAT-0003
   - capacidade-de-negocio::FEAT-0004
+  - capacidade-de-negocio::FEAT-0006
+  - api-ou-contrato::FEAT-0008
+  - interface-usuario::FEAT-0008
+  - capacidade-de-negocio::FEAT-0007
+  - capacidade-de-negocio::FEAT-0009
+  - capacidade-de-negocio::FEAT-0010
+  - implementacao-concluida::FEAT-0018
+  - documentacao-atualizada::FEAT-0018
+  - capacidade-de-negocio::FEAT-0011
+  - capacidade-de-negocio::FEAT-0012
+  - capacidade-de-negocio::FEAT-0013
+  - capacidade-de-negocio::FEAT-0014

@@ -2,7 +2,7 @@
 
 ## Contexto
 - Feature: FEAT-0003 - EPIC com IDs SDD em quatro dígitos
-- Origem: radar (EPIC-0002)
+- Origem: epic (EPIC-0002)
 - Finalizado em: 2026-04-11T08:12:46.885Z
 
 ## Decisao

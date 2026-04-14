@@ -54,7 +54,7 @@ Decidir `EPIC/EPIC-###` em vez de `RADAR/RAD-###` para representar a iniciativa 
   O papel atual de `RADAR` no projeto ja e de iniciativa aprovada que gera FEATs, acompanha progresso e serve de referencia de origem. Isso e semanticamente mais proximo de `EPIC` do que de um simples "radar".
 - Evidencias:
   - `opensdd sdd breakdown RAD-###` transforma a entidade em FEATs executaveis.
-  - `backlog.yaml` guarda `origin_type: radar` e `origin_ref: RAD-###`.
+  - `backlog.yaml` guarda `origin_type: epic` e `origin_ref: RAD-###`.
   - `check.ts`, `views.ts` e `operations.ts` calculam progresso agregado por `RAD`.
   - `onboard`, `context` e `start` aceitam `RAD-###` como referencia operacional.
   - A documentacao ja descreve esse item como iniciativa aprovada de planejamento.

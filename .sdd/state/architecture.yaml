@@ -31,3 +31,87 @@ nodes:
     description: ""
     repo_paths: []
     depends_on: []
+  - id: FEAT-0005
+    name: Validar coerencia entre estado logico e localizacao fisica dos artefatos
+      SDD
+    kind: feature
+    description: Implementar verificacao sistematica entre backlog/discovery e a
+      localizacao fisica em .sdd/active e .sdd/archived para impedir
+      divergencias historicas como features DONE ainda abertas em active.
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0008
+    name: Concluir normalizacao de EPIC como termo canonico nas interfaces e docs SDD
+    kind: feature
+    description: Fechar a migracao semantica de RAD/RADAR para EPIC em documentacao,
+      exemplos, help de comandos e mensagens humanas, preservando apenas
+      compatibilidade retroativa onde estritamente necessario.
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0007
+    name: Completar transicao documentada para IDs SDD canonicos de quatro digitos
+    kind: feature
+    description: "Padronizar a experiencia humana do SDD para IDs no formato #### em
+      docs, mensagens, exemplos e orientacoes operacionais, mantendo suporte
+      legada apenas como compatibilidade."
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0009
+    name: Gate mandatória de migração SDD
+    kind: feature
+    description: ""
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0010
+    name: "Debate: Elevar a qualidade automatizada do projeto com foco em cobertura
+      unitária máxima viável, definição de cobertura"
+    kind: feature
+    description: ""
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0018
+    name: Adotar DevTrack Foundation API como backend padrão do OpenSDD
+    kind: documentation
+    description: ""
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0011
+    name: Ampliar cobertura automatizada nos comandos com lógica real e branches
+      relevantes
+    kind: feature
+    description: Criar testes unitários para validate.ts, spec.ts, change.ts,
+      completion.ts e match.ts, atacando branches com lógica real de negócio
+      conforme decisão DEB-0007 Opção B.
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0012
+    name: Enriquecer prompts e templates com critérios de qualidade mínima por
+      artefato
+    kind: feature
+    description: Adicionar instruções de geração, critérios de qualidade mínima e
+      frases proibidas (placeholders) a cada template e lente do SDD. Garantir
+      que artefatos gerados por LLM não possam ser archivados com campos
+      Objetivo/Resumo contendo texto de placeholder.
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0013
+    name: Lentes estruturais como bloqueadores reais de transição no TransitionEngine
+    kind: feature
+    description: Vincular a aprovação de transição de estado à validação obrigatória
+      da lente do artefato. Nenhuma transição FEAT→IN_PROGRESS, FEAT→DONE ou
+      FEAT→ARCHIVED ocorre sem conformidade 100% da lente. Adicionar flag
+      forced_transition rastreável para casos de bypass explícito.
+    repo_paths: []
+    depends_on:
+      - FEAT-0012
+  - id: FEAT-0014
+    name: Roteamento semântico de skills por domínio da feature
+    kind: feature
+    description: Substituir a lista genérica de skills (architecture,
+      concise-planning, context-window-management) por roteamento baseado no
+      domínio declarado na FEAT
+      (backend/frontend/infra/testing/architecture/data/full-stack). Criar
+      skill-routing.yaml editável e gerar recomendações dinamicamente no
+      2-plan.md.
+    repo_paths: []
+    depends_on: []

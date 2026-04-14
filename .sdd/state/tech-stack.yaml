@@ -18,5 +18,10 @@ items:
   - layer: backend
     technology: backend
     version: ""
-    purpose: Area impactada por FEAT-001
+    purpose: Area impactada por FEAT-0001
+    constraints: []
+  - layer: docs
+    technology: docs
+    version: ""
+    purpose: Area impactada por FEAT-0018
     constraints: []

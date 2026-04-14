@@ -2,7 +2,7 @@
 
 ## Resumo
 - Titulo: EPIC com IDs SDD em quatro dígitos
-- Origem: radar (EPIC-0002)
+- Origem: epic (EPIC-0002)
 - Tipo: feature
 - Modo: local_plan
 - Fluxo: padrao

@@ -1,46 +1,46 @@
 version: 1
 counters:
-  INS: 4
-  DEB: 4
-  RAD: 1
-  EPIC: 3
-  FEAT: 4
+  INS: 8
+  DEB: 8
+  RAD: 0
+  EPIC: 8
+  FEAT: 18
   FGAP: 0
   TD: 0
 records:
-  - id: INS-001
+  - id: INS-0001
     type: INS
     title: Onboard vazio deve orientar próximos passos
     status: DEBATED
     origin_prompt: Quando o onboarding retorna backlog vazio, precisamos de próximos
       passos guiados automaticamente para usuário leigo.
     related_ids:
-      - DEB-001
+      - DEB-0001
     created_at: 2026-03-08T11:25:06.444Z
     updated_at: 2026-03-08T11:25:09.733Z
-  - id: DEB-001
+  - id: DEB-0001
     type: DEB
     title: Guia automático quando não há backlog
     status: APPROVED
-    origin_prompt: Debate originado de INS-001 por codex
+    origin_prompt: Debate originado de INS-0001 por codex
     related_ids:
-      - INS-001
-      - RAD-001
+      - INS-0001
+      - EPIC-0001
     created_at: 2026-03-08T11:25:09.733Z
     updated_at: 2026-03-08T11:25:19.530Z
-  - id: RAD-001
-    type: RAD
+  - id: EPIC-0001
+    type: EPIC
     title: Onboard com próximos passos guiados
     status: DONE
     origin_prompt: Sem backlog, onboard deve recomendar criação de
       insight/debate/breakdown e start
     related_ids:
-      - DEB-001
-      - INS-001
-      - FEAT-001
+      - DEB-0001
+      - INS-0001
+      - FEAT-0001
     created_at: 2026-03-08T11:25:19.530Z
     updated_at: 2026-03-08T11:33:23.388Z
-  - id: INS-002
+  - id: INS-0002
     type: INS
     title: RADAR deve virar EPIC
     status: DEBATED
@@ -49,20 +49,20 @@ records:
       compatibilidade, migração de estado, aliases de CLI, documentação e
       impactos em backlog/origin_ref.
     related_ids:
-      - DEB-002
+      - DEB-0002
     created_at: 2026-04-09T20:27:06.277Z
     updated_at: 2026-04-09T20:27:16.296Z
-  - id: DEB-002
+  - id: DEB-0002
     type: DEB
     title: Impacto de renomear RADAR para EPIC
     status: APPROVED
-    origin_prompt: Debate originado de INS-002 por codex
+    origin_prompt: Debate originado de INS-0002 por codex
     related_ids:
-      - INS-002
-      - EPIC-0001
+      - INS-0002
+      - EPIC-0005
     created_at: 2026-04-09T20:27:16.296Z
     updated_at: 2026-04-11T08:10:04.930Z
-  - id: INS-003
+  - id: INS-0003
     type: INS
     title: EPIC e IDs SDD com quatro dígitos
     status: DEBATED
@@ -72,20 +72,20 @@ records:
       compatibilidade, migracao de estado, templates, docs, aliases e projetos
       ja inicializados.
     related_ids:
-      - DEB-003
+      - DEB-0003
     created_at: 2026-04-09T20:31:18.659Z
     updated_at: 2026-04-09T20:31:34.181Z
-  - id: DEB-003
+  - id: DEB-0003
     type: DEB
     title: EPIC com IDs SDD em quatro dígitos
     status: APPROVED
-    origin_prompt: Debate originado de INS-003 por codex
+    origin_prompt: Debate originado de INS-0003 por codex
     related_ids:
-      - INS-003
+      - INS-0003
       - EPIC-0002
     created_at: 2026-04-09T20:31:34.181Z
     updated_at: 2026-04-11T08:10:41.417Z
-  - id: INS-004
+  - id: INS-0004
     type: INS
     title: Guardrails estruturais e qualidade rígida do SDD
     status: DEBATED
@@ -96,46 +96,201 @@ records:
       para garantir formato exato na geração por LLM, e impedir avanço de estado
       sem 100% de validação das regras obrigatórias.
     related_ids:
-      - DEB-004
+      - DEB-0004
     created_at: 2026-04-09T20:43:11.299Z
     updated_at: 2026-04-09T20:43:25.833Z
-  - id: DEB-004
+  - id: DEB-0004
     type: DEB
     title: Guardrails de estrutura, diretórios e qualidade do SDD
     status: APPROVED
-    origin_prompt: Debate originado de INS-004 por codex
+    origin_prompt: Debate originado de INS-0004 por codex
     related_ids:
-      - INS-004
+      - INS-0004
       - EPIC-0003
     created_at: 2026-04-09T20:43:25.833Z
     updated_at: 2026-04-11T08:10:54.708Z
-  - id: EPIC-0001
+  - id: EPIC-0005
     type: EPIC
     title: Impacto de renomear RADAR para EPIC
-    status: DONE
+    status: SPLIT
     related_ids:
-      - DEB-002
-      - INS-002
+      - DEB-0002
+      - INS-0002
       - FEAT-0002
+      - FEAT-0008
     created_at: 2026-04-11T08:10:04.930Z
-    updated_at: 2026-04-11T08:12:20.724Z
+    updated_at: 2026-04-12T05:45:08.255Z
   - id: EPIC-0002
     type: EPIC
     title: EPIC com IDs SDD em quatro dígitos
     status: DONE
     related_ids:
-      - DEB-003
-      - INS-003
+      - DEB-0003
+      - INS-0003
       - FEAT-0003
+      - FEAT-0007
     created_at: 2026-04-11T08:10:41.417Z
-    updated_at: 2026-04-11T08:12:46.885Z
+    updated_at: 2026-04-12T08:15:02.437Z
   - id: EPIC-0003
     type: EPIC
     title: Guardrails de estrutura, diretórios e qualidade do SDD
+    status: SPLIT
+    related_ids:
+      - DEB-0004
+      - INS-0004
+      - FEAT-0004
+      - FEAT-0005
+      - FEAT-0006
+    created_at: 2026-04-11T08:10:54.708Z
+    updated_at: 2026-04-12T06:10:00.000Z
+  - id: INS-0005
+    type: INS
+    title: Maturidade da migração mandatória do SDD
+    status: DEBATED
+    origin_prompt: Avaliar a maturidade e a completude da migracao mandatória do SDD
+      para o modelo canonico atual, incluindo renomeacao automatica de RAD para
+      EPIC, padronizacao de IDs em quatro digitos, migracao integral do
+      historico e enforcement de bloqueio do fluxo quando houver estado legado
+      pendente.
+    related_ids:
+      - DEB-0005
+    created_at: 2026-04-13T02:02:52.654Z
+    updated_at: 2026-04-13T02:03:05.279Z
+  - id: DEB-0005
+    type: DEB
+    title: Maturidade e completude da migração mandatória do SDD
+    status: APPROVED
+    origin_prompt: Debate originado de INS-0005
+    related_ids:
+      - INS-0005
+      - EPIC-0004
+    created_at: 2026-04-13T02:03:05.279Z
+    updated_at: 2026-04-13T02:15:53.463Z
+  - id: EPIC-0004
+    type: EPIC
+    title: Migração mandatória de estado SDD
+    status: DONE
+    origin_prompt: Tornar a migração para o modelo canônico automática, bloqueante e
+      auditável antes de qualquer fluxo operacional novo.
+    related_ids:
+      - DEB-0005
+      - INS-0005
+      - FEAT-0009
+    created_at: 2026-04-13T02:15:53.463Z
+    updated_at: 2026-04-13T02:32:30.319Z
+  - id: INS-0006
+    type: INS
+    title: Elevar a qualidade automatizada do projeto com foco em cobertura unitária
+      máxima viável, definição de cobertura e2e mens
+    status: DEBATED
+    origin_prompt: Elevar a qualidade automatizada do projeto com foco em cobertura
+      unitária máxima viável, definição de cobertura e2e mensurável e
+      endurecimento dos gates de teste para atingir o maior nível de confiança
+      possível antes de release.
+    related_ids:
+      - DEB-0006
+    created_at: 2026-04-13T03:51:02.978Z
+    updated_at: 2026-04-13T03:51:12.303Z
+  - id: DEB-0006
+    type: DEB
+    title: "Debate: Elevar a qualidade automatizada do projeto com foco em cobertura
+      unitária máxima viável, definição de cobertura "
+    status: APPROVED
+    origin_prompt: Debate originado de INS-0006
+    related_ids:
+      - INS-0006
+      - EPIC-0006
+    created_at: 2026-04-13T03:51:12.303Z
+    updated_at: 2026-04-13T03:52:07.211Z
+  - id: EPIC-0006
+    type: EPIC
+    title: "Debate: Elevar a qualidade automatizada do projeto com foco em cobertura
+      unitária máxima viável, definição de cobertura "
     status: DONE
     related_ids:
-      - DEB-004
-      - INS-004
-      - FEAT-0004
-    created_at: 2026-04-11T08:10:54.708Z
-    updated_at: 2026-04-11T08:13:21.419Z
+      - DEB-0006
+      - INS-0006
+      - FEAT-0010
+    created_at: 2026-04-13T03:52:07.211Z
+    updated_at: 2026-04-13T04:00:24.026Z
+  - id: INS-0007
+    type: INS
+    title: Mapear sistematicamente as lacunas de cobertura automatizada da
+      ferramenta, com foco em command wrappers, CLI entrypoint
+    status: DEBATED
+    origin_prompt: Mapear sistematicamente as lacunas de cobertura automatizada da
+      ferramenta, com foco em command wrappers, CLI entrypoints, fluxos SDD e
+      definicao de uma matriz priorizada de cenarios de teste de alto valor para
+      ampliar a confianca da suite.
+    related_ids:
+      - DEB-0007
+    created_at: 2026-04-13T04:32:35.796Z
+    updated_at: 2026-04-13T04:32:44.471Z
+  - id: DEB-0007
+    type: DEB
+    title: "Debate: Mapear sistematicamente as lacunas de cobertura automatizada da
+      ferramenta, com foco em command wrappers, CLI en"
+    status: APPROVED
+    origin_prompt: Debate originado de INS-0007
+    related_ids:
+      - INS-0007
+      - EPIC-0007
+    created_at: 2026-04-13T04:32:44.471Z
+    updated_at: 2026-04-13T04:34:46.012Z
+  - id: EPIC-0007
+    type: EPIC
+    title: "Debate: Mapear sistematicamente as lacunas de cobertura automatizada da
+      ferramenta, com foco em command wrappers, CLI en"
+    status: DONE
+    related_ids:
+      - DEB-0007
+      - INS-0007
+      - FEAT-0011
+    created_at: 2026-04-13T04:34:46.012Z
+    updated_at: 2026-04-14T03:55:17.129Z
+  - id: INS-0008
+    type: INS
+    title: Análise meta-crítica do SDD como sistema de gestão de estado de projetos
+    status: DEBATED
+    origin_prompt: Após observar o histórico completo de evolução do OpenSDD
+      (março–abril 2026), avaliar se a arquitetura atual de fluxo é a melhor
+      possível ou se existem lacunas estruturais que devem ser corrigidas —
+      cobrindo qualidade de prompts, lentes simbólicas, funil de decisão rápido
+      demais, skills genéricas, ADRs opcionais e ausência de meta-evolução
+      formal.
+    related_ids:
+      - DEB-0008
+    created_at: 2026-04-13T00:00:00.000Z
+    updated_at: 2026-04-13T00:00:00.000Z
+  - id: DEB-0008
+    type: DEB
+    title: Maturidade estrutural e evolução do SDD como sistema de gestão de estado
+      de projetos
+    status: APPROVED
+    origin_prompt: Debate originado de INS-0008 por análise humana assistida
+    related_ids:
+      - INS-0008
+      - EPIC-0008
+    created_at: 2026-04-13T00:00:00.000Z
+    updated_at: 2026-04-13T00:00:00.000Z
+  - id: EPIC-0008
+    type: EPIC
+    title: Hardening estrutural do SDD — modo dual, lentes reais e meta-evolução
+    status: SPLIT
+    origin_prompt: "Implementar os cinco eixos de hardening do SDD: (1)
+      enriquecimento de prompts por artefato, (2) lentes como bloqueadores reais
+      de transição, (3) roteamento semântico de skills, (4) ADR mandatório para
+      impacto arquitetural, (5) protocolo de meta-evolução semestral. Adicionar
+      modo dual rigoroso/express e sanitização semântica de propagação de
+      títulos."
+    related_ids:
+      - DEB-0008
+      - INS-0008
+      - FEAT-0012
+      - FEAT-0013
+      - FEAT-0014
+      - FEAT-0015
+      - FEAT-0016
+      - FEAT-0017
+    created_at: 2026-04-13T00:00:00.000Z
+    updated_at: 2026-04-13T00:00:00.000Z

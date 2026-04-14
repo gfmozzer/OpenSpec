@@ -38,6 +38,12 @@ This file mirrors `AGENTS.md` for tools that still require the singular filename
 - `docs/`: human documentation
 - `test/`: Vitest suites
 
+## Backend Canonical Boundary
+
+- `devtrack-foundation-api` is the canonical source for backend architecture, foundation skills/bundles and any future backend starter.
+- `devtrack-tools-opensdd` owns distribution, bootstrap, profiles and template materialization for derived projects.
+- When working on backend-default adoption in this repository, read the Foundation as reference only and avoid duplicating canonical artifacts here without an explicit sync/versioning rule.
+
 ## SDD Workflow (What agents should use)
 
 <!-- SDD:ROOT-AGENTS:START -->
@@ -47,16 +53,16 @@ Agents working in this repository must treat documentation sync as part of featu
 
 Required execution order:
 1. Run `opensdd sdd onboard system` before broad work.
-2. Run `opensdd sdd start FEAT-###` before implementation.
-3. Use `opensdd sdd context FEAT-###` before coding.
-4. Before archive/finalize, declare frontend impact with `opensdd sdd frontend-impact FEAT-### ...`.
+2. Run `opensdd sdd start FEAT-0001` before implementation.
+3. Use `opensdd sdd context FEAT-0001` before coding.
+4. Before archive/finalize, declare frontend impact with `opensdd sdd frontend-impact FEAT-0001 ...`.
 5. Before archive/finalize, update the documentation affected by the feature:
    - `README.md`
    - `.sdd/AGENT.md`
    - `.sdd/core/*.md`
    - `AGENTS.md`
    - `AGENT.md`
-6. Run `opensdd sdd finalize --ref FEAT-###` to consolidate memory.
+6. Run `opensdd sdd finalize --ref FEAT-0001` to consolidate memory.
 
 Canonical state lives in `.sdd/state/*.yaml`. Markdown files are operational views or guides derived from that state.
 <!-- SDD:ROOT-AGENTS:END -->

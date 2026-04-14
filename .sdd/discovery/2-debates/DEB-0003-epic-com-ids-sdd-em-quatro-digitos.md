@@ -66,7 +66,7 @@ Decidir a evolucao combinada do modelo SDD para usar `EPIC/EPIC-####` no lugar d
   - `src/core/sdd/types.ts` ainda define `DiscoveryTypeSchema` com `RAD`, nao `EPIC`.
   - `src/commands/sdd.ts` expoe `--radar`, mensagens `Use RAD-###` e descricoes de onboarding com `RAD-###`.
   - `README.md`, `AGENTS.md`, `docs/sdd-manual-pt-br.md`, `.sdd/README.md` e templates internos repetem a convencao atual.
-  - O estado real em `.sdd/state/discovery-index.yaml` e `.sdd/state/backlog.yaml` referencia `RAD-001`, `origin_type: radar` e `origin_ref: RAD-001`.
+  - O estado real em `.sdd/state/discovery-index.yaml` e `.sdd/state/backlog.yaml` referencia `RAD-001`, `origin_type: epic` e `origin_ref: RAD-001`.
 
 ## 5) Rodada de critica cruzada
 ### A critica B

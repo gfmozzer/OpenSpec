@@ -29,7 +29,7 @@ opensdd sdd orientar system
 ### O que o sistema gera para ela
 - `.sdd/descoberta/` para ideias e debates.
 - `.sdd/planejamento/` para backlog e progresso.
-- `.sdd/execucao/FEAT-###/` para execucao ativa.
+- `.sdd/execucao/FEAT-0001/` para execucao ativa.
 - `.sdd/state/*.yaml` como fonte de verdade.
 - `.sdd/core/*.md` como visao operacional gerada.
 
@@ -64,9 +64,9 @@ Marina decide comecar por uma iniciativa de agendamento online.
 
 ```bash
 opensdd sdd ideia "Clientes precisam agendar banho online por loja"
-opensdd sdd debater INS-001
-opensdd sdd decidir DEB-001 --outcome radar --rationale "Dor principal do negocio"
-opensdd sdd desdobrar RAD-001 --mode graph --incremental --titles "API de agendamento,Calendario por loja,Tela de agendamento"
+opensdd sdd debater INS-0001
+opensdd sdd decidir DEB-0001 --outcome epic --rationale "Dor principal do negocio"
+opensdd sdd desdobrar EPIC-0001 --mode graph --incremental --titles "API de agendamento,Calendario por loja,Tela de agendamento"
 opensdd sdd proximo
 ```
 
@@ -78,17 +78,17 @@ opensdd sdd proximo
 Exemplo de inicio em modo rigoroso:
 
 ```bash
-opensdd sdd start FEAT-001 --fluxo rigoroso
+opensdd sdd start FEAT-0001 --fluxo rigoroso
 ```
 
 ---
 
 ## Fase 4: Uso dos Arquivos de Execucao por Entrega
 Ao iniciar uma entrega, o sistema cria:
-- `.sdd/execucao/FEAT-001/1-especificacao.md`
-- `.sdd/execucao/FEAT-001/2-planejamento.md`
-- `.sdd/execucao/FEAT-001/3-tarefas.md`
-- `.sdd/execucao/FEAT-001/4-historico.md`
+- `.sdd/execucao/FEAT-0001/1-especificacao.md`
+- `.sdd/execucao/FEAT-0001/2-planejamento.md`
+- `.sdd/execucao/FEAT-0001/3-tarefas.md`
+- `.sdd/execucao/FEAT-0001/4-historico.md`
 
 Marina usa assim:
 1. `1-especificacao.md`: problema, objetivo, escopo, fora de escopo, criterios de aceite (`CA-##`).
@@ -99,19 +99,19 @@ Marina usa assim:
 Para revisar contexto antes de codar:
 
 ```bash
-opensdd sdd contexto FEAT-001
+opensdd sdd contexto FEAT-0001
 ```
 
 Antes de fechar a entrega, ela declara impacto de frontend:
 
 ```bash
-opensdd sdd impacto-frontend FEAT-001 --status required --reason "Nova rota e novo fluxo visual"
+opensdd sdd impacto-frontend FEAT-0001 --status required --reason "Nova rota e novo fluxo visual"
 ```
 
 Se for somente backend sem efeito de UI:
 
 ```bash
-opensdd sdd impacto-frontend FEAT-001 --status none --reason "Apenas refatoracao interna sem alteracao de interface"
+opensdd sdd impacto-frontend FEAT-0001 --status none --reason "Apenas refatoracao interna sem alteracao de interface"
 ```
 
 ---
@@ -120,9 +120,9 @@ opensdd sdd impacto-frontend FEAT-001 --status none --reason "Apenas refatoracao
 No modo `rigoroso`, Marina aprova etapas antes de concluir:
 
 ```bash
-opensdd sdd aprovar FEAT-001 --etapa proposta --por "Marina"
-opensdd sdd aprovar FEAT-001 --etapa planejamento --por "Marina"
-opensdd sdd aprovar FEAT-001 --etapa tarefas --por "Marina"
+opensdd sdd aprovar FEAT-0001 --etapa proposta --por "Marina"
+opensdd sdd aprovar FEAT-0001 --etapa planejamento --por "Marina"
+opensdd sdd aprovar FEAT-0001 --etapa tarefas --por "Marina"
 ```
 
 No modo `direto`, ela pode executar mais rapido sem cerimonia pesada.
@@ -134,9 +134,9 @@ Durante a implementacao, surge nova ideia:
 
 ```bash
 opensdd sdd ideia "Cada loja tem catalogo proprio de servicos"
-opensdd sdd debater INS-009
-opensdd sdd decidir DEB-009 --outcome radar --rationale "Impacta o agendamento"
-opensdd sdd desdobrar RAD-006 --mode graph --incremental --titles "Catalogo por loja"
+opensdd sdd debater INS-0009
+opensdd sdd decidir DEB-0009 --outcome epic --rationale "Impacta o agendamento"
+opensdd sdd desdobrar EPIC-0006 --mode graph --incremental --titles "Catalogo por loja"
 opensdd sdd proximo
 ```
 
@@ -149,7 +149,7 @@ Quando termina a entrega tecnica:
 
 ```bash
 opensdd arquivar <change-name>
-opensdd sdd consolidar --ref FEAT-001
+opensdd sdd consolidar --ref FEAT-0001
 opensdd sdd checar --render
 opensdd sdd orientar system
 ```

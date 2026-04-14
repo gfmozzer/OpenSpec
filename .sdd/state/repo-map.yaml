@@ -20,10 +20,44 @@ items:
     kind: manifest
     service_ref: ""
     notes: Manifesto principal
+  - path: src/core/init.ts
+    kind: source
+    service_ref: ""
+    notes: Bootstrap global do OpenSDD/OpenSpec e selecao dos perfis atuais de
+      workflow.
+  - path: src/core/profiles.ts
+    kind: source
+    service_ref: ""
+    notes: Define apenas perfis de workflow (`core` e `custom`), nao perfis de
+      backend.
+  - path: src/core/sdd/init.ts
+    kind: source
+    service_ref: ""
+    notes: Semeia a estrutura base do SDD, bootstrap inicial de contexto e
+      sincronizacao do catalogo curado.
+  - path: src/core/sdd/state.ts
+    kind: source
+    service_ref: ""
+    notes: Resolve paths, layouts e arquivos seed que definem o kit padrao do SDD.
+  - path: src/core/sdd/default-skills.ts
+    kind: source
+    service_ref: ""
+    notes: Define o catalogo curado local, bundles default e skills nativas do
+      bootstrap atual.
+  - path: src/core/sdd/operations.ts
+    kind: source
+    service_ref: ""
+    notes: Materializa/sincroniza bundles e skills curadas no workspace SDD do
+      projeto.
+  - path: .sdd/active/FEAT-0018
+    kind: docs
+    service_ref: ""
+    notes: Workspace ativo da feature de planejamento da adocao da Foundation API
+      como backend padrao.
   - path: openspec/changes/archive/feat-001-onboard-sugere-proximos-passos-quando-bac
     kind: change-archive
     service_ref: backend
-    notes: Consolidado no finalize FEAT-001
+    notes: Consolidado no finalize FEAT-0001
   - path: openspec/changes/archive/feat-0002-impacto-de-renomear-radar-para-epic
     kind: change-archive
     service_ref: backend
@@ -36,3 +70,43 @@ items:
     kind: change-archive
     service_ref: backend
     notes: Consolidado no finalize FEAT-0004
+  - path: openspec/changes/archive/feat-0006-aplicar-lentes-estruturais-e-politica-ce
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0006
+  - path: openspec/changes/archive/feat-0008-concluir-normalizacao-de-epic-como-termo
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0008
+  - path: openspec/changes/archive/feat-0007-completar-transicao-documentada-para-ids
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0007
+  - path: openspec/changes/archive/feat-0009-gate-mandatoria-de-migracao-sdd
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0009
+  - path: openspec/changes/archive/feat-0010-debate-elevar-a-qualidade-automatizada-d
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0010
+  - path: openspec/changes/archive/feat-0018-adotar-devtrack-foundation-api-como-back
+    kind: change-archive
+    service_ref: docs
+    notes: Consolidado no finalize FEAT-0018
+  - path: openspec/changes/archive/feat-0011-ampliar-cobertura-comandos-logica-real
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0011
+  - path: openspec/changes/archive/feat-0012-enriquecer-prompts-e-templates-qualidade
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0012
+  - path: openspec/changes/archive/feat-0013-lentes-como-bloqueadores-reais-transicao
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0013
+  - path: openspec/changes/archive/feat-0014-roteamento-semantico-skills-por-dominio
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0014

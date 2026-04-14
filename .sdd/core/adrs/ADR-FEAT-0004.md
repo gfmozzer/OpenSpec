@@ -2,7 +2,7 @@
 
 ## Contexto
 - Feature: FEAT-0004 - Guardrails de estrutura, diretórios e qualidade do SDD
-- Origem: radar (EPIC-0003)
+- Origem: epic (EPIC-0003)
 - Finalizado em: 2026-04-11T08:13:21.419Z
 
 ## Decisao

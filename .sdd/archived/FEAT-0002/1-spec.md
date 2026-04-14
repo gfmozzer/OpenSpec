@@ -2,7 +2,7 @@
 
 ## Resumo
 - Titulo: Impacto de renomear RADAR para EPIC
-- Origem: radar (EPIC-0001)
+- Origem: epic (EPIC-0005)
 - Tipo: feature
 - Modo: local_plan
 - Fluxo: padrao
@@ -18,4 +18,4 @@ Descrever o resultado esperado desta feature com criterios de aceite objetivos.
 
 ## Refs
 - Feature: FEAT-0002
-- Acceptance refs: EPIC-0001
+- Acceptance refs: EPIC-0005

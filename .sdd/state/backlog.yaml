@@ -1,10 +1,10 @@
 version: 1
 items:
-  - id: FEAT-001
+  - id: FEAT-0001
     title: Onboard sugere próximos passos quando backlog vazio
     status: DONE
-    origin_type: radar
-    origin_ref: RAD-001
+    origin_type: epic
+    origin_ref: EPIC-0001
     scale: STANDARD
     summary: ""
     blocked_by: []
@@ -15,7 +15,7 @@ items:
     execution_kind: feature
     planning_mode: local_plan
     flow_mode: padrao
-    current_stage: proposta
+    current_stage: consolidacao
     gates:
       proposta:
         status: rascunho
@@ -24,7 +24,7 @@ items:
       tarefas:
         status: rascunho
     acceptance_refs:
-      - RAD-001
+      - EPIC-0001
     produces:
       - capacidade-de-negocio
     consumes: []
@@ -38,7 +38,9 @@ items:
     change_name: feat-001-onboard-sugere-proximos-passos-quando-bac
     branch_name: ""
     worktree_path: ""
-    frontend_impact_status: unknown
+    frontend_impact_status: none
+    frontend_impact_reason: Ajuste historico do onboarding sem alteracao de interface.
+    frontend_impact_declared_at: 2026-04-12T00:00:00.000Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
     spec_refs: []
@@ -49,15 +51,15 @@ items:
   - id: FEAT-0002
     title: Impacto de renomear RADAR para EPIC
     status: DONE
-    origin_type: radar
-    origin_ref: EPIC-0001
+    origin_type: epic
+    origin_ref: EPIC-0005
     scale: STANDARD
     summary: ""
     blocked_by: []
     touches:
       - backend
     lock_domains: []
-    parallel_group: radar-epic-0001
+    parallel_group: radar-epic-0005
     execution_kind: feature
     planning_mode: local_plan
     flow_mode: padrao
@@ -79,7 +81,7 @@ items:
         approved_by: ""
         note: ""
     acceptance_refs:
-      - EPIC-0001
+      - EPIC-0005
     produces:
       - capacidade-de-negocio
     consumes: []
@@ -108,7 +110,7 @@ items:
   - id: FEAT-0003
     title: EPIC com IDs SDD em quatro dígitos
     status: DONE
-    origin_type: radar
+    origin_type: epic
     origin_ref: EPIC-0002
     scale: STANDARD
     summary: ""
@@ -167,7 +169,7 @@ items:
   - id: FEAT-0004
     title: Guardrails de estrutura, diretórios e qualidade do SDD
     status: DONE
-    origin_type: radar
+    origin_type: epic
     origin_ref: EPIC-0003
     scale: STANDARD
     summary: ""
@@ -222,4 +224,858 @@ items:
     last_sync_at: 2026-04-11T08:13:21.419Z
     archived_at: ""
     done_at: 2026-04-11T08:13:21.419Z
+    unblocked_at: ""
+  - id: FEAT-0008
+    title: Concluir normalizacao de EPIC como termo canonico nas interfaces e docs SDD
+    status: DONE
+    origin_type: epic
+    origin_ref: EPIC-0005
+    scale: STANDARD
+    summary: Fechar a migracao semantica de RAD/RADAR para EPIC em documentacao,
+      exemplos, help de comandos e mensagens humanas, preservando apenas
+      compatibilidade retroativa onde estritamente necessario.
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0005
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0005
+    produces:
+      - interface-usuario
+    consumes:
+      - api-ou-contrato
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: feat-0008-concluir-normalizacao-de-epic-como-termo
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Ajuste de nomenclatura e documentacao interna do SDD,
+      sem interface de produto.
+    frontend_impact_declared_at: 2026-04-12T06:10:00.000Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-12T08:16:57.000Z
+    archived_at: ""
+    done_at: 2026-04-12T08:16:57.000Z
+    unblocked_at: ""
+  - id: FEAT-0007
+    title: Completar transicao documentada para IDs SDD canonicos de quatro digitos
+    status: DONE
+    origin_type: epic
+    origin_ref: EPIC-0002
+    scale: STANDARD
+    summary: "Padronizar a experiencia humana do SDD para IDs no formato #### em
+      docs, mensagens, exemplos e orientacoes operacionais, mantendo suporte
+      legada apenas como compatibilidade."
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0002
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0002
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: feat-0007-completar-transicao-documentada-para-ids
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Regularizacao de formatos e mensagens internas do SDD
+      sem interface de produto.
+    frontend_impact_declared_at: 2026-04-12T06:10:00.000Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-12T08:15:02.437Z
+    archived_at: ""
+    done_at: 2026-04-12T08:15:02.437Z
+    unblocked_at: ""
+  - id: FEAT-0006
+    title: Aplicar lentes estruturais e politica central de transicao em todo o
+      fluxo SDD
+    status: DONE
+    origin_type: epic
+    origin_ref: EPIC-0003
+    scale: STANDARD
+    summary: Centralizar enforcement de transicoes e validacoes estruturais do SDD
+      para que start, approve, finalize e checks usem a mesma politica
+      operacional e as mesmas lentes obrigatorias.
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0003
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0003
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: feat-0006-aplicar-lentes-estruturais-e-politica-ce
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Fortalecimento de regras internas do fluxo SDD sem interface de produto.
+    frontend_impact_declared_at: 2026-04-12T06:10:00.000Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-12T08:16:57.000Z
+    archived_at: ""
+    done_at: 2026-04-12T08:16:57.000Z
+    unblocked_at: ""
+  - id: FEAT-0005
+    title: Validar coerencia entre estado logico e localizacao fisica dos artefatos
+      SDD
+    status: DONE
+    origin_type: epic
+    origin_ref: EPIC-0003
+    scale: STANDARD
+    summary: Implementar verificacao sistematica entre backlog/discovery e a
+      localizacao fisica em .sdd/active e .sdd/archived para impedir
+      divergencias historicas como features DONE ainda abertas em active.
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0003
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0003
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: feat-0005-validar-coerencia-entre-estado-logico-e
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Validacao estrutural interna do SDD sem interface de produto.
+    frontend_impact_declared_at: 2026-04-12T06:10:00.000Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-12T08:14:28.555Z
+    archived_at: ""
+    done_at: 2026-04-12T08:14:28.555Z
+    unblocked_at: ""
+  - id: FEAT-0009
+    title: Gate mandatória de migração SDD
+    status: DONE
+    origin_type: epic
+    origin_ref: EPIC-0004
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0004
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0004
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: feat-0009-gate-mandatoria-de-migracao-sdd
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Gate de migracao SDD atua apenas em backend, estado e
+      CLI; nao introduz superfícies de produto nem rotas novas.
+    frontend_impact_declared_at: 2026-04-13T02:30:32.675Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-13T02:32:30.319Z
+    archived_at: ""
+    done_at: 2026-04-13T02:32:30.319Z
+    unblocked_at: ""
+  - id: FEAT-0010
+    title: "Debate: Elevar a qualidade automatizada do projeto com foco em cobertura
+      unitária máxima viável, definição de cobertura"
+    status: DONE
+    origin_type: epic
+    origin_ref: EPIC-0006
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0006
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0006
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: feat-0010-debate-elevar-a-qualidade-automatizada-d
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Trabalho focado em cobertura automatizada, validacao e
+      comandos CLI; sem telas, rotas ou componentes de UI.
+    frontend_impact_declared_at: 2026-04-13T03:59:45.803Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-13T04:00:24.026Z
+    archived_at: ""
+    done_at: 2026-04-13T04:00:24.026Z
+    unblocked_at: ""
+  - id: FEAT-0012
+    title: Enriquecer prompts e templates com critérios de qualidade mínima por
+      artefato
+    status: DONE
+    origin_type: epic
+    origin_ref: EPIC-0008
+    scale: STANDARD
+    summary: Adicionar instruções de geração, critérios de qualidade mínima e frases
+      proibidas (placeholders) a cada template e lente do SDD. Garantir que
+      artefatos gerados por LLM não possam ser archivados com campos
+      Objetivo/Resumo contendo texto de placeholder.
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: epic-0008
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0008
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 90
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+    change_name: feat-0012-enriquecer-prompts-e-templates-qualidade
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Mecanismos estruturais de backoffice/linter apenas
+    frontend_impact_declared_at: 2026-04-14T05:40:29.832Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-14T05:40:40.333Z
+    archived_at: ""
+    done_at: 2026-04-14T05:40:40.333Z
+    unblocked_at: ""
+  - id: FEAT-0013
+    title: Lentes estruturais como bloqueadores reais de transição no TransitionEngine
+    status: DONE
+    origin_type: epic
+    origin_ref: EPIC-0008
+    scale: STANDARD
+    summary: Vincular a aprovação de transição de estado à validação obrigatória da
+      lente do artefato. Nenhuma transição FEAT→IN_PROGRESS, FEAT→DONE ou
+      FEAT→ARCHIVED ocorre sem conformidade 100% da lente. Adicionar flag
+      forced_transition rastreável para casos de bypass explícito.
+    blocked_by:
+      - FEAT-0012
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: epic-0008
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: direto
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: nao_exigida
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: nao_exigida
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0008
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 85
+    dependency_count: 1
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - systematic-debugging
+    change_name: feat-0013-lentes-como-bloqueadores-reais-transicao
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Backend apenas, sem interface CLI adicional a nao ser a flag forcada
+    frontend_impact_declared_at: 2026-04-14T06:03:25.561Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-14T06:03:26.870Z
+    archived_at: ""
+    done_at: 2026-04-14T06:03:26.870Z
+    unblocked_at: 2026-04-14T05:40:40.333Z
+  - id: FEAT-0014
+    title: Roteamento semântico de skills por domínio da feature
+    status: DONE
+    origin_type: epic
+    origin_ref: EPIC-0008
+    scale: STANDARD
+    summary: Substituir a lista genérica de skills (architecture, concise-planning,
+      context-window-management) por roteamento baseado no domínio declarado na
+      FEAT (backend/frontend/infra/testing/architecture/data/full-stack). Criar
+      skill-routing.yaml editável e gerar recomendações dinamicamente no
+      2-plan.md.
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: epic-0008
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: direto
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: nao_exigida
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: nao_exigida
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0008
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 80
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+    change_name: feat-0014-roteamento-semantico-skills-por-dominio
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Somente impacto de backend e regras SDD no typescript
+      sem interface de usuario
+    frontend_impact_declared_at: 2026-04-14T06:21:39.578Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-14T06:21:40.402Z
+    archived_at: ""
+    done_at: 2026-04-14T06:21:40.402Z
+    unblocked_at: ""
+  - id: FEAT-0015
+    title: ADR mandatório automático para features com impacto arquitetural declarado
+    status: READY
+    origin_type: epic
+    origin_ref: EPIC-0008
+    scale: STANDARD
+    summary: Quando o campo Impacto Arquitetural da FEAT declarar requires_adr:true,
+      o comando start cria automaticamente o template ADR-FEAT-####.md em
+      .sdd/core/adrs/. O finalize bloqueia se o ADR existir mas contiver
+      placeholders. A seção Refs da spec inclui link ao ADR automaticamente.
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: epic-0008
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: proposta
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0008
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 75
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture-decision-records
+      - architecture
+      - backend-dev-guidelines
+    change_name: feat-0015-adr-mandatorio-automatico-impacto-arquitetural
+    branch_name: ""
+    worktree_path: ""
+    frontend_impact_status: none
+    frontend_impact_reason: Geração de ADR é operação interna do SDD sem superfície de produto.
+    frontend_impact_declared_at: 2026-04-13T00:00:00.000Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-13T00:00:00.000Z
+    archived_at: ""
+    done_at: ""
+    unblocked_at: ""
+  - id: FEAT-0016
+    title: Protocolo de meta-evolução do SDD e comando sdd audit
+    status: BLOCKED
+    origin_type: epic
+    origin_ref: EPIC-0008
+    scale: STANDARD
+    summary: Implementar ciclo semestral de auditoria do próprio SDD via campo
+      meta_evolution em config.yaml e novo subcomando opensdd sdd audit. O
+      comando exibe métricas de saúde do ciclo (% artefatos sem placeholder, %
+      debates com deliberação real, % ADRs gerados vs esperados, FEATs com
+      forced_transition). Não cria INS automaticamente — apenas exibe relatório
+      e sugere criação.
+    blocked_by:
+      - FEAT-0012
+      - FEAT-0013
+      - FEAT-0014
+      - FEAT-0015
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: epic-0008
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: proposta
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0008
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 60
+    dependency_count: 4
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - observability-engineer
+      - backend-dev-guidelines
+    change_name: feat-0016-protocolo-meta-evolucao-sdd-audit
+    branch_name: ""
+    worktree_path: ""
+    frontend_impact_status: none
+    frontend_impact_reason: Comando de auditoria é CLI interno do SDD sem superfície de produto.
+    frontend_impact_declared_at: 2026-04-13T00:00:00.000Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-13T00:00:00.000Z
+    archived_at: ""
+    done_at: ""
+    unblocked_at: ""
+  - id: FEAT-0017
+    title: Sanitização semântica de títulos na propagação INS → DEB → EPIC → FEAT
+    status: READY
+    origin_type: epic
+    origin_ref: EPIC-0008
+    scale: STANDARD
+    summary: Adicionar campo title_canonical (max 60 chars, sem prefixos funcionais)
+      nos artefatos INS e DEB. Na transição DEB→EPIC, usar title_canonical em
+      vez do título do debate. Adicionar validação no check que rejeita EPIC ou
+      FEAT cujo título contenha "Debate:", "Insight:", "(preencher" ou
+      "(placeholder".
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: epic-0008
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: proposta
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0008
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 88
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - backend-dev-guidelines
+      - clean-code
+      - concise-planning
+    change_name: feat-0017-sanitizacao-semantica-titulos-propagacao
+    branch_name: ""
+    worktree_path: ""
+    frontend_impact_status: none
+    frontend_impact_reason: Sanitização de títulos é operação interna do SDD sem superfície de produto.
+    frontend_impact_declared_at: 2026-04-13T00:00:00.000Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-13T00:00:00.000Z
+    archived_at: ""
+    done_at: ""
+    unblocked_at: ""
+  - id: FEAT-0011
+    title: Ampliar cobertura automatizada nos comandos com lógica real e branches
+      relevantes
+    status: DONE
+    origin_type: epic
+    origin_ref: EPIC-0007
+    scale: STANDARD
+    summary: Criar testes unitários para validate.ts, spec.ts, change.ts,
+      completion.ts e match.ts, atacando branches com lógica real de negócio
+      conforme decisão DEB-0007 Opção B.
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0007
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0007
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - test-driven-development
+      - javascript-testing-patterns
+      - systematic-debugging
+    change_name: feat-0011-ampliar-cobertura-comandos-logica-real
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Testes automatizados de camadas de lógica interna da CLI
+      não geram nem alteram superfície de produto.
+    frontend_impact_declared_at: 2026-04-14T03:54:37.788Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-14T03:55:17.129Z
+    archived_at: ""
+    done_at: 2026-04-14T03:55:17.129Z
+    unblocked_at: ""
+  - id: FEAT-0018
+    title: Adotar DevTrack Foundation API como backend padrão do OpenSDD
+    status: DONE
+    origin_type: direct
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - docs
+    lock_domains: []
+    parallel_group: ""
+    execution_kind: documentation
+    planning_mode: direct_tasks
+    flow_mode: rigoroso
+    current_stage: consolidacao
+    gates:
+      proposta:
+        status: aprovada
+        approved_at: 2026-04-14T02:34:35.946Z
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: aprovada
+        approved_at: 2026-04-14T02:34:54.192Z
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: aprovada
+        approved_at: 2026-04-14T02:34:36.224Z
+        approved_by: ""
+        note: ""
+    acceptance_refs: []
+    produces:
+      - documentacao-atualizada
+    consumes:
+      - implementacao-concluida
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - context-window-management
+      - frontend-design
+      - api-design-principles
+    change_name: feat-0018-adotar-devtrack-foundation-api-como-back
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    frontend_impact_status: none
+    frontend_impact_reason: Planejamento arquitetural e documental para backend
+      padrao, sem superficie funcional de frontend.
+    frontend_impact_declared_at: 2026-04-14T02:33:57.655Z
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-14T02:35:00.320Z
+    archived_at: ""
+    done_at: 2026-04-14T02:35:00.320Z
     unblocked_at: ""
