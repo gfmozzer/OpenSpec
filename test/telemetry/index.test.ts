@@ -72,10 +72,17 @@ describe('telemetry/index', () => {
       expect(isTelemetryEnabled()).toBe(false);
     });
 
+    it('should return false when running under Vitest workers', () => {
+      process.env.VITEST_WORKER_ID = '1';
+      expect(isTelemetryEnabled()).toBe(false);
+    });
+
     it('should return true when no opt-out is set', () => {
       delete process.env.OPENSPEC_TELEMETRY;
       delete process.env.DO_NOT_TRACK;
       delete process.env.CI;
+      delete process.env.VITEST;
+      delete process.env.VITEST_WORKER_ID;
       expect(isTelemetryEnabled()).toBe(true);
     });
 
@@ -110,6 +117,8 @@ describe('telemetry/index', () => {
       delete process.env.OPENSPEC_TELEMETRY;
       delete process.env.DO_NOT_TRACK;
       delete process.env.CI;
+      delete process.env.VITEST;
+      delete process.env.VITEST_WORKER_ID;
 
       await trackCommand('test', '1.0.0');
 
@@ -130,6 +139,24 @@ describe('telemetry/index', () => {
       (PostHog as any).mockImplementation(() => mockPostHog);
 
       await expect(shutdown()).resolves.not.toThrow();
+    });
+
+    it('should not block indefinitely when shutdown hangs', async () => {
+      vi.useFakeTimers();
+      const mockPostHog = {
+        capture: vi.fn(),
+        shutdown: vi.fn().mockImplementation(() => new Promise<void>(() => {})),
+      };
+      (PostHog as any).mockImplementation(() => mockPostHog);
+
+      const tracking = trackCommand('test', '1.0.0');
+      await tracking;
+
+      const shutdownPromise = shutdown();
+      await vi.advanceTimersByTimeAsync(250);
+
+      await expect(shutdownPromise).resolves.toBeUndefined();
+      vi.useRealTimers();
     });
   });
 });

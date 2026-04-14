@@ -252,7 +252,9 @@ describe('config profile interactive flow', () => {
     await runConfigCommand(['profile']);
 
     const checkboxCall = checkbox.mock.calls[0][0];
-    expect(checkboxCall.message).toBe('Select workflows to make available:');
+    expect(checkboxCall.message).toBe(
+      'Select workflows to make available (Space to toggle, Enter to confirm):'
+    );
     expect(checkboxCall.choices).toEqual(expect.arrayContaining([
       expect.objectContaining({
         value: 'propose',

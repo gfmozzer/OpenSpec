@@ -84,14 +84,12 @@ export async function runCLI(args: string[] = [], options: RunCLIOptions = {}): 
       env: {
         ...process.env,
         OPEN_SPEC_INTERACTIVE: '0',
+        OPENSPEC_TELEMETRY: '0',
         ...options.env,
       },
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
     });
-
-    // Prevent child process from keeping the event loop alive
-    child.unref();
 
     let stdout = '';
     let stderr = '';

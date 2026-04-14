@@ -71,6 +71,8 @@ describe('SddInitCommand', () => {
     expect(await exists(path.join(testDir, '.sdd', 'templates', 'template-2-plan.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'templates', 'template-3-tasks.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'templates', 'template-4-changelog.md'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'discovery', '3-epic'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'discovery', '3-radar'))).toBe(false);
     expect(await exists(path.join(testDir, '.sdd', 'pendencias', 'backlog-features.md'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'AGENT.md'))).toBe(true);
     expect(await exists(path.join(testDir, 'README.md'))).toBe(true);
@@ -91,6 +93,11 @@ describe('SddInitCommand', () => {
     expect(parsed.sdd.enabled).toBe(true);
     expect(parsed.sdd.memoryDir).toBe('.sdd');
     expect(parsed.sdd.frontend.enabled).toBe(false);
+
+    const sddConfig = parseYaml(
+      await fs.readFile(path.join(testDir, '.sdd', 'config.yaml'), 'utf-8')
+    ) as Record<string, any>;
+    expect(sddConfig.state_version).toBe(2);
 
     // Frontend files should not exist by default
     expect(await exists(path.join(testDir, '.sdd', 'state', 'frontend-gaps.yaml'))).toBe(false);
@@ -122,6 +129,8 @@ describe('SddInitCommand', () => {
     expect(await exists(path.join(testDir, '.sdd', 'habilidades', 'pacotes'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'modelos'))).toBe(true);
     expect(await exists(path.join(testDir, '.sdd', 'descoberta', '1-insights'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'descoberta', '3-epic'))).toBe(true);
+    expect(await exists(path.join(testDir, '.sdd', 'descoberta', '3-radar'))).toBe(false);
     expect(await exists(path.join(testDir, '.sdd', 'planejamento', 'backlog-features.md'))).toBe(false);
 
     const report = await new SddInitContextCommand().execute(testDir, { render: true });
