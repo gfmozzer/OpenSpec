@@ -13,7 +13,7 @@ export declare class ZshInstaller {
     /**
      * Check if Oh My Zsh is installed
      *
-     * @returns true if Oh My Zsh is detected via $ZSH env var or directory exists
+     * @returns true if Oh My Zsh is detected for the installer's home directory
      */
     isOhMyZshInstalled(): Promise<boolean>;
     /**

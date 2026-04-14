@@ -1,4 +1,4 @@
-import { type ArchitectureState, type BacklogState, type DiscoveryIndexState, type FinalizeQueueState, type FrontendDecisionsState, type FrontendGapsState, type FrontendMapState, type IntegrationContractsState, type RepoMapState, type SourceIndexState, type SkillCatalogState, type ServiceCatalogState, type TechStackState, type TechDebtState, type UnblockEventsState } from './types.js';
+import { type ArchitectureState, type BacklogState, type DiscoveryIndexState, type FinalizeQueueState, type FrontendDecisionsState, type FrontendGapsState, type FrontendMapState, type IntegrationContractsState, type RepoMapState, type SourceIndexState, type SkillCatalogState, type SkillRoutingState, type ServiceCatalogState, type TechStackState, type TechDebtState, type UnblockEventsState } from './types.js';
 export interface SddRuntimeConfig {
     enabled: boolean;
     memoryDir: string;
@@ -59,6 +59,7 @@ export interface SddPaths {
         frontendDecisions: string;
         repoMap: string;
         sourceIndex: string;
+        skillRouting: string;
     };
 }
 export interface SddStateSnapshot {
@@ -77,6 +78,7 @@ export interface SddStateSnapshot {
     frontendDecisions?: FrontendDecisionsState;
     repoMap: RepoMapState;
     sourceIndex: SourceIndexState;
+    skillRouting: SkillRoutingState;
 }
 export declare function loadProjectSddConfig(projectRoot: string): Promise<SddRuntimeConfig>;
 export declare function upsertProjectSddConfig(projectRoot: string, overrides?: {

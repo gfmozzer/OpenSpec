@@ -330,6 +330,20 @@ export declare const SkillBundleSchema: z.ZodObject<{
     title: z.ZodString;
     skill_ids: z.ZodDefault<z.ZodArray<z.ZodString>>;
 }, z.core.$strip>;
+export declare const SkillRoutingRuleSchema: z.ZodObject<{
+    domain: z.ZodString;
+    skills: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    bundles: z.ZodDefault<z.ZodArray<z.ZodString>>;
+}, z.core.$strip>;
+export declare const SkillRoutingStateSchema: z.ZodObject<{
+    version: z.ZodLiteral<1>;
+    default_skills: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    routes: z.ZodDefault<z.ZodArray<z.ZodObject<{
+        domain: z.ZodString;
+        skills: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        bundles: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    }, z.core.$strip>>>;
+}, z.core.$strip>;
 export declare const SourceDocumentRecordSchema: z.ZodObject<{
     id: z.ZodString;
     type: z.ZodEnum<{
@@ -866,4 +880,6 @@ export type TechStackState = z.infer<typeof TechStackStateSchema>;
 export type IntegrationContractsState = z.infer<typeof IntegrationContractsStateSchema>;
 export type FrontendDecisionsState = z.infer<typeof FrontendDecisionsStateSchema>;
 export type RepoMapState = z.infer<typeof RepoMapStateSchema>;
+export type SkillRoutingRule = z.infer<typeof SkillRoutingRuleSchema>;
+export type SkillRoutingState = z.infer<typeof SkillRoutingStateSchema>;
 //# sourceMappingURL=types.d.ts.map

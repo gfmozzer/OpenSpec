@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { promises as fs } from 'node:fs';
+import { existsSync, promises as fs } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { createChange } from '../../utils/change-utils.js';
@@ -408,7 +408,7 @@ async function writeFileAlways(filePath, content) {
 function buildActiveSpecDoc(feature) {
     return `# Spec ${feature.id}
 
-## Resumo
+## Resumo da Entrega
 - Titulo: ${feature.title}
 - Origem: ${feature.origin_type}${feature.origin_ref ? ` (${feature.origin_ref})` : ''}
 - Tipo: ${feature.execution_kind}
@@ -422,9 +422,11 @@ function buildActiveSpecDoc(feature) {
 - Tarefas: ${feature.gates.tarefas.status}
 
 ## Objetivo
-Descrever o resultado esperado desta feature com criterios de aceite objetivos.
+- Descreva detalhadamente o resultado esperado.
+- Adicione contexto de negocio ou motivacao clara.
+- Liste impactos positivos para usuario ou sistema.
 
-## Refs
+## Referencias
 - Feature: ${feature.id}
 - Acceptance refs: ${feature.acceptance_refs.join(', ') || '-'}
 `;
@@ -482,7 +484,7 @@ function buildActiveTasksDoc(feature, paths) {
 - [DOC] Atualizar documentacao central e de handoff
 - [UI] Declarar impacto frontend e registrar lacunas/decisoes quando aplicavel
 - [ARQ] Arquivar a mudanca tecnica no OpenSpec
-- [MEM] Consolidar memoria com \`${CLI_NAME} sdd consolidar --ref ${feature.id}\`
+- [MEM] Consolidar memoria com \`${CLI_NAME} sdd finalize --ref ${feature.id}\`
 `;
 }
 function buildActiveChangelogDoc(feature) {
@@ -567,6 +569,7 @@ export class SddDebateCommand {
             created_at: now,
             updated_at: now,
         };
+        TransitionEngine.assertValid(insight.type, insight.status, 'DEBATED');
         insight.status = 'DEBATED';
         insight.related_ids = Array.from(new Set([...insight.related_ids, id]));
         insight.updated_at = now;
@@ -973,6 +976,25 @@ async function maybeCreateAutomaticFrontendGap(paths, snapshot, feature, options
     }
     return gapId;
 }
+function resolveRoutedSkills(snapshot, touches) {
+    let injectedSkills = [];
+    if (touches.length > 0 && snapshot.skillRouting && snapshot.skillRouting.routes) {
+        for (const touch of touches) {
+            const route = snapshot.skillRouting.routes.find((r) => r.domain === touch);
+            if (route && route.skills) {
+                injectedSkills.push(...route.skills);
+            }
+        }
+    }
+    if (injectedSkills.length === 0 && snapshot.skillRouting && snapshot.skillRouting.default_skills) {
+        injectedSkills = [...snapshot.skillRouting.default_skills];
+    }
+    // fallback extremo
+    if (injectedSkills.length === 0) {
+        injectedSkills = ['architecture', 'concise-planning', 'context-window-management'];
+    }
+    return Array.from(new Set(injectedSkills)).slice(0, 5);
+}
 export class SddBreakdownCommand {
     async execute(projectRoot, radarId, options) {
         const { config, paths } = await getRuntime(projectRoot);
@@ -980,8 +1002,6 @@ export class SddBreakdownCommand {
         const radar = findDiscoveryRecord(snapshot.discoveryIndex.records, radarId);
         resolveRadar(radar);
         const catalog = await loadSkillCatalogState(paths);
-        const ranked = suggestSkills(catalog, { phase: 'plan', max: 3 });
-        const recommended = ranked.map((entry) => entry.skill.id);
         const mode = options?.mode || 'graph';
         const dedupe = options?.dedupe || 'normal';
         const incremental = options?.incremental ?? false;
@@ -1016,6 +1036,7 @@ export class SddBreakdownCommand {
             }
             const id = await allocateEntityId(paths, 'FEAT');
             syncCounterFromId(snapshot.discoveryIndex, id);
+            const recommended = resolveRoutedSkills(snapshot, shape.touches);
             const item = buildBacklogItem(id, title, 'radar', radar.id, options?.scale || 'STANDARD', recommended, {
                 parallelGroup,
                 executionKind: shape.executionKind,
@@ -1054,6 +1075,7 @@ export class SddBreakdownCommand {
                 }
                 if (item.blocked_by.length > 0) {
                     item.consumes = Array.from(new Set([...item.consumes, ...item.blocked_by]));
+                    TransitionEngine.assertValid('FEAT', item.status, 'BLOCKED');
                     item.status = 'BLOCKED';
                 }
             }
@@ -1083,6 +1105,7 @@ export class SddBreakdownCommand {
                     }
                 }
                 if (addedDeps.size > 0) {
+                    TransitionEngine.assertValid('FEAT', createdItem.status, 'BLOCKED');
                     createdItem.status = 'BLOCKED';
                     const deps = rewiredMap.get(createdItem.id) || new Set();
                     for (const dep of addedDeps)
@@ -1092,8 +1115,11 @@ export class SddBreakdownCommand {
             }
         }
         updateDependencyMetadata(snapshot.backlog.items);
-        radar.status = 'SPLIT';
-        radar.updated_at = nowIso();
+        if (radar.status !== 'SPLIT') {
+            TransitionEngine.assertValid(radar.type, radar.status, 'SPLIT');
+            radar.status = 'SPLIT';
+            radar.updated_at = nowIso();
+        }
         radar.related_ids = Array.from(new Set([...radar.related_ids, ...created.map((item) => item.id)]));
         await saveBacklogState(paths, snapshot.backlog);
         await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
@@ -1285,8 +1311,6 @@ export class SddStartCommand {
         const { config, paths } = await getRuntime(projectRoot);
         const snapshot = await loadStateSnapshot(paths, config);
         const catalog = await loadSkillCatalogState(paths);
-        const ranked = suggestSkills(catalog, { phase: 'execute', max: 3 });
-        const recommended = ranked.map((entry) => entry.skill.id);
         const now = nowIso();
         let feature;
         if (/^FEAT-\d{3,}$/.test(value)) {
@@ -1304,6 +1328,7 @@ export class SddStartCommand {
                 resolveRadar(radar);
                 const title = radar.title || `Feature de ${value}`;
                 const shape = classifyFeatureShape(title);
+                const recommended = resolveRoutedSkills(snapshot, shape.touches);
                 feature = buildBacklogItem(id, title, 'epic', value, options?.scale || 'STANDARD', recommended, {
                     parallelGroup: `epic-${value.toLowerCase()}`,
                     executionKind: shape.executionKind,
@@ -1322,6 +1347,7 @@ export class SddStartCommand {
             const id = await allocateEntityId(paths, 'FEAT');
             syncCounterFromId(snapshot.discoveryIndex, id);
             const shape = classifyFeatureShape(value);
+            const recommended = resolveRoutedSkills(snapshot, shape.touches);
             feature = buildBacklogItem(id, value, inferOriginType(value), /^([A-Z]+-\d{3,})$/.test(value) ? value : undefined, options?.scale || 'STANDARD', recommended, {
                 executionKind: shape.executionKind,
                 planningMode: shape.planningMode,
@@ -1360,11 +1386,43 @@ export class SddStartCommand {
             throw new Error(`Nao foi possivel iniciar ${feature.id}: lock conflict com ${lockConflicts.join(', ')}. Use --force para bypass explicito.`);
         }
         if (!feature.change_name) {
-            const base = slugify(`${feature.id}-${feature.title}`).slice(0, 50) || feature.id.toLowerCase();
+            const base = slugify(`${feature.id}-${feature.title}`).slice(0, 50).replace(/-+$/g, '') ||
+                feature.id.toLowerCase();
             const changeName = base;
-            await createChange(projectRoot, changeName, { schema: options?.schema });
+            const existingChangeDir = path.join(projectRoot, 'openspec', 'changes', changeName);
+            const existingChangeMetadata = path.join(existingChangeDir, '.openspec.yaml');
+            const archivedChangeDir = path.join(projectRoot, 'openspec', 'changes', 'archive', changeName);
+            const canAdoptExistingChange = existsSync(existingChangeDir) &&
+                existsSync(existingChangeMetadata) &&
+                !existsSync(archivedChangeDir);
+            if (!canAdoptExistingChange) {
+                await createChange(projectRoot, changeName, { schema: options?.schema });
+            }
             feature.change_name = changeName;
         }
+        let startLensViolations = [];
+        if (feature.origin_type === 'epic' && feature.origin_ref) {
+            const parentDir = paths.discoveryEpicDir;
+            const files = await fs.readdir(parentDir).catch(() => []);
+            const parentFile = files.find((f) => f.startsWith(`${feature.origin_ref}-`));
+            if (parentFile) {
+                const content = await fs.readFile(path.join(parentDir, parentFile), 'utf-8').catch(() => '');
+                if (content) {
+                    const miss = validateDocumentAgainstLens(content, LENSES.epic);
+                    startLensViolations.push(...miss.map((m) => `Epic: ${m}`));
+                }
+                else {
+                    startLensViolations.push(`Epic Original (${feature.origin_ref}) vazio ou inacessível.`);
+                }
+            }
+            else {
+                startLensViolations.push(`Epic Original (${feature.origin_ref}) não encontrado.`);
+            }
+        }
+        TransitionEngine.assertValid('FEAT', feature.status, 'IN_PROGRESS', {
+            forceTransition: options?.forceTransition,
+            lensViolations: startLensViolations
+        });
         feature.status = 'IN_PROGRESS';
         feature.current_stage = 'execucao';
         feature.last_sync_at = now;
@@ -1374,7 +1432,7 @@ export class SddStartCommand {
         if (feature.execution_kind === 'frontend_coverage' && feature.frontend_impact_status === 'unknown') {
             feature.frontend_impact_status = 'required';
         }
-        feature.recommended_skills = pickTopSkills(catalog.skills, feature.recommended_skills, 3);
+        feature.recommended_skills = resolveRoutedSkills(snapshot, feature.touches);
         if (options?.force && (unresolved.length > 0 || lockConflicts.length > 0)) {
             const notes = [
                 unresolved.length > 0 ? `FORCED blocked_by pendente: ${unresolved.join(', ')}` : '',
@@ -1385,8 +1443,12 @@ export class SddStartCommand {
         if ((feature.origin_type === 'radar' || feature.origin_type === 'epic') && feature.origin_ref) {
             const radar = findDiscoveryRecord(snapshot.discoveryIndex.records, feature.origin_ref);
             if (radar && (radar.type === 'RAD' || radar.type === 'EPIC')) {
-                radar.status = 'IN_PROGRESS';
-                radar.updated_at = now;
+                const shouldPromoteParent = radar.status === 'READY' || radar.status === 'PLANNED';
+                if (shouldPromoteParent) {
+                    TransitionEngine.assertValid(radar.type, radar.status, 'IN_PROGRESS');
+                    radar.status = 'IN_PROGRESS';
+                    radar.updated_at = now;
+                }
             }
         }
         const recommendedBundles = bundlesForSkills(catalog, feature.recommended_skills);
@@ -1434,6 +1496,7 @@ async function buildFinalizeQueue(paths, backlogItems, queueItems) {
             });
         }
         if (item.status !== 'ARCHIVED') {
+            TransitionEngine.assertValid('FEAT', item.status, 'ARCHIVED');
             item.status = 'ARCHIVED';
             item.archived_at = nowIso();
         }
@@ -1464,7 +1527,7 @@ Consolidar a implementacao da feature ${feature.id} e oficializar o resultado na
 ## Dependentes liberados
 ${unlocked.length > 0 ? unlocked.map((id) => `- ${id}`).join('\n') : '- Nenhum'}
 
-## Refs
+## Referencias
 - ${refs}
 `;
 }
@@ -1580,6 +1643,38 @@ export class SddFinalizeCommand {
                     docWarnings.push(`${feature.id} finalizada com --force-frontend apesar de guardrails: ${reasons.join(' | ')}`);
                 }
             }
+            // Validação de Lentes nos MDs do Workspace Ativo
+            const activePath = path.join(paths.activeDir, feature.id);
+            const docNames = activeDocNamesForLayout(config);
+            const specPath = path.join(activePath, docNames.spec);
+            const planPath = path.join(activePath, docNames.plan);
+            let lensViolations = [];
+            const specContent = await fs.readFile(specPath, 'utf8').catch(() => '');
+            if (specContent) {
+                const miss = validateDocumentAgainstLens(specContent, LENSES.feature_spec);
+                lensViolations.push(...miss.map(m => `Spec: ${m}`));
+            }
+            else {
+                lensViolations.push('Arquivo de especificação não encontrado ou vazio.');
+            }
+            const planContent = await fs.readFile(planPath, 'utf8').catch(() => '');
+            if (planContent) {
+                const miss = validateDocumentAgainstLens(planContent, LENSES.feature_plan);
+                lensViolations.push(...miss.map(m => `Plan: ${m}`));
+            }
+            else {
+                lensViolations.push('Arquivo de plano não encontrado ou vazio.');
+            }
+            try {
+                TransitionEngine.assertValid('FEAT', feature.status, 'DONE', {
+                    forceTransition: options?.forceTransition,
+                    lensViolations
+                });
+            }
+            catch (err) {
+                docWarnings.push(`${feature.id} ${err.message}`);
+                continue;
+            }
             feature.status = 'DONE';
             feature.current_stage = 'consolidacao';
             feature.done_at = now;
@@ -1600,11 +1695,15 @@ export class SddFinalizeCommand {
             }
             if ((feature.origin_type === 'radar' || feature.origin_type === 'epic') && feature.origin_ref) {
                 const siblings = snapshot.backlog.items.filter((item) => (item.origin_type === 'radar' || item.origin_type === 'epic') && item.origin_ref === feature.origin_ref);
-                if (siblings.every((item) => item.status === 'DONE')) {
+                if (siblings.every((item) => item.status === 'DONE' || item.status === 'ARCHIVED')) {
                     const radar = snapshot.discoveryIndex.records.find((r) => r.id === feature.origin_ref);
                     if (radar && (radar.type === 'RAD' || radar.type === 'EPIC')) {
-                        radar.status = RADAR_TO_DISCOVERY_STATUS.DONE;
-                        radar.updated_at = now;
+                        const targetStatus = RADAR_TO_DISCOVERY_STATUS.DONE;
+                        if (radar.status !== targetStatus) {
+                            TransitionEngine.assertValid(radar.type, radar.status, targetStatus);
+                            radar.status = targetStatus;
+                            radar.updated_at = now;
+                        }
                     }
                 }
             }
@@ -1701,13 +1800,19 @@ export class SddFinalizeCommand {
                 const adrPath = path.join(paths.coreDir, 'adrs', `ADR-${feature.id}.md`);
                 await fs.writeFile(adrPath, buildAdrMarkdown(feature, unlockedByFeature, now), 'utf-8');
             }
-            const activePath = path.join(paths.activeDir, feature.id);
-            const archivedPath = path.join(paths.archivedDir, feature.id);
+            const activeDirPath = path.join(paths.activeDir, feature.id);
+            const archivedDirPath = path.join(paths.archivedDir, feature.id);
             try {
-                const stat = await fs.stat(activePath);
+                const stat = await fs.stat(activeDirPath);
                 if (stat.isDirectory()) {
                     await fs.mkdir(paths.archivedDir, { recursive: true });
-                    await fs.rename(activePath, archivedPath);
+                    // Try to move folder. If archivedDirPath exists, we might need to remove it or merge it. 
+                    // Since it's done once, it's safer to overwrite.
+                    const existingArchive = await fs.stat(archivedDirPath).catch(() => null);
+                    if (existingArchive) {
+                        await fs.rm(archivedDirPath, { recursive: true, force: true });
+                    }
+                    await fs.rename(activeDirPath, archivedDirPath);
                 }
             }
             catch (err) {

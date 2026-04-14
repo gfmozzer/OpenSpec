@@ -368,58 +368,80 @@ export class InitCommand {
         const shouldGenerateCommands = delivery !== 'skills';
         const skillTemplates = shouldGenerateSkills ? getSkillTemplates(workflows) : [];
         const commandContents = shouldGenerateCommands ? getCommandContents(workflows) : [];
-        // Process each tool
-        for (const tool of tools) {
-            const spinner = ora(`Setting up ${tool.name}...`).start();
+        const useSpinner = tools.length === 1;
+        const toolResults = await Promise.all(tools.map(async (tool) => {
+            const spinner = useSpinner ? ora(`Setting up ${tool.name}...`).start() : null;
             try {
-                // Generate skill files if delivery includes skills
                 if (shouldGenerateSkills) {
-                    // Use tool-specific skillsDir
                     const skillsDir = path.join(projectPath, tool.skillsDir, 'skills');
-                    // Create skill directories and SKILL.md files
-                    for (const { template, dirName } of skillTemplates) {
+                    await Promise.all(skillTemplates.map(async ({ template, dirName }) => {
                         const skillDir = path.join(skillsDir, dirName);
                         const skillFile = path.join(skillDir, 'SKILL.md');
-                        // Generate SKILL.md content with YAML frontmatter including generatedBy
-                        // Use hyphen-based command references for OpenCode
                         const transformer = tool.value === 'opencode' ? transformToHyphenCommands : undefined;
                         const skillContent = generateSkillContent(template, OPENSPEC_VERSION, transformer);
-                        // Write the skill file
                         await FileSystemUtils.writeFile(skillFile, skillContent);
-                    }
+                    }));
                 }
+                let toolRemovedSkillCount = 0;
                 if (!shouldGenerateSkills) {
                     const skillsDir = path.join(projectPath, tool.skillsDir, 'skills');
-                    removedSkillCount += await this.removeSkillDirs(skillsDir);
+                    toolRemovedSkillCount = await this.removeSkillDirs(skillsDir);
                 }
-                // Generate commands if delivery includes commands
+                let toolCommandsSkipped = false;
                 if (shouldGenerateCommands) {
                     const adapter = CommandAdapterRegistry.get(tool.value);
                     if (adapter) {
                         const generatedCommands = generateCommands(commandContents, adapter);
-                        for (const cmd of generatedCommands) {
+                        await Promise.all(generatedCommands.map(async (cmd) => {
                             const commandFile = path.isAbsolute(cmd.path) ? cmd.path : path.join(projectPath, cmd.path);
                             await FileSystemUtils.writeFile(commandFile, cmd.fileContent);
-                        }
+                        }));
                     }
                     else {
-                        commandsSkipped.push(tool.value);
+                        toolCommandsSkipped = true;
                     }
                 }
+                let toolRemovedCommandCount = 0;
                 if (!shouldGenerateCommands) {
-                    removedCommandCount += await this.removeCommandFiles(projectPath, tool.value);
+                    toolRemovedCommandCount = await this.removeCommandFiles(projectPath, tool.value);
                 }
-                spinner.succeed(`Setup complete for ${tool.name}`);
-                if (tool.wasConfigured) {
-                    refreshedTools.push(tool);
-                }
-                else {
-                    createdTools.push(tool);
-                }
+                spinner?.succeed(`Setup complete for ${tool.name}`);
+                return {
+                    tool,
+                    ok: true,
+                    commandsSkipped: toolCommandsSkipped,
+                    removedCommandCount: toolRemovedCommandCount,
+                    removedSkillCount: toolRemovedSkillCount,
+                };
             }
             catch (error) {
-                spinner.fail(`Failed for ${tool.name}`);
-                failedTools.push({ name: tool.name, error: error });
+                spinner?.fail(`Failed for ${tool.name}`);
+                return {
+                    tool,
+                    ok: false,
+                    error: error,
+                    commandsSkipped: false,
+                    removedCommandCount: 0,
+                    removedSkillCount: 0,
+                };
+            }
+        }));
+        for (const result of toolResults) {
+            removedCommandCount += result.removedCommandCount;
+            removedSkillCount += result.removedSkillCount;
+            if (result.commandsSkipped) {
+                commandsSkipped.push(result.tool.value);
+            }
+            if (result.ok) {
+                if (result.tool.wasConfigured) {
+                    refreshedTools.push(result.tool);
+                }
+                else {
+                    createdTools.push(result.tool);
+                }
+            }
+            else {
+                failedTools.push({ name: result.tool.name, error: result.error });
             }
         }
         return {

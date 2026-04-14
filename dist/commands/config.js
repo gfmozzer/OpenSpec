@@ -489,8 +489,7 @@ export function registerConfigCommand(program) {
                     };
                 };
                 const selectedWorkflows = await checkbox({
-                    message: 'Select workflows to make available:',
-                    instructions: 'Space to toggle, Enter to confirm',
+                    message: 'Select workflows to make available (Space to toggle, Enter to confirm):',
                     pageSize: ALL_WORKFLOWS.length,
                     theme: {
                         icon: {

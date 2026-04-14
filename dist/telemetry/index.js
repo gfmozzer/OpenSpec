@@ -18,6 +18,7 @@ const POSTHOG_API_KEY = 'phc_Hthu8YvaIJ9QaFKyTG4TbVwkbd5ktcAFzVTKeMmoW2g';
 const POSTHOG_HOST = 'https://edge.openspec.dev';
 let posthogClient = null;
 let anonymousId = null;
+const SHUTDOWN_TIMEOUT_MS = 200;
 /**
  * Check if telemetry is enabled.
  *
@@ -37,6 +38,10 @@ export function isTelemetryEnabled() {
     }
     // Auto-disable in CI environments
     if (process.env.CI === 'true') {
+        return false;
+    }
+    // Auto-disable in Vitest subprocesses spawned by the test suite.
+    if ('VITEST' in process.env || 'VITEST_WORKER_ID' in process.env) {
         return false;
     }
     return true;
@@ -133,7 +138,12 @@ export async function shutdown() {
         return;
     }
     try {
-        await posthogClient.shutdown();
+        await Promise.race([
+            posthogClient.shutdown(),
+            new Promise((resolve) => {
+                setTimeout(resolve, SHUTDOWN_TIMEOUT_MS);
+            }),
+        ]);
     }
     catch {
         // Silent failure - telemetry should never break CLI exit

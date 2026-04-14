@@ -94,6 +94,7 @@ export declare class SddStartCommand {
         schema?: string;
         force?: boolean;
         flowMode?: FlowMode;
+        forceTransition?: boolean;
     }): Promise<{
         featureId: string;
         changeName: string;
@@ -124,6 +125,7 @@ export declare class SddFinalizeCommand {
         render?: boolean;
         noAdr?: boolean;
         forceFrontend?: boolean;
+        forceTransition?: boolean;
     }): Promise<{
         finalized: string[];
         unblocked: string[];

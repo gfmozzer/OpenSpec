@@ -49,9 +49,9 @@ Ordem de leitura para qualquer agente novo:
 Comandos essenciais:
 - \`${CLI_NAME} sdd onboard system\`
 - \`${CLI_NAME} sdd next\`
-- \`${CLI_NAME} sdd context FEAT-###\`
-- \`${CLI_NAME} sdd frontend-impact FEAT-### --status required|none --reason "..."\`
-- \`${CLI_NAME} sdd finalize --ref FEAT-###\``;
+- \`${CLI_NAME} sdd context FEAT-0001\`
+- \`${CLI_NAME} sdd frontend-impact FEAT-0001 --status required|none --reason "..."\`
+- \`${CLI_NAME} sdd finalize --ref FEAT-0001\``;
 }
 function buildAgentGuideBlock(memoryDir, config) {
     const planningDir = config?.folders.planning || 'pendencias';
@@ -63,15 +63,15 @@ function buildAgentGuideBlock(memoryDir, config) {
 Trilha oficial:
 1. Rode \`${CLI_NAME} sdd onboard system\`.
 2. Use \`${CLI_NAME} sdd next\` para escolher trabalho pronto.
-3. Use \`${CLI_NAME} sdd start FEAT-###\` para abrir execução.
-4. Use \`${CLI_NAME} sdd context FEAT-###\` antes de codar.
-5. Declare impacto de frontend com \`${CLI_NAME} sdd frontend-impact FEAT-### ...\`.
-6. Após archive, rode \`${CLI_NAME} sdd finalize --ref FEAT-###\`.
+3. Use \`${CLI_NAME} sdd start FEAT-0001\` para abrir execução.
+4. Use \`${CLI_NAME} sdd context FEAT-0001\` antes de codar.
+5. Declare impacto de frontend com \`${CLI_NAME} sdd frontend-impact FEAT-0001 ...\`.
+6. Após archive, rode \`${CLI_NAME} sdd finalize --ref FEAT-0001\`.
 
 Fontes canônicas:
 - Estados: \`${memoryDir}/state/*.yaml\`
 - Views: \`${memoryDir}/core/*.md\` e \`${memoryDir}/${planningDir}/*.md\`
-- Workspace ativo por feature: \`${memoryDir}/${activeDir}/FEAT-###/\`
+- Workspace ativo por feature: \`${memoryDir}/${activeDir}/FEAT-0001/\`
 - Deposito bruto: \`${memoryDir}/${depositoDir}/\` (PRDs, RFCs, wireframes e referencias)
 - Prompts recomendados: \`${memoryDir}/${promptsDir}/\``;
 }
@@ -82,16 +82,16 @@ Agents working in this repository must treat documentation sync as part of featu
 
 Required execution order:
 1. Run \`${CLI_NAME} sdd onboard system\` before broad work.
-2. Run \`${CLI_NAME} sdd start FEAT-###\` before implementation.
-3. Use \`${CLI_NAME} sdd context FEAT-###\` before coding.
-4. Before archive/finalize, declare frontend impact with \`${CLI_NAME} sdd frontend-impact FEAT-### ...\`.
+2. Run \`${CLI_NAME} sdd start FEAT-0001\` before implementation.
+3. Use \`${CLI_NAME} sdd context FEAT-0001\` before coding.
+4. Before archive/finalize, declare frontend impact with \`${CLI_NAME} sdd frontend-impact FEAT-0001 ...\`.
 5. Before archive/finalize, update the documentation affected by the feature:
    - \`README.md\`
    - \`${memoryDir}/AGENT.md\`
    - \`${memoryDir}/core/*.md\`
    - \`AGENTS.md\`
    - \`AGENT.md\`
-6. Run \`${CLI_NAME} sdd finalize --ref FEAT-###\` to consolidate memory.
+6. Run \`${CLI_NAME} sdd finalize --ref FEAT-0001\` to consolidate memory.
 
 Canonical state lives in \`${memoryDir}/state/*.yaml\`. Markdown files are operational views or guides derived from that state.`;
 }

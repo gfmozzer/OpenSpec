@@ -1,9 +1,12 @@
+import { promises as fs } from 'node:fs';
 import chalk from 'chalk';
 import { SddInitCommand, SddInitContextCommand } from '../core/sdd/init.js';
 import { SddCheckCommand } from '../core/sdd/check.js';
 import { loadProjectSddConfig, loadSkillCatalogState, resolveSddPaths } from '../core/sdd/state.js';
 import { listBundles, suggestSkills } from '../core/sdd/skills.js';
 import { SddBreakdownCommand, SddContextCommand, SddDebateCommand, SddDecideCommand, SddFinalizeCommand, SddFrontendImpactCommand, SddFrontendGapCommand, SddIngestDepositoCommand, SddApproveCommand, SddInsightCommand, SddNextCommand, SddOnboardCommand, SddSkillsInvokeCommand, SddSkillsSyncCommand, SddStartCommand, } from '../core/sdd/operations.js';
+import { assessSddMigration, SddMigrateCommand } from '../core/sdd/migrate.js';
+import { isInteractive } from '../utils/interactive.js';
 function parseCsvOption(value) {
     if (!value)
         return [];
@@ -25,6 +28,40 @@ function parseLayoutOption(value) {
     if (value === 'legacy' || value === 'pt-BR')
         return value;
     throw new Error('Valor invalido em --layout. Use legacy ou pt-BR.');
+}
+async function ensureMandatorySddMigration(targetPath) {
+    const config = await loadProjectSddConfig(targetPath);
+    const paths = resolveSddPaths(targetPath, config);
+    try {
+        await Promise.all([
+            fs.access(paths.configFile),
+            fs.access(paths.stateFiles.discoveryIndex),
+            fs.access(paths.stateFiles.backlog),
+        ]);
+    }
+    catch {
+        return;
+    }
+    const assessment = await assessSddMigration(targetPath);
+    if (!assessment.needsMigration) {
+        return;
+    }
+    const summary = assessment.reasons.join(' | ');
+    if (isInteractive()) {
+        const { confirm } = await import('@inquirer/prompts');
+        const approved = await confirm({
+            message: `Migracao SDD obrigatoria detectada. Deseja aplicar agora para continuar? ${summary}`,
+            default: true,
+        });
+        if (!approved) {
+            throw new Error('Operacao interrompida: aplique a migracao SDD mandatória com `openspec sdd migrate`.');
+        }
+    }
+    const command = new SddMigrateCommand();
+    const result = await command.execute(targetPath, { radToEpic: true });
+    for (const message of result.messages) {
+        console.log(chalk.yellow(`[sdd:migrate] ${message}`));
+    }
 }
 export function registerSddCommand(program) {
     const sddCmd = program.command('sdd').description('Operacoes de memoria SDD');
@@ -97,6 +134,7 @@ export function registerSddCommand(program) {
         .option('--title <title>', 'Titulo curto do insight')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (texto, options) => {
+        await ensureMandatorySddMigration('.');
         const command = new SddInsightCommand();
         const result = await command.execute('.', texto, {
             title: options?.title,
@@ -123,6 +161,7 @@ export function registerSddCommand(program) {
         .option('--json', 'Saida em JSON')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (options) => {
+        await ensureMandatorySddMigration('.');
         const flow = options?.flowMode || options?.fluxo;
         if (flow && !['direto', 'padrao', 'rigoroso'].includes(flow)) {
             throw new Error('Valor invalido em --flow-mode/--fluxo. Use direto, padrao ou rigoroso.');
@@ -175,6 +214,7 @@ export function registerSddCommand(program) {
         .option('--agent <name>', 'Nome do agente que iniciou o debate')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (insightId, options) => {
+        await ensureMandatorySddMigration('.');
         const command = new SddDebateCommand();
         const result = await command.execute('.', insightId, {
             title: options?.title,
@@ -189,14 +229,15 @@ export function registerSddCommand(program) {
         .command('decide <debateId>')
         .description('Decide o resultado de um debate: epic ou descarte')
         .alias('decidir')
-        .requiredOption('--outcome <result>', 'Resultado: epic|radar|discard')
-        .option('--title <title>', 'Titulo do epic (quando outcome=epic/radar)')
+        .requiredOption('--outcome <result>', 'Resultado: epic|discard (radar legado ainda aceito)')
+        .option('--title <title>', 'Titulo do epic (quando outcome=epic; radar legado ainda aceito)')
         .option('--rationale <text>', 'Racional da decisao')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (debateId, options) => {
+        await ensureMandatorySddMigration('.');
         const outcome = options?.outcome;
         if (outcome !== 'radar' && outcome !== 'epic' && outcome !== 'discard') {
-            throw new Error('Valor invalido em --outcome. Use epic, radar ou discard.');
+            throw new Error('Valor invalido em --outcome. Use epic, discard ou radar (legado).');
         }
         const normalizedOutcome = outcome === 'epic' ? 'radar' : outcome;
         const command = new SddDecideCommand();
@@ -206,7 +247,7 @@ export function registerSddCommand(program) {
             render: options?.render,
         });
         if (result.outcome === 'radar') {
-            console.log(chalk.green(`Debate ${debateId} aprovado para epic ${result.radarId}`));
+            console.log(chalk.green(`Debate ${debateId} aprovado para EPIC ${result.radarId}`));
             console.log(`Arquivo: ${result.radarPath}`);
         }
         else {
@@ -216,7 +257,7 @@ export function registerSddCommand(program) {
     });
     sddCmd
         .command('breakdown <radarId>')
-        .description('Quebra um EPIC/RAD em uma ou mais features FEAT')
+        .description('Quebra um EPIC em uma ou mais features FEAT (RAD legado ainda aceito)')
         .alias('quebrar')
         .alias('desdobrar')
         .option('--titles <list>', 'Titulos separados por virgula para gerar varias FEAT')
@@ -227,6 +268,7 @@ export function registerSddCommand(program) {
         .option('--json', 'Saida em JSON')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (radarId, options) => {
+        await ensureMandatorySddMigration('.');
         if (options?.mode && options.mode !== 'graph' && options.mode !== 'flat') {
             throw new Error('Valor invalido em --mode. Use graph ou flat.');
         }
@@ -254,16 +296,18 @@ export function registerSddCommand(program) {
     });
     sddCmd
         .command('start <refOrText>')
-        .description('Inicia execucao de FEAT/EPIC/RAD/FGAP/TD ou cria FEAT direta')
+        .description('Inicia execucao de FEAT/EPIC/FGAP/TD ou cria FEAT direta (RAD legado ainda aceito)')
         .alias('iniciar-execucao')
         .option('--scale <scale>', 'Escala QUICK|STANDARD|LARGE')
         .option('--schema <schema>', 'Schema para criar change em openspec/changes')
         .option('--force', 'Bypass de bloqueios e conflitos de lock')
+        .option('--force-transition', 'Bypass das restrições e violações das lentes estruturais')
         .option('--flow-mode <flowMode>', 'Fluxo: direto|padrao|rigoroso')
         .option('--fluxo <flowMode>', 'Alias em portugues para --flow-mode')
         .option('--json', 'Saida em JSON')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (refOrText, options) => {
+        await ensureMandatorySddMigration('.');
         const flow = options?.flowMode || options?.fluxo;
         if (flow && !['direto', 'padrao', 'rigoroso'].includes(flow)) {
             throw new Error('Valor invalido em --flow-mode/--fluxo. Use direto, padrao ou rigoroso.');
@@ -273,6 +317,7 @@ export function registerSddCommand(program) {
             scale: options?.scale,
             schema: options?.schema,
             force: options?.force,
+            forceTransition: options?.forceTransition,
             flowMode: flow,
             render: options?.render,
         });
@@ -300,6 +345,7 @@ export function registerSddCommand(program) {
         .option('--json', 'Saida em JSON')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (featureId, options) => {
+        await ensureMandatorySddMigration('.');
         const status = options?.status;
         if (!status || !['unknown', 'none', 'required'].includes(status)) {
             throw new Error('Valor invalido em --status. Use unknown, none ou required.');
@@ -325,19 +371,22 @@ export function registerSddCommand(program) {
         .command('finalize')
         .description('Consolida memoria e marca FEAT como DONE')
         .alias('consolidar')
-        .option('--ref <featId>', 'Finaliza feature especifica (ex: FEAT-001)')
+        .option('--ref <featId>', 'Finaliza feature especifica (ex: FEAT-0001)')
         .option('--all-ready', 'Finaliza todas as features prontas na fila')
         .option('--no-adr', 'Nao gera ADR automatico nesta execucao')
         .option('--force-frontend', 'Bypass dos guardrails de frontend com auditoria explicita')
+        .option('--force-transition', 'Bypass de bloqueios estruturais por lentes no finalize')
         .option('--json', 'Saida em JSON')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (options) => {
+        await ensureMandatorySddMigration('.');
         const command = new SddFinalizeCommand();
         const result = await command.execute('.', {
             ref: options?.ref,
             allReady: options?.allReady,
             noAdr: options?.noAdr,
             forceFrontend: options?.forceFrontend,
+            forceTransition: options?.forceTransition,
             render: options?.render,
         });
         if (options?.json) {
@@ -369,10 +418,11 @@ export function registerSddCommand(program) {
     });
     sddCmd
         .command('context <ref>')
-        .description('Gera contexto objetivo para FEAT/EPIC/RAD/FGAP/TD')
+        .description('Gera contexto objetivo para FEAT/EPIC/FGAP/TD (RAD legado ainda aceito)')
         .alias('contexto')
         .option('--json', 'Saida em JSON')
         .action(async (ref, options) => {
+        await ensureMandatorySddMigration('.');
         const command = new SddContextCommand();
         const context = await command.execute('.', ref);
         if (options?.json) {
@@ -410,6 +460,7 @@ export function registerSddCommand(program) {
         .option('--json', 'Saida em JSON')
         .option('--compact', 'Retorna payload resumido')
         .action(async (target = 'system', options) => {
+        await ensureMandatorySddMigration('.');
         const command = new SddOnboardCommand();
         const result = await command.execute('.', target, { compact: options?.compact });
         if (options?.json) {
@@ -435,6 +486,7 @@ export function registerSddCommand(program) {
         .option('--json', 'Saida em JSON')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (featId, options) => {
+        await ensureMandatorySddMigration('.');
         const etapa = options?.etapa;
         if (!etapa || !['proposta', 'planejamento', 'tarefas'].includes(etapa)) {
             throw new Error('Valor invalido em --etapa. Use proposta, planejamento ou tarefas.');
@@ -461,6 +513,7 @@ export function registerSddCommand(program) {
         .option('--limit <n>', 'Limite de itens prontos (padrao: 10)')
         .option('--json', 'Saida em JSON')
         .action(async (targetPath = '.', options) => {
+        await ensureMandatorySddMigration(targetPath);
         if (options?.rank && !['impact', 'criticality', 'fifo'].includes(options.rank)) {
             throw new Error('Valor invalido em --rank. Use impact, criticality ou fifo.');
         }
@@ -498,6 +551,7 @@ export function registerSddCommand(program) {
         .option('--render', 'Gera views Markdown apos validacao bem-sucedida')
         .option('--json', 'Retorna relatorio em JSON')
         .action(async (targetPath = '.', options) => {
+        await ensureMandatorySddMigration(targetPath);
         const command = new SddCheckCommand();
         const report = await command.execute(targetPath, {
             render: options?.render,
@@ -532,7 +586,7 @@ export function registerSddCommand(program) {
                 console.log(`Features required sem FGAP: ${report.summary.features_missing_fgap_link.join(', ')}`);
             }
             if (report.summary.progress_by_radar.length > 0) {
-                console.log('Progresso por EPIC/RAD:');
+                console.log('Progresso por EPIC:');
                 for (const radar of report.summary.progress_by_radar) {
                     console.log(`- ${radar.radar_id}: ${radar.percent}% (${radar.done}/${radar.total})`);
                 }
@@ -558,6 +612,24 @@ export function registerSddCommand(program) {
             throw new Error('Falha na validacao do SDD');
         }
     });
+    sddCmd
+        .command('migrate')
+        .description('Migra entidades legado para os novos formatos SDD')
+        .alias('migrar')
+        .option('--rad-to-epic', 'Migra instancias de RAD para EPIC (4-digitos)')
+        .option('--json', 'Saida em JSON')
+        .action(async (options) => {
+        const command = new SddMigrateCommand();
+        const result = await command.execute('.', { radToEpic: options?.radToEpic });
+        if (options?.json) {
+            console.log(JSON.stringify(result, null, 2));
+            return;
+        }
+        console.log(chalk.green(`Migracao concluida.`));
+        for (const msg of result.messages) {
+            console.log(`- ${msg}`);
+        }
+    });
     const skillsCmd = sddCmd
         .command('skills')
         .description('Operacoes de curadoria e sugestao de skills');
@@ -568,6 +640,7 @@ export function registerSddCommand(program) {
         .alias('pacotes')
         .option('--json', 'Retorna resultado em JSON')
         .action(async (targetPath = '.', options) => {
+        await ensureMandatorySddMigration(targetPath);
         const config = await loadProjectSddConfig(targetPath);
         const paths = resolveSddPaths(targetPath, config);
         const catalog = await loadSkillCatalogState(paths);
@@ -589,6 +662,7 @@ export function registerSddCommand(program) {
         .option('--all', 'Sincroniza todas as skills do catalogo')
         .option('--tools <list>', 'Ferramentas alvo separadas por virgula (ex: codex,cursor,claude)')
         .action(async (targetPath = '.', options) => {
+        await ensureMandatorySddMigration(targetPath);
         const command = new SddSkillsSyncCommand();
         const bundles = parseCsvOption(options?.bundle);
         const tools = parseCsvOption(options?.tools);
@@ -614,6 +688,7 @@ export function registerSddCommand(program) {
         .option('--max <n>', 'Quantidade maxima de sugestoes (padrao: 5)')
         .option('--json', 'Retorna resultado em JSON')
         .action(async (targetPath = '.', options) => {
+        await ensureMandatorySddMigration(targetPath);
         const config = await loadProjectSddConfig(targetPath);
         const paths = resolveSddPaths(targetPath, config);
         const catalog = await loadSkillCatalogState(paths);
@@ -655,9 +730,10 @@ export function registerSddCommand(program) {
         .option('--bundles <list>', 'Bundles separados por virgula')
         .option('--max <n>', 'Quantidade maxima quando usar sugestao (padrao: 5)')
         .option('--objetivo <texto>', 'Objetivo em linguagem natural para o prompt')
-        .option('--ref <id>', 'Referencia de contexto (ex: FEAT-001, RAD-001)')
+        .option('--ref <id>', 'Referencia de contexto (ex: FEAT-0001, EPIC-0001)')
         .option('--json', 'Retorna payload em JSON')
         .action(async (targetPath = '.', options) => {
+        await ensureMandatorySddMigration(targetPath);
         const command = new SddSkillsInvokeCommand();
         const result = await command.execute(targetPath, {
             ids: parseCsvOption(options?.ids),
@@ -686,11 +762,12 @@ export function registerSddCommand(program) {
         .command('add <title>')
         .description('Abre um novo FGAP')
         .alias('abrir')
-        .option('--origin <featId>', 'Feature de origem (FEAT-###)')
+        .option('--origin <featId>', 'Feature de origem (FEAT-0001)')
         .option('--routes <list>', 'Rotas separadas por virgula')
         .option('--menu <list>', 'Alvos de menu separados por virgula')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (title, options) => {
+        await ensureMandatorySddMigration('.');
         const command = new SddFrontendGapCommand();
         const result = await command.add('.', title, {
             originFeature: options?.origin,
@@ -709,6 +786,7 @@ export function registerSddCommand(program) {
         .option('--routes <list>', 'Rotas atualizadas separadas por virgula')
         .option('--no-render', 'Nao gera views apos atualizar estado')
         .action(async (gapId, options) => {
+        await ensureMandatorySddMigration('.');
         const command = new SddFrontendGapCommand();
         const result = await command.resolve('.', gapId, {
             feature: options?.feature,
