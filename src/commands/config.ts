@@ -579,8 +579,7 @@ export function registerConfigCommand(program: Command): void {
           };
 
           const selectedWorkflows = await checkbox<string>({
-            message: 'Select workflows to make available:',
-            instructions: 'Space to toggle, Enter to confirm',
+            message: 'Select workflows to make available (Space to toggle, Enter to confirm):',
             pageSize: ALL_WORKFLOWS.length,
             theme: {
               icon: {

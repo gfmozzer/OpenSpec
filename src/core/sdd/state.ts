@@ -14,6 +14,7 @@ import {
   RepoMapStateSchema,
   SourceIndexStateSchema,
   SkillCatalogStateSchema,
+  SkillRoutingStateSchema,
   ServiceCatalogStateSchema,
   TechStackStateSchema,
   TechDebtStateSchema,
@@ -28,6 +29,7 @@ import {
   type RepoMapState,
   type SourceIndexState,
   type SkillCatalogState,
+  type SkillRoutingState,
   type ServiceCatalogState,
   type TechStackState,
   type TechDebtState,
@@ -114,6 +116,7 @@ export interface SddPaths {
     frontendDecisions: string;
     repoMap: string;
     sourceIndex: string;
+    skillRouting: string;
   };
 }
 
@@ -133,6 +136,7 @@ export interface SddStateSnapshot {
   frontendDecisions?: FrontendDecisionsState;
   repoMap: RepoMapState;
   sourceIndex: SourceIndexState;
+  skillRouting: SkillRoutingState;
 }
 
 const LEGACY_LAYOUT_FOLDERS = {
@@ -185,6 +189,27 @@ const DEFAULT_PROJECT_CONFIG = {
   schema: 'spec-driven',
   sdd: DEFAULT_SDD_CONFIG,
 };
+
+const CANONICAL_FOLDER_OPTIONS = {
+  legacy: {
+    discovery: ['discovery'],
+    planning: ['pendencias'],
+    skills: ['skills'],
+    templates: ['templates'],
+    deposito: ['deposito'],
+    active: ['active'],
+    archived: ['archived'],
+  },
+  'pt-BR': {
+    discovery: ['descoberta'],
+    planning: ['planejamento'],
+    skills: ['habilidades'],
+    templates: ['modelos'],
+    deposito: ['deposito'],
+    active: ['execucao'],
+    archived: ['arquivados'],
+  },
+} as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value);
@@ -266,6 +291,26 @@ function mergeRuntimeConfig(raw: unknown): SddRuntimeConfig {
   };
 }
 
+function validateRuntimeConfig(config: SddRuntimeConfig): void {
+  const allowed = CANONICAL_FOLDER_OPTIONS[config.layout];
+  const invalidEntries = Object.entries(config.folders).flatMap(([key, value]) => {
+    const folderKey = key as keyof SddRuntimeConfig['folders'];
+    const accepted = allowed[folderKey];
+    if (accepted.includes(value as never)) {
+      return [];
+    }
+    return [`${folderKey}="${value}" (permitidos: ${accepted.join(', ')})`];
+  });
+
+  if (invalidEntries.length > 0) {
+    throw new Error(
+      `Configuracao SDD invalida em openspec/config.yaml: folders fora do canonico para layout ${config.layout}: ${invalidEntries.join(
+        '; '
+      )}`
+    );
+  }
+}
+
 async function fileExists(filePath: string): Promise<boolean> {
   try {
     await fs.access(filePath);
@@ -290,18 +335,22 @@ export async function loadProjectSddConfig(projectRoot: string): Promise<SddRunt
       : null;
 
   if (!configPath) {
-    return {
+    const config = {
       ...DEFAULT_SDD_CONFIG,
       folders: { ...DEFAULT_SDD_CONFIG.folders },
       frontend: { enabled: false },
       views: { autoRender: true },
     };
+    validateRuntimeConfig(config);
+    return config;
   }
 
   const rawContent = await fs.readFile(configPath, 'utf-8');
   const parsed = parseYaml(rawContent);
   const root = isRecord(parsed) ? parsed : {};
-  return mergeRuntimeConfig(root.sdd);
+  const config = mergeRuntimeConfig(root.sdd);
+  validateRuntimeConfig(config);
+  return config;
 }
 
 export async function upsertProjectSddConfig(
@@ -348,6 +397,7 @@ export async function upsertProjectSddConfig(
     mergedSdd.folders = defaultFoldersForLayout(overrides.layout);
   }
   rootConfig.sdd = mergedSdd;
+  validateRuntimeConfig(mergedSdd);
 
   await fs.writeFile(configPath, stringifyYaml(rootConfig), 'utf-8');
   return mergedSdd;
@@ -369,8 +419,10 @@ export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): 
   const archivedDir = path.join(memoryRoot, config.folders.archived);
   const discoveryInsightsDir = path.join(discoveryDir, '1-insights');
   const discoveryDebatesDir = path.join(discoveryDir, '2-debates');
-  const discoveryRadarDir = path.join(discoveryDir, '3-radar');
   const discoveryEpicDir = path.join(discoveryDir, '3-epic');
+  // Mantemos a chave legada por compatibilidade interna, mas novos projetos
+  // devem materializar apenas a pasta canonica `3-epic`.
+  const discoveryRadarDir = discoveryEpicDir;
   const discoveryDiscardedDir = path.join(discoveryDir, '4-discarded');
 
   return {
@@ -412,6 +464,7 @@ export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): 
       frontendDecisions: path.join(stateDir, 'frontend-decisions.yaml'),
       repoMap: path.join(stateDir, 'repo-map.yaml'),
       sourceIndex: path.join(stateDir, 'source-index.yaml'),
+      skillRouting: path.join(stateDir, 'skill-routing.yaml'),
     },
   };
 }
@@ -527,6 +580,7 @@ async function ensureCuratedSkillCatalog(filePath: string): Promise<void> {
 export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig): Promise<void> {
   await writeYamlIfMissing(paths.configFile, {
     version: 1,
+    state_version: 2,
     generatedBy: `${CLI_NAME} sdd init`,
     language: config.language,
     layout: config.layout,
@@ -551,6 +605,15 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
   await writeYamlIfMissing(paths.stateFiles.integrationContracts, { version: 1, contracts: [] });
   await writeYamlIfMissing(paths.stateFiles.repoMap, { version: 1, items: [] });
   await writeYamlIfMissing(paths.stateFiles.sourceIndex, { version: 1, sources: [] });
+  await writeYamlIfMissing(paths.stateFiles.skillRouting, {
+    version: 1,
+    default_skills: ['architecture', 'concise-planning', 'context-window-management'],
+    routes: [
+      { domain: 'backend', skills: ['architecture', 'backend-dev-guidelines'], bundles: [] },
+      { domain: 'frontend', skills: ['frontend-design', 'react-patterns'], bundles: [] },
+      { domain: 'infra', skills: ['terraform-specialist', 'docker-expert'], bundles: [] }
+    ]
+  });
 
   if (config.frontend.enabled) {
     await writeYamlIfMissing(paths.stateFiles.frontendGaps, { version: 1, items: [] });
@@ -648,6 +711,16 @@ export async function loadStateSnapshot(
   );
   const repoMap = RepoMapStateSchema.parse(await readYaml(paths.stateFiles.repoMap));
   const sourceIndex = SourceIndexStateSchema.parse(await readYaml(paths.stateFiles.sourceIndex));
+  let skillRouting: SkillRoutingState;
+  try {
+    skillRouting = SkillRoutingStateSchema.parse(await readYaml(paths.stateFiles.skillRouting));
+  } catch (e) {
+    skillRouting = {
+      version: 1,
+      default_skills: ['architecture', 'concise-planning', 'context-window-management'],
+      routes: []
+    };
+  }
 
   let frontendGaps: FrontendGapsState | undefined;
   let frontendMap: FrontendMapState | undefined;
@@ -676,6 +749,7 @@ export async function loadStateSnapshot(
     frontendDecisions,
     repoMap,
     sourceIndex,
+    skillRouting,
   };
 }
 

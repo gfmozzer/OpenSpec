@@ -75,16 +75,16 @@ function checkUniqueIds<T extends { id: string }>(
 function validateDiscoveryRecords(records: DiscoveryRecord[], errors: string[]): void {
   for (const record of records) {
     if (record.type === 'INS' && !ID_PATTERNS.insight.test(record.id)) {
-      errors.push(`Registro de discovery ${record.id} e INS, mas nao segue INS-###`);
+      errors.push(`Registro de discovery ${record.id} e INS, mas nao segue INS-####`);
     }
     if (record.type === 'DEB' && !ID_PATTERNS.debate.test(record.id)) {
-      errors.push(`Registro de discovery ${record.id} e DEB, mas nao segue DEB-###`);
+      errors.push(`Registro de discovery ${record.id} e DEB, mas nao segue DEB-####`);
     }
     if (record.type === 'RAD' && !ID_PATTERNS.epicOrRadar.test(record.id)) {
-      errors.push(`Registro de discovery ${record.id} e RAD, mas nao segue RAD-###/EPIC-####`);
+      errors.push(`Registro de discovery ${record.id} e RAD, mas nao segue RAD-### ou EPIC-####`);
     }
     if (record.type === 'EPIC' && !ID_PATTERNS.epicOrRadar.test(record.id)) {
-      errors.push(`Registro de discovery ${record.id} e EPIC, mas nao segue EPIC-####/RAD-###`);
+      errors.push(`Registro de discovery ${record.id} e EPIC, mas nao segue EPIC-#### (ou RAD-### legado)`);
     }
   }
 }
@@ -286,6 +286,32 @@ async function validateActiveTaskChecklist(
   }
 }
 
+async function validateWorkspaceCoherence(
+  activeDir: string,
+  archivedDir: string,
+  items: BacklogItem[],
+  warnings: string[]
+): Promise<void> {
+  for (const item of items) {
+    const activePath = path.join(activeDir, item.id);
+    const archivedPath = path.join(archivedDir, item.id);
+    const activeExists = existsSync(activePath);
+    const archivedExists = existsSync(archivedPath);
+
+    if (item.status === 'IN_PROGRESS' && !activeExists) {
+      warnings.push(`Feature ${item.id} em IN_PROGRESS sem workspace ativo em .sdd/active.`);
+    }
+
+    if ((item.status === 'DONE' || item.status === 'ARCHIVED') && activeExists) {
+      warnings.push(`Feature ${item.id} concluida ainda presente em .sdd/active.`);
+    }
+
+    if (item.status === 'IN_PROGRESS' && archivedExists) {
+      warnings.push(`Feature ${item.id} em IN_PROGRESS ja possui workspace em .sdd/archived.`);
+    }
+  }
+}
+
 function parseRouteToken(value: string): string | null {
   const token = value.trim();
   if (!token) return null;
@@ -315,16 +341,80 @@ function featureHasMetadataFrontendEvidence(item: BacklogItem): boolean {
   );
 }
 
+async function validateCanonicalSddStructure(
+  memoryRoot: string,
+  errors: string[]
+): Promise<void> {
+  const forbiddenTopLevelDirs = ['backlog', 'features', 'finalize', 'queue'];
+
+  for (const dirName of forbiddenTopLevelDirs) {
+    const candidate = path.join(memoryRoot, dirName);
+    if (existsSync(candidate)) {
+      errors.push(
+        `Estrutura SDD nao canônica detectada: ${path.relative(process.cwd(), candidate)}. Use apenas state/, pendencias|planejamento/, active|execucao/ e archived|arquivados/.`
+      );
+    }
+  }
+
+  const forbiddenNestedPaths = [path.join(memoryRoot, 'backlog', 'features')];
+  for (const candidate of forbiddenNestedPaths) {
+    if (existsSync(candidate)) {
+      errors.push(
+        `Estrutura SDD nao canônica detectada: ${path.relative(process.cwd(), candidate)}. Backlog de features deve existir apenas em .sdd/state/backlog.yaml e nas views renderizadas de planejamento.`
+      );
+    }
+  }
+}
+
 export class SddCheckCommand {
   async execute(projectRoot: string, options: SddCheckOptions = {}): Promise<SddCheckReport> {
-    const config = await loadProjectSddConfig(projectRoot);
-    const paths = resolveSddPaths(projectRoot, config);
+    let config;
+    let paths;
     const errors: string[] = [];
     const warnings: string[] = [];
+
+    try {
+      config = await loadProjectSddConfig(projectRoot);
+      paths = resolveSddPaths(projectRoot, config);
+    } catch (error) {
+      return {
+        valid: false,
+        errors: [(error as Error).message],
+        warnings,
+        summary: {
+          discovery: 0,
+          backlog: 0,
+          techDebt: 0,
+          finalizeQueue: 0,
+          frontendEnabled: false,
+          frontendGaps: 0,
+          frontendRoutes: 0,
+          progress_global: { done: 0, total: 0, percent: 0 },
+          progress_by_radar: [],
+          ready_for_parallel: 0,
+          blocked: 0,
+          lock_conflicts: 0,
+          documentation_sync: false,
+          core_views_stale: true,
+          missing_architecture_fields: [],
+          frontend_coverage_sync: true,
+          features_missing_frontend_declaration: [],
+          features_with_frontend_conflict: [],
+          features_missing_fgap_link: [],
+          graph: {
+            readyForParallel: 0,
+            blocked: 0,
+            lockConflicts: 0,
+          },
+        },
+      };
+    }
 
     if (!existsSync(paths.memoryRoot)) {
       throw new Error(`Diretorio de memoria SDD nao encontrado em ${paths.memoryRoot}. Execute "${CLI_NAME} sdd init".`);
     }
+
+    await validateCanonicalSddStructure(paths.memoryRoot, errors);
 
     const requiredFiles = [
       paths.stateFiles.discoveryIndex,
@@ -450,6 +540,12 @@ export class SddCheckCommand {
       validateFrontendReferences(snapshot.frontendGaps.items, snapshot.backlog.items, errors, warnings);
     }
     await validateActiveTaskChecklist(paths.activeDir, snapshot.backlog.items, warnings);
+    await validateWorkspaceCoherence(
+      paths.activeDir,
+      paths.archivedDir,
+      snapshot.backlog.items,
+      warnings
+    );
 
     const featuresMissingFrontendDeclaration = config.frontend.enabled
       ? snapshot.backlog.items
@@ -490,7 +586,13 @@ export class SddCheckCommand {
     if (snapshot.repoMap.items.length === 0) {
       missingArchitectureFields.push('repo-map.items vazio');
     }
-    if (config.frontend.enabled && (snapshot.frontendDecisions?.items.length ?? 0) === 0) {
+    const hasFrontendDecisionDemand =
+      config.frontend.enabled &&
+      (
+        (snapshot.frontendGaps?.items.length ?? 0) > 0 ||
+        snapshot.backlog.items.some((item) => featureHasMetadataFrontendEvidence(item))
+      );
+    if (hasFrontendDecisionDemand && (snapshot.frontendDecisions?.items.length ?? 0) === 0) {
       missingArchitectureFields.push('frontend-decisions.items vazio');
     }
 

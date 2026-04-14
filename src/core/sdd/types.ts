@@ -230,6 +230,18 @@ export const SkillBundleSchema = z.object({
   skill_ids: StringArraySchema,
 });
 
+export const SkillRoutingRuleSchema = z.object({
+  domain: z.string().min(1),
+  skills: StringArraySchema,
+  bundles: StringArraySchema,
+});
+
+export const SkillRoutingStateSchema = z.object({
+  version: z.literal(1),
+  default_skills: StringArraySchema,
+  routes: z.array(SkillRoutingRuleSchema).default([]),
+});
+
 export const SourceDocumentRecordSchema = z.object({
   id: z.string().min(1),
   type: SourceDocumentTypeSchema,
@@ -445,3 +457,5 @@ export type TechStackState = z.infer<typeof TechStackStateSchema>;
 export type IntegrationContractsState = z.infer<typeof IntegrationContractsStateSchema>;
 export type FrontendDecisionsState = z.infer<typeof FrontendDecisionsStateSchema>;
 export type RepoMapState = z.infer<typeof RepoMapStateSchema>;
+export type SkillRoutingRule = z.infer<typeof SkillRoutingRuleSchema>;
+export type SkillRoutingState = z.infer<typeof SkillRoutingStateSchema>;

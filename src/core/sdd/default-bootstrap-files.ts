@@ -42,14 +42,14 @@ Este diretorio guarda a memoria operacional do projeto.
 ## Como operar
 1. Rode \`${CLI_NAME} sdd onboard system\` para entender o estado atual.
 2. Rode \`${CLI_NAME} sdd next\` para ver o que pode comecar agora.
-3. Rode \`${CLI_NAME} sdd start FEAT-###\` para abrir a execucao.
-4. Rode \`${CLI_NAME} sdd context FEAT-###\` antes de implementar.
-5. Declare impacto de frontend com \`${CLI_NAME} sdd frontend-impact FEAT-### --status required|none --reason "..."\`.
-6. Rode \`${CLI_NAME} sdd finalize --ref FEAT-###\` ao consolidar a feature.
+3. Rode \`${CLI_NAME} sdd start FEAT-0001\` para abrir a execucao.
+4. Rode \`${CLI_NAME} sdd context FEAT-0001\` antes de implementar.
+5. Declare impacto de frontend com \`${CLI_NAME} sdd frontend-impact FEAT-0001 --status required|none --reason "..."\`.
+6. Rode \`${CLI_NAME} sdd finalize --ref FEAT-0001\` ao consolidar a feature.
 
 ## Pastas principais
 - \`core/\`: visao macro atual do sistema.
-- \`${discovery}/\`: insights, debates, radar e descartes.
+- \`${discovery}/\`: insights, debates, epics e descartes.
 - \`${planning}/\`: backlog, progresso, gaps e fila de finalize.
 - \`${planning}/frontend-auditoria.md\`: auditoria de cobertura frontend por FEAT.
 - \`state/\`: fonte canonica em YAML.
@@ -129,9 +129,9 @@ Resultado esperado:
 ## 4) Como executar uma feature
 
 \`\`\`bash
-opensdd sdd start FEAT-001 --fluxo padrao
-opensdd sdd context FEAT-001
-opensdd sdd frontend-impact FEAT-001 --status required --reason "Nova rota e novos componentes de UI"
+opensdd sdd start FEAT-0001 --fluxo padrao
+opensdd sdd context FEAT-0001
+opensdd sdd frontend-impact FEAT-0001 --status required --reason "Nova rota e novos componentes de UI"
 \`\`\`
 
 Implemente e atualize o pacote da FEAT:
@@ -144,7 +144,7 @@ Implemente e atualize o pacote da FEAT:
 
 \`\`\`bash
 opensdd archive <change-name>
-opensdd sdd finalize --ref FEAT-001
+opensdd sdd finalize --ref FEAT-0001
 opensdd sdd check --render
 opensdd sdd onboard system
 \`\`\`
@@ -166,10 +166,10 @@ Resultado: backlog atualizado, docs sincronizadas e proxima FEAT liberada sem ad
 - \`opensdd sdd onboard system\`: entender o estado atual.
 - \`opensdd sdd ingest-deposito\`: transformar material bruto em trilha executavel.
 - \`opensdd sdd next\`: ver o que pode comecar agora.
-- \`opensdd sdd start FEAT-###\`: abrir execucao da feature.
-- \`opensdd sdd context FEAT-###\`: gerar contexto focado.
-- \`opensdd sdd frontend-impact FEAT-### --status required|none --reason "..."\`: declarar impacto frontend.
-- \`opensdd sdd finalize --ref FEAT-###\`: consolidar memoria e concluir.
+- \`opensdd sdd start FEAT-0001\`: abrir execucao da feature.
+- \`opensdd sdd context FEAT-0001\`: gerar contexto focado.
+- \`opensdd sdd frontend-impact FEAT-0001 --status required|none --reason "..."\`: declarar impacto frontend.
+- \`opensdd sdd finalize --ref FEAT-0001\`: consolidar memoria e concluir.
 `;
 
 export const PROMPT_01_INGESTAO_DEPOSITO_MD = `# Prompt: Ingestao de Deposito
@@ -184,7 +184,7 @@ Objetivo:
 1. Varrer \`.sdd/deposito/\`.
 2. Atualizar \`.sdd/state/source-index.yaml\`.
 3. Consolidar contexto canônico (\`architecture\`, \`service-catalog\`, \`tech-stack\`, \`integration-contracts\`, frontend quando habilitado).
-4. Gerar trilha executável (EPIC/RAD + FEATs) com rastreabilidade de origem.
+4. Gerar trilha executável (EPIC, com suporte a RAD legado, + FEATs) com rastreabilidade de origem.
 
 Saida obrigatoria:
 - resumo das fontes lidas;
@@ -211,12 +211,12 @@ Objetivo:
 Executar uma FEAT sem perder rastreabilidade.
 
 Instrucoes:
-1. Rode \`opensdd sdd context FEAT-###\`.
-2. Atualize \`.sdd/execucao|active/FEAT-###/\` (spec/plano/tarefas/historico).
+1. Rode \`opensdd sdd context FEAT-0001\`.
+2. Atualize \`.sdd/execucao|active/FEAT-0001/\` (spec/plano/tarefas/historico).
 3. Implemente.
 4. Atualize docs canônicas afetadas.
-5. Declare impacto frontend com \`opensdd sdd frontend-impact FEAT-### ...\`.
-6. Finalize com \`opensdd archive <change-name>\` e \`opensdd sdd finalize --ref FEAT-###\`.
+5. Declare impacto frontend com \`opensdd sdd frontend-impact FEAT-0001 ...\`.
+6. Finalize com \`opensdd archive <change-name>\` e \`opensdd sdd finalize --ref FEAT-0001\`.
 `;
 
 export const PROMPT_04_CONSOLIDACAO_FINALIZE_MD = `# Prompt: Consolidacao e Finalize
@@ -228,12 +228,18 @@ Checklist:
 1. Revisar diff técnico da FEAT.
 2. Atualizar documentação central (\`README.md\`, \`.sdd/AGENT.md\`, \`.sdd/core/*.md\`, \`AGENTS.md\`, \`AGENT.md\`).
 3. Garantir registro de gaps/decisoes de frontend quando aplicavel.
-4. Declarar impacto frontend com \`opensdd sdd frontend-impact FEAT-### --status required|none --reason "..."\`.
+4. Declarar impacto frontend com \`opensdd sdd frontend-impact FEAT-0001 --status required|none --reason "..."\`.
 5. Rodar \`opensdd sdd check --render\`.
-6. Rodar \`opensdd sdd finalize --ref FEAT-###\` e reportar docs atualizados.
+6. Rodar \`opensdd sdd finalize --ref FEAT-0001\` e reportar docs atualizados.
 `;
 
 export const TEMPLATE_1_SPEC_MD = `# Especificacao: [NOME_DA_ENTREGA]
+
+<!-- Instrucao do sistema:
+- Contem: Dor real e objetivo descritos com clareza.
+- Proibido: ["TODO", "(preencher", "Descrever o", ou repeticoes do titulo]
+- Qualidade minima exigida: As secoes 'Resumo da Entrega', 'Problema' e 'Objetivo' devem possuir ao menos 3 sentencas substanciais de contexto.
+-->
 
 ## Resumo da Entrega
 - Entrega:
@@ -244,7 +250,9 @@ export const TEMPLATE_1_SPEC_MD = `# Especificacao: [NOME_DA_ENTREGA]
 Descreva a dor real que esta entrega resolve.
 
 ## Objetivo
-Descreva o resultado esperado para usuario ou sistema.
+- Descreva detalhadamente o resultado esperado.
+- Adicione contexto de negocio ou motivacao clara.
+- Liste impactos positivos para usuario ou sistema.
 
 ## Escopo
 - [ ] Item 1
@@ -270,7 +278,7 @@ Descreva o resultado esperado para usuario ou sistema.
 ## Declaracao de Impacto Frontend
 - Status (\`unknown|none|required\`):
 - Justificativa:
-- Comando: \`${CLI_NAME} sdd frontend-impact FEAT-### --status required|none --reason "..."\`
+- Comando: \`${CLI_NAME} sdd frontend-impact FEAT-0001 --status required|none --reason "..."\`
 
 ## Referencias
 - FEAT:
@@ -280,6 +288,12 @@ Descreva o resultado esperado para usuario ou sistema.
 `;
 
 export const TEMPLATE_2_PLAN_MD = `# Planejamento: [NOME_DA_ENTREGA]
+
+<!-- Instrucao do sistema:
+- Contem: Detalhes concretos de implementacao e fatiamento tecnico.
+- Proibido: ["TODO", "(preencher", descricoes vazias sem aprofundamento tecnico]
+- Qualidade minima exigida: A secao 'Abordagem Tecnica' deve explicar COMO a feature sera resolvida.
+-->
 
 ## Abordagem Tecnica
 Descreva como a solucao sera implementada.
@@ -295,14 +309,16 @@ Descreva como a solucao sera implementada.
 
 ## Impacto Arquitetural
 - Servicos afetados:
-- Contratos afetados:
 - Dados afetados:
 
-## Impacto no Frontend
+## Contratos Afetados
+- APIs e contratos consumidos/providos:
+
+## Impacto Frontend
 - Rotas afetadas:
 - Gaps criados ou resolvidos:
 - Decisoes de frontend relevantes:
-- Declaracao obrigatoria: \`${CLI_NAME} sdd frontend-impact FEAT-### --status required|none --reason "..."\`
+- Declaracao obrigatoria: \`${CLI_NAME} sdd frontend-impact FEAT-0001 --status required|none --reason "..."\`
 
 ## Skills e Bundles
 - Skills consultadas:
@@ -316,28 +332,40 @@ Descreva como a solucao sera implementada.
 
 export const TEMPLATE_3_TASKS_MD = `# Checklist de Tarefas: [NOME_DA_ENTREGA]
 
+<!-- Instrucao do sistema:
+- Contem: Lista acionavel de tarefas sequenciais.
+- Proibido: ["TODO", "(preencher"]
+- Qualidade minima exigida: Passos realistas de implementacao desdobrados do plano.
+-->
+
 ## Passos de Implementacao
-- [ ] Entender o contexto com \`${CLI_NAME} sdd context FEAT-###\`
+- [ ] Entender o contexto com \`${CLI_NAME} sdd context FEAT-0001\`
 - [ ] Ajustar ou confirmar o plano tecnico
 - [ ] Implementar o codigo
 - [ ] Validar comportamento e testes
-- [ ] Declarar impacto frontend com \`${CLI_NAME} sdd frontend-impact FEAT-### --status required|none --reason "..."\`
+- [ ] Declarar impacto frontend com \`${CLI_NAME} sdd frontend-impact FEAT-0001 --status required|none --reason "..."\`
 
 ## Consolidacao Obrigatoria
 - [ ] Atualizar \`README.md\`, \`.sdd/AGENT.md\`, \`AGENTS.md\`, \`AGENT.md\` e os arquivos de \`.sdd/core/\` afetados
 - [ ] Se impacto frontend=required, garantir FGAP aberto/atualizado antes do finalize
 - [ ] Registrar gaps de frontend criados ou resolvidos
 - [ ] Atualizar o changelog da feature
-- [ ] Arquivar a mudanca tecnica e executar \`${CLI_NAME} sdd finalize --ref FEAT-###\`
+- [ ] Arquivar a mudanca tecnica e executar \`${CLI_NAME} sdd finalize --ref FEAT-0001\`
 
 ## Definition of Done
 - [DOC] Documentacao central atualizada
 - [UI] Lacunas/decisoes de frontend registradas (quando aplicavel)
 - [ARQ] Change tecnica arquivada no OpenSpec
-- [MEM] Memoria consolidada com \`${CLI_NAME} sdd consolidar --ref FEAT-###\`
+- [MEM] Memoria consolidada com \`${CLI_NAME} sdd finalize --ref FEAT-0001\`
 `;
 
 export const TEMPLATE_4_CHANGELOG_MD = `# Changelog de Arquitetura: [NOME_DA_FEATURE]
+
+<!-- Instrucao do sistema:
+- Contem: Registro concreto do que mudou ou foi resolvido.
+- Proibido: ["TODO", "(preencher", arquivos mockados sem mudanca real]
+- Qualidade minima exigida: Refletir a verdade do commit/implementacao.
+-->
 
 ## Novas Entidades / Modelos
 -
