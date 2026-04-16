@@ -113,6 +113,7 @@ export const DiscoveryRecordSchema = z
     id: z.string().min(1),
     type: DiscoveryTypeSchema,
     title: z.string().min(1),
+    title_canonical: z.string().min(1).max(60).optional(),
     status: DiscoveryStatusSchema,
     origin_prompt: NullableStringSchema,
     related_ids: StringArraySchema,

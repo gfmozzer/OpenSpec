@@ -145,6 +145,7 @@ export declare const DiscoveryRecordSchema: z.ZodObject<{
         EPIC: "EPIC";
     }>;
     title: z.ZodString;
+    title_canonical: z.ZodOptional<z.ZodString>;
     status: z.ZodEnum<{
         PLANNED: "PLANNED";
         NEW: "NEW";
@@ -490,6 +491,7 @@ export declare const DiscoveryIndexStateSchema: z.ZodObject<{
             EPIC: "EPIC";
         }>;
         title: z.ZodString;
+        title_canonical: z.ZodOptional<z.ZodString>;
         status: z.ZodEnum<{
             PLANNED: "PLANNED";
             NEW: "NEW";

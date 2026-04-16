@@ -32,6 +32,19 @@ function slugify(value) {
         .replace(/^-+|-+$/g, '')
         .replace(/-{2,}/g, '-');
 }
+function stripFunctionalTitlePrefixes(value) {
+    return value
+        .replace(/^\s*debate:\s*/i, '')
+        .replace(/^\s*insight:\s*/i, '')
+        .trim();
+}
+function computeCanonicalTitle(value) {
+    const normalized = stripFunctionalTitlePrefixes(value)
+        .replace(/\s+/g, ' ')
+        .trim();
+    const fallback = normalized || 'Sem titulo canonico';
+    return fallback.slice(0, 60).trim();
+}
 function ensureMemoryInitialized(paths) {
     return fs.access(paths.memoryRoot).catch(() => {
         throw new Error(`Diretorio ${paths.memoryRoot} nao encontrado. Execute "${CLI_NAME} sdd init".`);
@@ -657,10 +670,12 @@ export class SddInsightCommand {
         syncCounterFromId(snapshot.discoveryIndex, id);
         const now = nowIso();
         const title = (options?.title || trimmed.split('\n')[0] || 'Insight sem titulo').slice(0, 120);
+        const titleCanonical = computeCanonicalTitle(title);
         const record = {
             id,
             type: 'INS',
             title,
+            title_canonical: titleCanonical,
             status: 'NEW',
             origin_prompt: trimmed,
             related_ids: [],
@@ -687,10 +702,12 @@ export class SddDebateCommand {
         syncCounterFromId(snapshot.discoveryIndex, id);
         const now = nowIso();
         const title = (options?.title || `Debate: ${insight.title}`).slice(0, 120);
+        const titleCanonical = computeCanonicalTitle(options?.title || insight.title_canonical || insight.title);
         const debate = {
             id,
             type: 'DEB',
             title,
+            title_canonical: titleCanonical,
             status: 'OPEN',
             origin_prompt: `Debate originado de ${insight.id}${options?.agent ? ` por ${options.agent}` : ''}`,
             related_ids: [insight.id],
@@ -740,7 +757,7 @@ export class SddDecideCommand {
         }
         const radarId = await allocateEntityId(paths, 'EPIC');
         syncCounterFromId(snapshot.discoveryIndex, radarId);
-        const radarTitle = (options?.title || debate.title).slice(0, 120);
+        const radarTitle = (options?.title || debate.title_canonical || debate.title).slice(0, 120);
         const radarRecord = {
             id: radarId,
             type: 'EPIC',

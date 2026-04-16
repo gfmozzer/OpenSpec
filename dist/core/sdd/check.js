@@ -15,6 +15,15 @@ function checkUniqueIds(items, scope, errors) {
         seen.add(item.id);
     }
 }
+const FORBIDDEN_TITLE_PATTERNS = ['debate:', 'insight:', '(preencher', '(placeholder'];
+function hasForbiddenTitleToken(title) {
+    const lowered = title.toLowerCase();
+    for (const token of FORBIDDEN_TITLE_PATTERNS) {
+        if (lowered.includes(token))
+            return token;
+    }
+    return null;
+}
 function validateDiscoveryRecords(records, errors) {
     for (const record of records) {
         if (record.type === 'INS' && !ID_PATTERNS.insight.test(record.id)) {
@@ -29,12 +38,22 @@ function validateDiscoveryRecords(records, errors) {
         if (record.type === 'EPIC' && !ID_PATTERNS.epicOrRadar.test(record.id)) {
             errors.push(`Registro de discovery ${record.id} e EPIC, mas nao segue EPIC-#### (ou RAD-### legado)`);
         }
+        if (record.type === 'EPIC') {
+            const forbidden = hasForbiddenTitleToken(record.title);
+            if (forbidden) {
+                errors.push(`EPIC ${record.id} possui titulo invalido com token proibido "${forbidden}": "${record.title}"`);
+            }
+        }
     }
 }
-function validateBacklog(items, warnings) {
+function validateBacklog(items, errors, warnings) {
     const ids = new Set(items.map((item) => item.id));
     const lockOwners = new Map();
     for (const item of items) {
+        const forbidden = hasForbiddenTitleToken(item.title);
+        if (forbidden) {
+            errors.push(`FEAT ${item.id} possui titulo invalido com token proibido "${forbidden}": "${item.title}"`);
+        }
         if (item.origin_type !== 'direct' && !item.origin_ref) {
             warnings.push(`Item de backlog ${item.id} tem origin_type="${item.origin_type}" mas origin_ref vazio`);
         }
@@ -411,7 +430,7 @@ export class SddCheckCommand {
         checkUniqueIds(snapshot.backlog.items, 'backlog.items', errors);
         checkUniqueIds(snapshot.techDebt.items, 'tech-debt.items', errors);
         validateDiscoveryRecords(snapshot.discoveryIndex.records, errors);
-        validateBacklog(snapshot.backlog.items, warnings);
+        validateBacklog(snapshot.backlog.items, errors, warnings);
         validateTechDebt(snapshot.techDebt.items, errors);
         if (config.frontend.enabled && snapshot.frontendGaps) {
             checkUniqueIds(snapshot.frontendGaps.items, 'frontend-gaps.items', errors);
