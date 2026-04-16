@@ -82,8 +82,7 @@ out
 .nuxt
 
 # Build output
-# dist/ is committed because GitHub/global installs of the CLI must not depend on local compilation
-
+dist/
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
