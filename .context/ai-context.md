@@ -114,3 +114,46 @@
 - Evidencia local desta rodada:
   - `pnpm test test/core/sdd-check.test.ts test/core/sdd-init.test.ts` aprovado.
   - `pnpm build` aprovado.
+
+## Atualizacao 2026-04-15
+- Foi aberto o ciclo de discovery `INS-0009` -> `DEB-0009` para discutir uma politica de convivencia entre projetos com sequenciadores SDD de 3 digitos e projetos com sequenciadores de 4 digitos.
+- A pergunta estrategica nova nao e mais "como migrar todo mundo para quatro digitos", e sim "como tornar o padding um contrato por projeto", preservando legado de 3 digitos para repositorios historicos e mantendo 4 digitos como padrao de projetos novos, sem conversao forcada cruzada.
+- O debate aberto deve cobrir emissao, renderizacao, validacao, migracao e compatibilidade de qualquer artefato com sequenciador numerico apos o prefixo.
+- Na investigacao inicial do `DEB-0009`, ficou claro que a divergencia nao esta limitada a `INS/DEB/EPIC/FEAT`: o escopo precisa incluir `FGAP`, `TD`, `SRC` e `ADR` derivado de `FEAT`.
+- Clarificacao importante persistida: o repositorio nao usa `DT` como tipo canonico; a familia real de divida tecnica e `TD`.
+- Achados relevantes:
+  - `src/core/sdd/state.ts` ja emite 4 digitos para `INS/DEB/RAD/EPIC/FEAT/FGAP/TD`;
+  - `src/core/sdd/operations.ts` ainda gera `SRC` com `padStart(3)`;
+  - docs, templates, mensagens e fixtures ainda ensinam ou preservam varios exemplos `###`;
+  - ha historico legado real com 3 digitos em arquivos arquivados, discovery antigo e ADRs antigos.
+
+## Atualizacao 2026-04-15/2
+- Foi aberto o ciclo `INS-0010` -> `DEB-0010` para transformar a arquitetura da `devtrack-foundation-api` em contrato backend obrigatorio do OpenSDD.
+- Escopo clarificado pelo usuario: o contrato nao pode ser reduzido a infraestrutura. Ele precisa cobrir o projeto backend inteiro, incluindo:
+  - versoes de bibliotecas;
+  - formas de conexao;
+  - configuracoes;
+  - padrao arquitetural;
+  - padroes de projeto implementados;
+  - regras de negocio com validadores especificados.
+- Decisao registrada no debate: a Foundation deve ser espelho fiel do backend padrao, e o OpenSDD deve materializar esse contrato por profile/bootstrap/template/checks/ADR, permitindo especializacao apenas com justificativa explicita.
+- Se faltarem exemplos canônicos suficientes na Foundation para algum eixo recorrente, o caminho recomendado e adicionar exemplos espelho na propria Foundation antes de endurecer o enforcement no OpenSDD.
+
+## Atualizacao 2026-04-16
+- A `FEAT-0015` foi implementada com suporte real de contrato no runtime SDD:
+  - `BacklogItem` agora aceita `requires_adr` no estado canônico.
+  - `sdd start` passa a criar automaticamente `ADR-FEAT-####.md` quando `requires_adr=true`, sem sobrescrever ADR existente.
+  - O `1-spec.md` do workspace ativo agora referencia explicitamente o ADR obrigatório quando aplicável.
+  - `sdd finalize` passou a validar existência e conformidade do ADR pela `LENSES.adr`, bloqueando a finalização em caso de ausência/violação (com bypass explícito via `--force-transition`).
+- Foram adicionados testes de regressão cobrindo criação/não sobrescrita de ADR e bloqueio do finalize por ADR inválido.
+
+## Atualizacao 2026-04-16/2
+- Escopo da `FEAT-0016` consolidado para introduzir auditoria periódica de meta-evolução do próprio SDD.
+- Foi implementado o novo comando `opensdd sdd audit`, com saída textual e JSON, para calcular:
+  - `% de artefatos sem placeholders`;
+  - `% de debates com deliberação real`;
+  - `% de ADRs gerados vs esperados`;
+  - total de evidências de `forced_transition` em changelogs de FEAT.
+- A auditoria agora computa um `score` de saúde e sinaliza recomendação explícita de abertura de INS quando o resultado fica abaixo do limiar configurado.
+- O arquivo `.sdd/config.yaml` passou a suportar o bloco `meta_evolution` como contrato configurável (`enabled`, `audit_interval_days`, `placeholder_markers`, `health_alert_threshold`), com defaults aplicados no bootstrap.
+- Foram adicionados testes dedicados (`test/core/sdd-audit.test.ts`) para cenários saudável e degradado, garantindo cobertura mínima de regressão funcional da nova capacidade.

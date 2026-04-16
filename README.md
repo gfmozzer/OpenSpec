@@ -198,11 +198,21 @@ Se nao houver FEAT pronta, o onboarding agora retorna passos guiados (ex.: criar
 opensdd sdd next
 ```
 
+Auditar a saude de evolucao do proprio processo SDD (ciclo recomendado: semestral):
+
+```bash
+opensdd sdd audit
+```
+
 3. Iniciar uma feature
 
 ```bash
 opensdd sdd start FEAT-0001 --fluxo padrao
 ```
+
+Se a `FEAT` no backlog tiver `requires_adr: true`, o `start` cria automaticamente
+`.sdd/core/adrs/ADR-FEAT-####.md` (sem sobrescrever ADR já existente) e injeta a
+referência no `1-spec.md` da workspace ativa.
 
 4. Ler o contexto da feature
 
@@ -217,6 +227,10 @@ opensdd sdd context FEAT-0001
 ```bash
 opensdd sdd finalize --ref FEAT-0001
 ```
+
+Quando `requires_adr: true`, o `finalize` exige ADR existente e válido pela lente
+`adr` (seções `Contexto`, `Decisão`, `Consequências` e sem frase proibida de
+placeholder). Em caso de violação, o fluxo é bloqueado.
 
 Regra operacional central:
 
@@ -344,6 +358,7 @@ Bootstrap:
 - `opensdd install --tools all`
 - `opensdd sdd init-context`
 - `opensdd sdd check --render`
+- `opensdd sdd audit`
 - `opensdd sdd ingest-deposito`
 
 Onboarding e operacao:
@@ -354,6 +369,7 @@ Onboarding e operacao:
 - `opensdd sdd start FEAT-0001 --fluxo direto|padrao|rigoroso`
 - `opensdd sdd aprovar FEAT-0001 --etapa proposta|planejamento|tarefas`
 - `opensdd sdd context FEAT-0001`
+- `opensdd sdd audit`
 - `opensdd sdd finalize --ref FEAT-0001`
 
 Descoberta:

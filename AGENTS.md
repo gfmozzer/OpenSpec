@@ -73,9 +73,10 @@ For planning/execution memory and handoff, prefer these commands:
 2. `opensdd sdd check --render`
 3. `opensdd sdd onboard system`
 4. `opensdd sdd next`
-5. `opensdd sdd start FEAT-###`
-6. `opensdd sdd context FEAT-###`
-7. `opensdd sdd finalize --ref FEAT-###`
+5. `opensdd sdd audit`
+6. `opensdd sdd start FEAT-###`
+7. `opensdd sdd context FEAT-###`
+8. `opensdd sdd finalize --ref FEAT-###`
 
 Discovery pipeline for ideas:
 

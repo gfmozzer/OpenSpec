@@ -1,37 +1,30 @@
 # Tasks FEAT-0017
 
 1. Entender contexto com `opensdd sdd context FEAT-0017`.
-2. Adicionar `title_canonical?: string` aos tipos `InsightItem` e `DebateItem` em `src/core/sdd/types.ts`.
-3. Criar função utilitária `sanitizeTitle(raw: string): string` (remove prefixos funcionais, trunca a 60 chars) — pode ir em `src/core/sdd/utils.ts` ou no próprio módulo de types.
-4. Criar `validateTitleCanonical(title: string): string[]` que verifica prefixos proibidos e comprimento máximo.
-5. Enriquecer `LENSES.epic.forbidden_phrases` em `src/core/sdd/lenses.ts` com: `"Debate:"`, `"Insight:"`, `"(preencher"`, `"(placeholder"`.
-6. Enriquecer `LENSES.feature_spec.forbidden_phrases` com os mesmos padrões.
-7. Localizar o handler que executa a transição DEB → EPIC (criar EPIC a partir de debate).
-8. Substituir uso de `deb.title` por `deb.title_canonical ?? sanitizeTitle(deb.title)` na criação da EPIC.
-9. Localizar handler do `opensdd sdd check`.
-10. Integrar verificação de `validateTitleCanonical` no check para todos os items EPIC e FEAT.
-11. Escrever testes unitários:
-    - `sanitizeTitle("Debate: Foo")` → `"Foo"`
-    - `validateTitleCanonical("Debate: ...")` → lista com violação
-    - `validateTitleCanonical("Título limpo")` → lista vazia
-    - Título com 65 chars → violação de comprimento
-    - Transição DEB→EPIC com `title_canonical` usa o campo correto
-12. Declarar impacto frontend com `opensdd sdd frontend-impact FEAT-0017 --status none --reason "Sanitização de títulos é operação interna do SDD sem superfície de produto."`.
-13. Atualizar documentação operacional e canônica.
-14. Validar e preparar finalize com `opensdd sdd finalize --ref FEAT-0017`.
+2. Confirmar plano e tarefas técnicas.
+3. Implementar com rastreabilidade no changelog.
+4. Declarar impacto de frontend (obrigatorio) com `opensdd sdd frontend-impact FEAT-0017 ...`.
+5. Se frontend_impact_status=required, abrir/atualizar FGAP antes do finalize.
+6. Atualizar, se houve impacto, a documentação operacional e canônica:
+   - `README.md`
+   - `.sdd/AGENT.md`
+   - `AGENTS.md`
+   - `AGENT.md`
+   - `.sdd/core/arquitetura.md`
+   - `.sdd/core/servicos.md`
+   - `.sdd/core/spec-tecnologica.md`
+   - `.sdd/core/repo-map.md`
+   - `.sdd/core/frontend-decisions.md` (quando aplicável)
+7. Validar e preparar finalize.
 
 ## Dependências
-- blocked_by: —
+- blocked_by: -
 
-## Definição de Pronto
-- `title_canonical` existe nos tipos INS e DEB.
-- Transição DEB→EPIC usa `title_canonical` quando disponível.
-- `check` detecta e exibe avisos para títulos com prefixos proibidos.
-- Lentes `epic` e `feature_spec` possuem `forbidden_phrases` para os prefixos.
-- Testes unitários passando.
+## Definição de pronto
+- A feature não está pronta enquanto as mudanças de documentação e handoff não estiverem refletidas.
 
 ## Checklist DOD
-- [DOC] Atualizar documentação central e de handoff
-- [UI] Declarar impacto frontend (`opensdd sdd frontend-impact FEAT-0017 --status none ...`)
-- [ARQ] Arquivar a mudança técnica no OpenSDD
-- [MEM] Consolidar memória com `opensdd sdd finalize --ref FEAT-0017`
+- [DOC] Atualizar documentacao central e de handoff
+- [UI] Declarar impacto frontend e registrar lacunas/decisoes quando aplicavel
+- [ARQ] Arquivar a mudanca tecnica no OpenSpec
+- [MEM] Consolidar memoria com `opensdd sdd finalize --ref FEAT-0017`
