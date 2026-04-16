@@ -6,7 +6,7 @@
 
 ## Impacto Frontend
 - Frontend gaps relacionados: -
-- Rotas/áreas impactadas: (preencher)
+- Rotas/áreas impactadas: nao se aplica (backend/estado SDD)
 - Declaracao obrigatoria: opensdd sdd frontend-impact FEAT-0017 --status required|none --reason "<justificativa>"
 
 ## Contratos Afetados

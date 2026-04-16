@@ -74,12 +74,23 @@ describe('sdd operations', () => {
 
     const debate = await new SddDebateCommand().execute(testDir, insight.id, { agent: 'agente-a' });
     expect(debate.id).toBe('DEB-0001');
+    const discoveryBeforeDecision = await readYamlFile<Record<string, any>>(
+      path.join(testDir, '.sdd', 'state', 'discovery-index.yaml')
+    );
+    const debateRecord = discoveryBeforeDecision.records.find((record: any) => record.id === 'DEB-0001');
+    expect(debateRecord.title).toMatch(/^Debate:/);
+    expect(debateRecord.title_canonical).toBe('Nova estrategia de autorizacao');
     await completeDebateTemplate(testDir, debate.id);
 
     const decision = await new SddDecideCommand().execute(testDir, debate.id, 'radar', {
       rationale: 'Aprovado para planejamento',
     });
     expect(decision.radarId).toBe('EPIC-0001');
+    const discoveryAfterDecision = await readYamlFile<Record<string, any>>(
+      path.join(testDir, '.sdd', 'state', 'discovery-index.yaml')
+    );
+    const epicRecord = discoveryAfterDecision.records.find((record: any) => record.id === 'EPIC-0001');
+    expect(epicRecord.title).toBe('Nova estrategia de autorizacao');
 
     const breakdown = await new SddBreakdownCommand().execute(testDir, 'EPIC-0001', {
       titles: ['API de autorizacao', 'Politicas por workspace'],

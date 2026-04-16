@@ -14,9 +14,10 @@
 - Tarefas: rascunho
 
 ## Objetivo
-- Descreva detalhadamente o resultado esperado.
-- Adicione contexto de negocio ou motivacao clara.
-- Liste impactos positivos para usuario ou sistema.
+- Introduzir `title_canonical` nos registros de discovery (`INS` e `DEB`) com limite de 60 caracteres e sem prefixos funcionais como `Debate:`/`Insight:`.
+- Garantir que a transição `DEB -> EPIC` use `title_canonical` como fonte do título do `EPIC`, removendo propagação de títulos legados com prefixos semânticos.
+- Endurecer o `sdd check` para rejeitar `EPIC` e `FEAT` com títulos que contenham tokens proibidos (`Debate:`, `Insight:`, `(preencher`, `(placeholder`), evitando regressão de qualidade de nomenclatura.
+- Reconciliar dados legados necessários no estado atual para manter o projeto consistente após o novo guardrail.
 
 ## Referencias
 - Feature: FEAT-0017

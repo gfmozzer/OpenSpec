@@ -145,4 +145,42 @@ describe('SddCheckCommand', () => {
     const report = await new SddCheckCommand().execute(testDir, { render: false });
     expect(report.warnings.some((warning) => warning.includes('concluida ainda presente em .sdd/active'))).toBe(true);
   });
+
+  it('fails when EPIC or FEAT titles contain forbidden semantic prefixes/placeholders', async () => {
+    const discoveryPath = path.join(testDir, '.sdd', 'state', 'discovery-index.yaml');
+    const discovery = parseYaml(await fs.readFile(discoveryPath, 'utf-8')) as Record<string, any>;
+    discovery.records = [
+      {
+        id: 'EPIC-0001',
+        type: 'EPIC',
+        title: 'Debate: titulo legado',
+        status: 'READY',
+        related_ids: [],
+      },
+    ];
+    await fs.writeFile(discoveryPath, stringifyYaml(discovery), 'utf-8');
+
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = parseYaml(await fs.readFile(backlogPath, 'utf-8')) as Record<string, any>;
+    backlog.items = [
+      {
+        id: 'FEAT-0001',
+        title: 'Insight: titulo invalido',
+        status: 'READY',
+        origin_type: 'direct',
+        blocked_by: [],
+        touches: [],
+        lock_domains: [],
+        recommended_skills: [],
+        frontend_gap_refs: [],
+        spec_refs: [],
+      },
+    ];
+    await fs.writeFile(backlogPath, stringifyYaml(backlog), 'utf-8');
+
+    const report = await new SddCheckCommand().execute(testDir, { render: false });
+    expect(report.valid).toBe(false);
+    expect(report.errors.some((error) => error.includes('EPIC EPIC-0001 possui titulo invalido'))).toBe(true);
+    expect(report.errors.some((error) => error.includes('FEAT FEAT-0001 possui titulo invalido'))).toBe(true);
+  });
 });
