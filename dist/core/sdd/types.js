@@ -163,6 +163,7 @@ export const BacklogItemSchema = z.object({
     branch_name: NullableStringSchema,
     worktree_path: NullableStringSchema,
     start_commit_sha: NullableStringSchema,
+    requires_adr: z.boolean().default(false),
     frontend_impact_status: FrontendImpactStatusSchema.default('unknown'),
     frontend_impact_reason: NullableStringSchema,
     frontend_impact_declared_at: NullableStringSchema,

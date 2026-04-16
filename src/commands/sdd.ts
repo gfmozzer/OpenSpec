@@ -15,6 +15,7 @@ import {
   SddFrontendGapCommand,
   SddIngestDepositoCommand,
   SddApproveCommand,
+  SddAuditCommand,
   SddInsightCommand,
   SddNextCommand,
   SddOnboardCommand,
@@ -142,6 +143,9 @@ interface SddApproveCliOptions {
 interface SddNextCliOptions {
   rank?: 'impact' | 'criticality' | 'fifo';
   limit?: string;
+  json?: boolean;
+}
+interface SddAuditCliOptions {
   json?: boolean;
 }
 
@@ -754,6 +758,39 @@ export function registerSddCommand(program: Command): void {
         const locks = item.lock_domains.length > 0 ? item.lock_domains.join(', ') : '-';
         console.log(`- ${item.id}: ${item.title} | locks: ${locks}`);
       }
+    });
+
+  sddCmd
+    .command('audit [path]')
+    .description('Audita a saude de meta-evolucao do SDD (placeholders, deliberacao, ADR e forced transition)')
+    .alias('auditar')
+    .option('--json', 'Saida em JSON')
+    .action(async (targetPath = '.', options?: SddAuditCliOptions) => {
+      await ensureMandatorySddMigration(targetPath);
+      const command = new SddAuditCommand();
+      const result = await command.execute(targetPath);
+      if (options?.json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log(chalk.green('Auditoria SDD concluida.'));
+      console.log(`Gerado em: ${result.generated_at}`);
+      console.log(`Score: ${result.score}% (limiar: ${result.meta_evolution.health_alert_threshold}%)`);
+      console.log(`Saude: ${result.healthy ? 'OK' : 'ALERTA'}`);
+      console.log(
+        `Artefatos sem placeholder: ${result.metrics.artifacts_without_placeholder.ok}/${result.metrics.artifacts_without_placeholder.total} (${result.metrics.artifacts_without_placeholder.percent}%)`
+      );
+      console.log(
+        `Debates com deliberacao real: ${result.metrics.debates_with_real_deliberation.ok}/${result.metrics.debates_with_real_deliberation.total} (${result.metrics.debates_with_real_deliberation.percent}%)`
+      );
+      console.log(
+        `ADRs gerados vs esperados: ${result.metrics.adrs_generated_vs_expected.ok}/${result.metrics.adrs_generated_vs_expected.total} (${result.metrics.adrs_generated_vs_expected.percent}%)`
+      );
+      console.log(`Forced transitions detectadas: ${result.metrics.forced_transitions.total}`);
+      if (result.metrics.forced_transitions.feature_refs.length > 0) {
+        console.log(`Features com evidencias: ${result.metrics.forced_transitions.feature_refs.join(', ')}`);
+      }
+      console.log(result.recommendation);
     });
 
   sddCmd

@@ -2,10 +2,12 @@ import path from 'node:path';
 import { existsSync, promises as fs } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { parse as parseYaml } from 'yaml';
 import { createChange } from '../../utils/change-utils.js';
 import { AI_TOOLS } from '../config.js';
 import { CLI_NAME } from '../branding.js';
 import { LENSES, validateDocumentAgainstLens } from './lenses.js';
+import { adrFileName, generateAdrTemplate } from './adr.js';
 import { TransitionEngine } from './transition-engine.js';
 import { suggestSkills } from './skills.js';
 import {
@@ -211,6 +213,145 @@ function markdownDiscardTemplate(debate: DiscoveryRecord, rationale?: string): s
 ## Motivo do descarte
 ${rationale || '(motivo nao informado)'}
 `;
+}
+
+interface MetaEvolutionConfig {
+  enabled: boolean;
+  audit_interval_days: number;
+  placeholder_markers: string[];
+  health_alert_threshold: number;
+}
+
+const DEFAULT_META_EVOLUTION_CONFIG: MetaEvolutionConfig = {
+  enabled: true,
+  audit_interval_days: 180,
+  placeholder_markers: ['(preencher', '(placeholder', 'todo', 'tbd'],
+  health_alert_threshold: 75,
+};
+
+const FORCED_TRANSITION_MARKERS = [
+  '--force-transition',
+  'forced_transition',
+  'transição forçada',
+  'transicao forcada',
+];
+
+function normalizePercent(part: number, total: number): number {
+  if (total <= 0) return 100;
+  return Math.round((part / total) * 10000) / 100;
+}
+
+async function readMetaEvolutionConfig(paths: SddPaths): Promise<MetaEvolutionConfig> {
+  try {
+    const raw = parseYaml(await fs.readFile(paths.configFile, 'utf-8')) as Record<string, unknown> | null;
+    const candidate =
+      raw && typeof raw === 'object' && raw.meta_evolution && typeof raw.meta_evolution === 'object'
+        ? (raw.meta_evolution as Record<string, unknown>)
+        : {};
+    const placeholderMarkers = Array.isArray(candidate.placeholder_markers)
+      ? candidate.placeholder_markers
+          .map((value) => String(value).trim().toLowerCase())
+          .filter((value) => value.length > 0)
+      : DEFAULT_META_EVOLUTION_CONFIG.placeholder_markers;
+    return {
+      enabled:
+        typeof candidate.enabled === 'boolean'
+          ? candidate.enabled
+          : DEFAULT_META_EVOLUTION_CONFIG.enabled,
+      audit_interval_days:
+        typeof candidate.audit_interval_days === 'number' &&
+        Number.isFinite(candidate.audit_interval_days) &&
+        candidate.audit_interval_days > 0
+          ? candidate.audit_interval_days
+          : DEFAULT_META_EVOLUTION_CONFIG.audit_interval_days,
+      placeholder_markers:
+        placeholderMarkers.length > 0
+          ? placeholderMarkers
+          : DEFAULT_META_EVOLUTION_CONFIG.placeholder_markers,
+      health_alert_threshold:
+        typeof candidate.health_alert_threshold === 'number' &&
+        Number.isFinite(candidate.health_alert_threshold) &&
+        candidate.health_alert_threshold >= 0 &&
+        candidate.health_alert_threshold <= 100
+          ? candidate.health_alert_threshold
+          : DEFAULT_META_EVOLUTION_CONFIG.health_alert_threshold,
+    };
+  } catch {
+    return { ...DEFAULT_META_EVOLUTION_CONFIG };
+  }
+}
+
+async function listFilesRecursive(rootDir: string): Promise<string[]> {
+  const files: string[] = [];
+
+  async function walk(currentDir: string): Promise<void> {
+    const entries = await fs.readdir(currentDir, { withFileTypes: true }).catch(() => []);
+    for (const entry of entries) {
+      const full = path.join(currentDir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(full);
+      } else {
+        files.push(full);
+      }
+    }
+  }
+
+  await walk(rootDir);
+  return files;
+}
+
+function hasPlaceholder(content: string, markers: string[]): boolean {
+  const normalized = content.toLowerCase();
+  return markers.some((marker) => normalized.includes(marker));
+}
+
+async function collectAuditArtifacts(paths: SddPaths): Promise<string[]> {
+  const roots = [paths.activeDir, paths.archivedDir, paths.discoveryDir, path.join(paths.coreDir, 'adrs')];
+  const markdownFiles: string[] = [];
+  for (const root of roots) {
+    const files = await listFilesRecursive(root);
+    for (const filePath of files) {
+      if (filePath.endsWith('.md')) markdownFiles.push(filePath);
+    }
+  }
+  return markdownFiles;
+}
+
+function debateHasRealDeliberation(content: string): boolean {
+  const lower = content.toLowerCase();
+  const sectionIndex = lower.indexOf('## 7) decisao do mediador');
+  if (sectionIndex < 0) return false;
+  const tail = content.slice(sectionIndex);
+  const escolhaMatch = tail.match(/- Escolha \(A\/B\/C\):\s*(.+)/i);
+  const justificativaMatch = tail.match(/- Justificativa:\s*(.+)/i);
+  if (!escolhaMatch || !justificativaMatch) return false;
+  const escolha = escolhaMatch[1].trim().toLowerCase();
+  const justificativa = justificativaMatch[1].trim().toLowerCase();
+  const invalidTokens = ['(preencher', '____', '-', ''];
+  const escolhaInvalid = invalidTokens.some((token) => escolha === token || escolha.includes(token));
+  const justificativaInvalid = invalidTokens.some(
+    (token) => justificativa === token || justificativa.includes(token)
+  );
+  return !escolhaInvalid && !justificativaInvalid;
+}
+
+async function collectForcedTransitions(paths: SddPaths): Promise<{ total: number; featureRefs: string[] }> {
+  const roots = [paths.activeDir, paths.archivedDir];
+  let count = 0;
+  const featureRefs = new Set<string>();
+  for (const root of roots) {
+    const files = await listFilesRecursive(root);
+    for (const filePath of files) {
+      if (!filePath.endsWith('.md') || !/4-(changelog|historico)\.md$/i.test(filePath)) continue;
+      const content = (await fs.readFile(filePath, 'utf-8').catch(() => '')).toLowerCase();
+      if (FORCED_TRANSITION_MARKERS.some((marker) => content.includes(marker))) {
+        count += 1;
+        const match = filePath.match(/FEAT-\d{3,}/);
+        if (match?.[0]) featureRefs.add(match[0]);
+      }
+    }
+  }
+  return { total: count, featureRefs: Array.from(featureRefs).sort() };
 }
 
 function sourceTypeFromRelativePath(relativePath: string): SourceDocumentRecord['type'] {
@@ -497,6 +638,9 @@ async function writeFileAlways(filePath: string, content: string): Promise<void>
 }
 
 function buildActiveSpecDoc(feature: BacklogItem): string {
+  const adrRef = feature.requires_adr
+    ? `.sdd/core/adrs/${adrFileName(feature.id)}`
+    : '-';
   return `# Spec ${feature.id}
 
 ## Resumo da Entrega
@@ -520,6 +664,7 @@ function buildActiveSpecDoc(feature: BacklogItem): string {
 ## Referencias
 - Feature: ${feature.id}
 - Acceptance refs: ${feature.acceptance_refs.join(', ') || '-'}
+- ADR: ${adrRef}
 `;
 }
 
@@ -841,6 +986,7 @@ function buildBacklogItem(
     branch_name: '',
     worktree_path: '',
     start_commit_sha: '',
+    requires_adr: false,
     frontend_impact_status: 'unknown',
     frontend_impact_reason: '',
     frontend_impact_declared_at: '',
@@ -1788,6 +1934,15 @@ export class SddStartCommand {
 
     const recommendedBundles = bundlesForSkills(catalog, feature.recommended_skills);
     const activeWorkspace = await ensureFeatureActiveWorkspace(paths, config, feature, recommendedBundles);
+    if (feature.requires_adr) {
+      const adrDir = path.join(paths.coreDir, 'adrs');
+      const adrPath = path.join(adrDir, adrFileName(feature.id));
+      const adrExists = await pathExists(adrPath);
+      if (!adrExists) {
+        await fs.mkdir(adrDir, { recursive: true });
+        await fs.writeFile(adrPath, generateAdrTemplate(feature, now), 'utf-8');
+      }
+    }
 
     updateDependencyMetadata(snapshot.backlog.items);
     await saveBacklogState(paths, snapshot.backlog);
@@ -2034,6 +2189,33 @@ export class SddFinalizeCommand {
         }
       }
 
+      if (feature.requires_adr) {
+        const requiredAdrPath = path.join(paths.coreDir, 'adrs', adrFileName(feature.id));
+        const adrContent = await fs.readFile(requiredAdrPath, 'utf-8').catch(() => '');
+        if (!adrContent.trim()) {
+          docWarnings.push(`${feature.id} exige ADR obrigatório ausente: ${relProjectPath(paths, requiredAdrPath)}`);
+          if (!options?.forceTransition) {
+            continue;
+          }
+          docWarnings.push(
+            `${feature.id} finalizada com --force-transition sem ADR obrigatório preenchido.`
+          );
+        } else {
+          const adrViolations = validateDocumentAgainstLens(adrContent, LENSES.adr);
+          if (adrViolations.length > 0) {
+            docWarnings.push(
+              `${feature.id} ADR obrigatório inválido: ${adrViolations.join(' | ')}`
+            );
+            if (!options?.forceTransition) {
+              continue;
+            }
+            docWarnings.push(
+              `${feature.id} finalizada com --force-transition apesar de violações no ADR obrigatório.`
+            );
+          }
+        }
+      }
+
       // Validação de Lentes nos MDs do Workspace Ativo
       const activePath = path.join(paths.activeDir, feature.id);
       const docNames = activeDocNamesForLayout(config);
@@ -2212,7 +2394,7 @@ export class SddFinalizeCommand {
         }
       }
 
-      if (!options?.noAdr) {
+      if (!options?.noAdr && !feature.requires_adr) {
         const adrPath = path.join(paths.coreDir, 'adrs', `ADR-${feature.id}.md`);
         await fs.writeFile(adrPath, buildAdrMarkdown(feature, unlockedByFeature, now), 'utf-8');
       }
@@ -2275,6 +2457,108 @@ export class SddFinalizeCommand {
       doc_warnings: docWarnings,
       auto_frontend_gaps: autoFrontendGaps,
       frontend_guardrails: frontendGuardrails,
+    };
+  }
+}
+
+export interface SddAuditResult {
+  generated_at: string;
+  meta_evolution: MetaEvolutionConfig;
+  metrics: {
+    artifacts_without_placeholder: { ok: number; total: number; percent: number };
+    debates_with_real_deliberation: { ok: number; total: number; percent: number };
+    adrs_generated_vs_expected: { ok: number; total: number; percent: number };
+    forced_transitions: { total: number; feature_refs: string[] };
+  };
+  score: number;
+  healthy: boolean;
+  should_open_insight: boolean;
+  recommendation: string;
+}
+
+export class SddAuditCommand {
+  async execute(projectRoot: string): Promise<SddAuditResult> {
+    const { config, paths } = await getRuntime(projectRoot);
+    const snapshot = await loadStateSnapshot(paths, config);
+    const metaEvolution = await readMetaEvolutionConfig(paths);
+
+    const artifacts = await collectAuditArtifacts(paths);
+    let placeholderFreeCount = 0;
+    for (const artifact of artifacts) {
+      const content = await fs.readFile(artifact, 'utf-8').catch(() => '');
+      if (!hasPlaceholder(content, metaEvolution.placeholder_markers)) {
+        placeholderFreeCount += 1;
+      }
+    }
+
+    const debateFiles = await fs.readdir(paths.discoveryDebatesDir).catch(() => []);
+    let debatesWithRealDeliberation = 0;
+    for (const fileName of debateFiles) {
+      if (!fileName.endsWith('.md')) continue;
+      const debateContent = await fs
+        .readFile(path.join(paths.discoveryDebatesDir, fileName), 'utf-8')
+        .catch(() => '');
+      if (debateHasRealDeliberation(debateContent)) {
+        debatesWithRealDeliberation += 1;
+      }
+    }
+
+    const expectedAdrFeatures = snapshot.backlog.items.filter((item) => item.requires_adr);
+    let generatedAdrCount = 0;
+    for (const feature of expectedAdrFeatures) {
+      const adrPath = path.join(paths.coreDir, 'adrs', adrFileName(feature.id));
+      if (existsSync(adrPath)) {
+        generatedAdrCount += 1;
+      }
+    }
+
+    const forcedTransitions = await collectForcedTransitions(paths);
+
+    const placeholdersMetric = {
+      ok: placeholderFreeCount,
+      total: artifacts.length,
+      percent: normalizePercent(placeholderFreeCount, artifacts.length),
+    };
+    const debateMetric = {
+      ok: debatesWithRealDeliberation,
+      total: debateFiles.filter((name) => name.endsWith('.md')).length,
+      percent: normalizePercent(
+        debatesWithRealDeliberation,
+        debateFiles.filter((name) => name.endsWith('.md')).length
+      ),
+    };
+    const adrMetric = {
+      ok: generatedAdrCount,
+      total: expectedAdrFeatures.length,
+      percent: normalizePercent(generatedAdrCount, expectedAdrFeatures.length),
+    };
+
+    const scoreBase =
+      placeholdersMetric.percent * 0.4 + debateMetric.percent * 0.35 + adrMetric.percent * 0.25;
+    const forcedPenalty = Math.min(forcedTransitions.total * 2, 20);
+    const score = Math.max(0, Math.round((scoreBase - forcedPenalty) * 100) / 100);
+    const healthy = score >= metaEvolution.health_alert_threshold;
+    const shouldOpenInsight = !healthy && metaEvolution.enabled;
+    const recommendation = shouldOpenInsight
+      ? `Saude do ciclo abaixo do limiar (${metaEvolution.health_alert_threshold}%). Sugestao: abrir INS com "${CLI_NAME} sdd insight \\"Meta-evolucao SDD: reduzir placeholders e fortalecer deliberacao\\"".`
+      : 'Ciclo dentro do limiar configurado. Manter monitoramento semestral.';
+
+    return {
+      generated_at: nowIso(),
+      meta_evolution: metaEvolution,
+      metrics: {
+        artifacts_without_placeholder: placeholdersMetric,
+        debates_with_real_deliberation: debateMetric,
+        adrs_generated_vs_expected: adrMetric,
+        forced_transitions: {
+          total: forcedTransitions.total,
+          feature_refs: forcedTransitions.featureRefs,
+        },
+      },
+      score,
+      healthy,
+      should_open_insight: shouldOpenInsight,
+      recommendation,
     };
   }
 }

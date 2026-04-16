@@ -1,4 +1,10 @@
 import type { FlowMode, Scale } from './types.js';
+interface MetaEvolutionConfig {
+    enabled: boolean;
+    audit_interval_days: number;
+    placeholder_markers: string[];
+    health_alert_threshold: number;
+}
 export declare class SddInsightCommand {
     execute(projectRoot: string, text: string, options?: {
         title?: string;
@@ -145,6 +151,38 @@ export declare class SddFinalizeCommand {
             reasons: string[];
         }[];
     }>;
+}
+export interface SddAuditResult {
+    generated_at: string;
+    meta_evolution: MetaEvolutionConfig;
+    metrics: {
+        artifacts_without_placeholder: {
+            ok: number;
+            total: number;
+            percent: number;
+        };
+        debates_with_real_deliberation: {
+            ok: number;
+            total: number;
+            percent: number;
+        };
+        adrs_generated_vs_expected: {
+            ok: number;
+            total: number;
+            percent: number;
+        };
+        forced_transitions: {
+            total: number;
+            feature_refs: string[];
+        };
+    };
+    score: number;
+    healthy: boolean;
+    should_open_insight: boolean;
+    recommendation: string;
+}
+export declare class SddAuditCommand {
+    execute(projectRoot: string): Promise<SddAuditResult>;
 }
 export declare class SddContextCommand {
     execute(projectRoot: string, ref: string): Promise<{

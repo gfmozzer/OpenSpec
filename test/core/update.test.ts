@@ -686,8 +686,8 @@ Old version content
         'utf-8'
       );
 
-      // Should contain generatedBy field
-      expect(updatedContent).toMatch(/generatedBy:\s*["']\d+\.\d+\.\d+["']/);
+      // Should contain generatedBy field with semver-like version (including prerelease)
+      expect(updatedContent).toMatch(/generatedBy:\s*["']\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?["']/);
     });
   });
 

@@ -266,6 +266,7 @@ export declare const BacklogItemSchema: z.ZodObject<{
     branch_name: z.ZodOptional<z.ZodString>;
     worktree_path: z.ZodOptional<z.ZodString>;
     start_commit_sha: z.ZodOptional<z.ZodString>;
+    requires_adr: z.ZodDefault<z.ZodBoolean>;
     frontend_impact_status: z.ZodDefault<z.ZodEnum<{
         unknown: "unknown";
         none: "none";
@@ -613,6 +614,7 @@ export declare const BacklogStateSchema: z.ZodObject<{
         branch_name: z.ZodOptional<z.ZodString>;
         worktree_path: z.ZodOptional<z.ZodString>;
         start_commit_sha: z.ZodOptional<z.ZodString>;
+        requires_adr: z.ZodDefault<z.ZodBoolean>;
         frontend_impact_status: z.ZodDefault<z.ZodEnum<{
             unknown: "unknown";
             none: "none";

@@ -382,6 +382,12 @@ export async function ensureBaseFiles(paths, config) {
         version: 1,
         state_version: 2,
         generatedBy: `${CLI_NAME} sdd init`,
+        meta_evolution: {
+            enabled: true,
+            audit_interval_days: 180,
+            placeholder_markers: ['(preencher', '(placeholder', 'todo', 'tbd'],
+            health_alert_threshold: 75,
+        },
         language: config.language,
         layout: config.layout,
         folders: config.folders,

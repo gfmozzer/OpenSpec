@@ -616,6 +616,67 @@ describe('sdd operations', () => {
     expect(unblockedView).toContain('FEAT-0002');
   });
 
+  it('creates required ADR on start and does not overwrite existing ADR', async () => {
+    const startCmd = new SddStartCommand();
+    await startCmd.execute(testDir, 'Feature com ADR obrigatorio');
+
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = await readYamlFile<Record<string, any>>(backlogPath);
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
+    feat1.status = 'READY';
+    feat1.requires_adr = true;
+    await writeYamlFile(backlogPath, backlog);
+
+    await startCmd.execute(testDir, 'FEAT-0001');
+    const adrPath = path.join(testDir, '.sdd', 'core', 'adrs', 'ADR-FEAT-0001.md');
+    const adrContent = await fs.readFile(adrPath, 'utf-8');
+    expect(adrContent).toContain('## Contexto');
+    expect(adrContent).toContain('## Decisão');
+    expect(adrContent).toContain('## Consequências');
+
+    const specPath = path.join(testDir, '.sdd', 'active', 'FEAT-0001', '1-spec.md');
+    const specContent = await fs.readFile(specPath, 'utf-8');
+    expect(specContent).toContain('- ADR: .sdd/core/adrs/ADR-FEAT-0001.md');
+
+    await fs.writeFile(adrPath, '# ADR FEAT-0001\n\nconteudo manual preservado', 'utf-8');
+    const refreshed = await readYamlFile<Record<string, any>>(backlogPath);
+    const refreshedFeat1 = refreshed.items.find((item: any) => item.id === 'FEAT-0001');
+    refreshedFeat1.status = 'READY';
+    refreshedFeat1.requires_adr = true;
+    await writeYamlFile(backlogPath, refreshed);
+
+    await startCmd.execute(testDir, 'FEAT-0001');
+    const preserved = await fs.readFile(adrPath, 'utf-8');
+    expect(preserved).toContain('conteudo manual preservado');
+  });
+
+  it('blocks finalize when required ADR has lens violations', async () => {
+    vi.restoreAllMocks();
+    const startCmd = new SddStartCommand();
+    await startCmd.execute(testDir, 'Feature com enforce de ADR');
+
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = await readYamlFile<Record<string, any>>(backlogPath);
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
+    feat1.status = 'READY';
+    feat1.requires_adr = true;
+    feat1.frontend_impact_status = 'none';
+    feat1.frontend_impact_reason = 'Mudanca de backend sem superficie de frontend.';
+    await writeYamlFile(backlogPath, backlog);
+
+    await startCmd.execute(testDir, 'FEAT-0001');
+    const adrPath = path.join(testDir, '.sdd', 'core', 'adrs', 'ADR-FEAT-0001.md');
+    await fs.writeFile(
+      adrPath,
+      '# ADR FEAT-0001\n\n## Contexto\n(preencher contexto)\n\n## Decisão\n-\n\n## Consequências\n-',
+      'utf-8'
+    );
+
+    const result = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-0001' });
+    expect(result.finalized).toHaveLength(0);
+    expect(result.doc_warnings.some((warning) => warning.includes('ADR obrigatório inválido'))).toBe(true);
+  });
+
   it('finalize auto-creates frontend gap for backend change without explicit coverage', async () => {
     await new SddInitCommand().execute(testDir, { frontendEnabled: true, render: false });
     const startCmd = new SddStartCommand();
