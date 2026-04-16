@@ -1,5 +1,14 @@
 version: 1
 generatedBy: openspec sdd init
+meta_evolution:
+  enabled: true
+  audit_interval_days: 180
+  placeholder_markers:
+    - "(preencher"
+    - "(placeholder"
+    - todo
+    - tbd
+  health_alert_threshold: 75
 frontend:
   enabled: false
 views:

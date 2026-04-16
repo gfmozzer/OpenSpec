@@ -4,6 +4,6 @@ Documento gerado a partir de `.sdd/state/service-catalog.yaml`.
 
 | ID | Nome | Responsabilidade | Owners | Contratos | Dependencias externas |
 | --- | --- | --- | --- | --- | --- |
-| backend | backend | Consolidado por FEAT-0014 | FEAT-0014 | - | - |
+| backend | backend | Consolidado por FEAT-0016 | FEAT-0016 | - | - |
 | docs | docs | Consolidado por FEAT-0018 | FEAT-0018 | implementacao-concluida | - |
 | gfmozzer-opensdd | @gfmozzer/opensdd | Servico inicial detectado no bootstrap de contexto | - | - | - |

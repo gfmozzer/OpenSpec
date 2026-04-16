@@ -110,3 +110,11 @@ items:
     kind: change-archive
     service_ref: backend
     notes: Consolidado no finalize FEAT-0014
+  - path: openspec/changes/archive/feat-0015-adr-mandatorio-automatico-impacto-arquitetural
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0015
+  - path: openspec/changes/archive/feat-0016-protocolo-meta-evolucao-sdd-audit
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0016

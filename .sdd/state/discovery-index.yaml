@@ -1,9 +1,9 @@
 version: 1
 counters:
-  INS: 8
-  DEB: 8
+  INS: 10
+  DEB: 10
   RAD: 0
-  EPIC: 8
+  EPIC: 9
   FEAT: 18
   FGAP: 0
   TD: 0
@@ -294,3 +294,62 @@ records:
       - FEAT-0017
     created_at: 2026-04-13T00:00:00.000Z
     updated_at: 2026-04-13T00:00:00.000Z
+  - id: INS-0009
+    type: INS
+    title: Convivência entre IDs de 3 e 4 dígitos por projeto
+    status: DEBATED
+    origin_prompt: Definir uma estrategia de convivencia para sequenciadores
+      numericos apos o prefixo em artefatos SDD, de modo que projetos iniciados
+      no padrao historico de 3 digitos permaneçam com 3 digitos em todos os
+      artefatos sequenciais, enquanto projetos novos ou inicializados no padrao
+      de 4 digitos permaneçam com 4 digitos, sem conversao forcada cruzada e com
+      regras consistentes de emissao, renderizacao, validacao, migracao e
+      compatibilidade por projeto.
+    related_ids:
+      - DEB-0009
+    created_at: 2026-04-15T14:38:42.071Z
+    updated_at: 2026-04-15T14:38:49.564Z
+  - id: DEB-0009
+    type: DEB
+    title: Estratégia de convivência entre projetos com IDs de 3 e 4 dígitos
+    status: APPROVED
+    origin_prompt: Debate originado de INS-0009
+    related_ids:
+      - INS-0009
+      - EPIC-0009
+    created_at: 2026-04-15T14:38:49.564Z
+    updated_at: 2026-04-15T17:24:33.591Z
+  - id: EPIC-0009
+    type: EPIC
+    title: Estratégia de convivência entre projetos com IDs de 3 e 4 dígitos
+    status: READY
+    related_ids:
+      - DEB-0009
+      - INS-0009
+    created_at: 2026-04-15T17:24:33.591Z
+    updated_at: 2026-04-15T17:24:33.591Z
+  - id: INS-0010
+    type: INS
+    title: Backend canônico da Foundation como contrato obrigatório do SDD
+    status: DEBATED
+    origin_prompt: Transformar a arquitetura backend canonica da
+      devtrack-foundation-api em contrato operacional obrigatorio do SDD, para
+      que projetos backend nascam e evoluam seguindo fielmente a mesma estrutura
+      de pacotes, pastas, nomenclatura, camadas, regras e fluxos. O objetivo e
+      eliminar erros arquiteturais pequenos e recorrentes, fazendo o OpenSDD
+      materializar esse padrao como referencia padrao de bootstrap, ADR,
+      validacao e template, com especializacao apenas quando houver
+      justificativa explicita.
+    related_ids:
+      - DEB-0010
+    created_at: 2026-04-15T20:11:35.336Z
+    updated_at: 2026-04-15T20:11:48.014Z
+  - id: DEB-0010
+    type: DEB
+    title: Padrão backend canônico da Foundation como referência obrigatória do SDD
+    status: OPEN
+    origin_prompt: Debate originado de INS-0010
+    related_ids:
+      - INS-0010
+    created_at: 2026-04-15T20:11:48.014Z
+    updated_at: 2026-04-15T20:11:48.014Z

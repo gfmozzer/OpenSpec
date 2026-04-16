@@ -65,13 +65,23 @@ items:
     summary: "Finalizado manualmente: FEAT-0013"
     created_at: 2026-04-14T06:03:26.870Z
     completed_at: 2026-04-14T06:03:26.870Z
-  - feature_id: FEAT-0018
-    status: DONE
-    summary: "Finalizado manualmente: FEAT-0018"
-    created_at: 2026-04-14T02:35:00.320Z
-    completed_at: 2026-04-14T02:35:00.320Z
   - feature_id: FEAT-0014
     status: DONE
     summary: "Finalizado manualmente: FEAT-0014"
     created_at: 2026-04-14T06:21:40.402Z
     completed_at: 2026-04-14T06:21:40.402Z
+  - feature_id: FEAT-0015
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0015"
+    created_at: 2026-04-16T14:36:46.551Z
+    completed_at: 2026-04-16T14:36:46.551Z
+  - feature_id: FEAT-0018
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0018"
+    created_at: 2026-04-14T02:35:00.320Z
+    completed_at: 2026-04-14T02:35:00.320Z
+  - feature_id: FEAT-0016
+    status: DONE
+    summary: "Finalizado manualmente: FEAT-0016"
+    created_at: 2026-04-16T18:04:59.970Z
+    completed_at: 2026-04-16T18:04:59.970Z

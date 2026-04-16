@@ -73,15 +73,15 @@ Documento gerado a partir de `.sdd/state/backlog.yaml`.
   - tipo: feature | modo: local_plan | fluxo: direto | grupo: epic-0008
   - depende de: nenhuma
   - lock domains: nenhum
-- FEAT-0015 [READY] ADR mandatório automático para features com impacto arquitetural declarado
+- FEAT-0015 [DONE] ADR mandatório automático para features com impacto arquitetural declarado
   - tipo: feature | modo: local_plan | fluxo: padrao | grupo: epic-0008
   - depende de: nenhuma
   - lock domains: nenhum
-- FEAT-0016 [BLOCKED] Protocolo de meta-evolução do SDD e comando sdd audit
+- FEAT-0016 [DONE] Protocolo de meta-evolução do SDD e comando sdd audit
   - tipo: feature | modo: local_plan | fluxo: padrao | grupo: epic-0008
   - depende de: FEAT-0012, FEAT-0013, FEAT-0014, FEAT-0015
   - lock domains: nenhum
-- FEAT-0017 [READY] Sanitização semântica de títulos na propagação INS → DEB → EPIC → FEAT
+- FEAT-0017 [IN_PROGRESS] Sanitização semântica de títulos na propagação INS → DEB → EPIC → FEAT
   - tipo: feature | modo: local_plan | fluxo: padrao | grupo: epic-0008
   - depende de: nenhuma
   - lock domains: nenhum

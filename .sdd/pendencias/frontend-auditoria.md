@@ -18,7 +18,7 @@ Documento gerado a partir de `.sdd/state/backlog.yaml` + `.sdd/state/frontend-ga
 | FEAT-0012 | DONE | none | Mecanismos estruturais de backoffice/linter apenas | - | - |
 | FEAT-0013 | DONE | none | Backend apenas, sem interface CLI adicional a nao ser a flag forcada | - | - |
 | FEAT-0014 | DONE | none | Somente impacto de backend e regras SDD no typescript sem interface de usuario | - | - |
-| FEAT-0015 | READY | none | Geração de ADR é operação interna do SDD sem superfície de produto. | - | - |
-| FEAT-0016 | BLOCKED | none | Comando de auditoria é CLI interno do SDD sem superfície de produto. | - | - |
-| FEAT-0017 | READY | none | Sanitização de títulos é operação interna do SDD sem superfície de produto. | - | - |
+| FEAT-0015 | DONE | none | Geração e validação de ADR obrigatório ocorrem no backend/CLI sem superfície de produto. | - | - |
+| FEAT-0016 | DONE | none | Comando de auditoria e protocolo de meta-evolucao atuam apenas em CLI/estado SDD, sem superficie de frontend. | - | - |
+| FEAT-0017 | IN_PROGRESS | none | Sanitização de títulos é operação interna do SDD sem superfície de produto. | - | - |
 | FEAT-0018 | DONE | none | Planejamento arquitetural e documental para backend padrao, sem superficie funcional de frontend. | - | - |

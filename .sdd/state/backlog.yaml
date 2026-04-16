@@ -38,6 +38,7 @@ items:
     change_name: feat-001-onboard-sugere-proximos-passos-quando-bac
     branch_name: ""
     worktree_path: ""
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Ajuste historico do onboarding sem alteracao de interface.
     frontend_impact_declared_at: 2026-04-12T00:00:00.000Z
@@ -96,6 +97,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: 569a078ac0d44f886e6c46c1d8c4f293febfc84f
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Regularizacao historica de mudanca backend e sem
       artefato de interface novo.
@@ -155,6 +157,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: 569a078ac0d44f886e6c46c1d8c4f293febfc84f
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Regularizacao historica de mudanca backend e sem
       artefato de interface novo.
@@ -214,6 +217,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: 569a078ac0d44f886e6c46c1d8c4f293febfc84f
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Regularizacao historica de mudanca backend e sem
       artefato de interface novo.
@@ -276,6 +280,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Ajuste de nomenclatura e documentacao interna do SDD,
       sem interface de produto.
@@ -337,6 +342,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Regularizacao de formatos e mensagens internas do SDD
       sem interface de produto.
@@ -399,6 +405,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Fortalecimento de regras internas do fluxo SDD sem interface de produto.
     frontend_impact_declared_at: 2026-04-12T06:10:00.000Z
@@ -460,6 +467,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Validacao estrutural interna do SDD sem interface de produto.
     frontend_impact_declared_at: 2026-04-12T06:10:00.000Z
@@ -518,6 +526,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Gate de migracao SDD atua apenas em backend, estado e
       CLI; nao introduz superfícies de produto nem rotas novas.
@@ -578,6 +587,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Trabalho focado em cobertura automatizada, validacao e
       comandos CLI; sem telas, rotas ou componentes de UI.
@@ -639,6 +649,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Mecanismos estruturais de backoffice/linter apenas
     frontend_impact_declared_at: 2026-04-14T05:40:29.832Z
@@ -700,6 +711,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Backend apenas, sem interface CLI adicional a nao ser a flag forcada
     frontend_impact_declared_at: 2026-04-14T06:03:25.561Z
@@ -761,6 +773,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Somente impacto de backend e regras SDD no typescript
       sem interface de usuario
@@ -774,7 +787,7 @@ items:
     unblocked_at: ""
   - id: FEAT-0015
     title: ADR mandatório automático para features com impacto arquitetural declarado
-    status: READY
+    status: DONE
     origin_type: epic
     origin_ref: EPIC-0008
     scale: STANDARD
@@ -790,7 +803,7 @@ items:
     execution_kind: feature
     planning_mode: local_plan
     flow_mode: padrao
-    current_stage: proposta
+    current_stage: consolidacao
     gates:
       proposta:
         status: rascunho
@@ -816,25 +829,28 @@ items:
     dependency_count: 0
     agent_role: ""
     recommended_skills:
-      - architecture-decision-records
       - architecture
-      - backend-dev-guidelines
+      - concise-planning
+      - context-window-management
     change_name: feat-0015-adr-mandatorio-automatico-impacto-arquitetural
     branch_name: ""
     worktree_path: ""
+    start_commit_sha: 257e350fbbc38d962cb36195048e1eda805141b5
+    requires_adr: false
     frontend_impact_status: none
-    frontend_impact_reason: Geração de ADR é operação interna do SDD sem superfície de produto.
-    frontend_impact_declared_at: 2026-04-13T00:00:00.000Z
+    frontend_impact_reason: Geração e validação de ADR obrigatório ocorrem no
+      backend/CLI sem superfície de produto.
+    frontend_impact_declared_at: 2026-04-16T14:36:33.413Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
     spec_refs: []
-    last_sync_at: 2026-04-13T00:00:00.000Z
+    last_sync_at: 2026-04-16T14:36:46.551Z
     archived_at: ""
-    done_at: ""
+    done_at: 2026-04-16T14:36:46.551Z
     unblocked_at: ""
   - id: FEAT-0016
     title: Protocolo de meta-evolução do SDD e comando sdd audit
-    status: BLOCKED
+    status: DONE
     origin_type: epic
     origin_ref: EPIC-0008
     scale: STANDARD
@@ -856,7 +872,7 @@ items:
     execution_kind: feature
     planning_mode: local_plan
     flow_mode: padrao
-    current_stage: proposta
+    current_stage: consolidacao
     gates:
       proposta:
         status: rascunho
@@ -883,24 +899,27 @@ items:
     agent_role: ""
     recommended_skills:
       - architecture
-      - observability-engineer
-      - backend-dev-guidelines
+      - concise-planning
+      - context-window-management
     change_name: feat-0016-protocolo-meta-evolucao-sdd-audit
     branch_name: ""
     worktree_path: ""
+    start_commit_sha: 257e350fbbc38d962cb36195048e1eda805141b5
+    requires_adr: false
     frontend_impact_status: none
-    frontend_impact_reason: Comando de auditoria é CLI interno do SDD sem superfície de produto.
-    frontend_impact_declared_at: 2026-04-13T00:00:00.000Z
+    frontend_impact_reason: Comando de auditoria e protocolo de meta-evolucao atuam
+      apenas em CLI/estado SDD, sem superficie de frontend.
+    frontend_impact_declared_at: 2026-04-16T18:04:42.587Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
     spec_refs: []
-    last_sync_at: 2026-04-13T00:00:00.000Z
+    last_sync_at: 2026-04-16T18:04:59.970Z
     archived_at: ""
-    done_at: ""
-    unblocked_at: ""
+    done_at: 2026-04-16T18:04:59.970Z
+    unblocked_at: 2026-04-16T14:36:46.551Z
   - id: FEAT-0017
     title: Sanitização semântica de títulos na propagação INS → DEB → EPIC → FEAT
-    status: READY
+    status: IN_PROGRESS
     origin_type: epic
     origin_ref: EPIC-0008
     scale: STANDARD
@@ -917,7 +936,7 @@ items:
     execution_kind: feature
     planning_mode: local_plan
     flow_mode: padrao
-    current_stage: proposta
+    current_stage: execucao
     gates:
       proposta:
         status: rascunho
@@ -943,22 +962,24 @@ items:
     dependency_count: 0
     agent_role: ""
     recommended_skills:
-      - backend-dev-guidelines
-      - clean-code
+      - architecture
       - concise-planning
+      - context-window-management
     change_name: feat-0017-sanitizacao-semantica-titulos-propagacao
     branch_name: ""
     worktree_path: ""
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Sanitização de títulos é operação interna do SDD sem superfície de produto.
     frontend_impact_declared_at: 2026-04-13T00:00:00.000Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
     spec_refs: []
-    last_sync_at: 2026-04-13T00:00:00.000Z
+    last_sync_at: 2026-04-16T18:39:58.243Z
     archived_at: ""
     done_at: ""
     unblocked_at: ""
+    start_commit_sha: 257e350fbbc38d962cb36195048e1eda805141b5
   - id: FEAT-0011
     title: Ampliar cobertura automatizada nos comandos com lógica real e branches
       relevantes
@@ -1010,6 +1031,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Testes automatizados de camadas de lógica interna da CLI
       não geram nem alteram superfície de produto.
@@ -1068,6 +1090,7 @@ items:
     branch_name: ""
     worktree_path: ""
     start_commit_sha: f1deb38c04b9079150e609ec9b7e8e4e38567676
+    requires_adr: false
     frontend_impact_status: none
     frontend_impact_reason: Planejamento arquitetural e documental para backend
       padrao, sem superficie funcional de frontend.

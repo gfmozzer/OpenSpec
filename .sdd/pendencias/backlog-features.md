@@ -18,7 +18,7 @@ Documento gerado a partir de `.sdd/state/backlog.yaml`.
 | FEAT-0012 | DONE | Enriquecer prompts e templates com critérios de qualidade mínima por artefato | epic | STANDARD | feature | local_plan | padrao | epic-0008 | - |
 | FEAT-0013 | DONE | Lentes estruturais como bloqueadores reais de transição no TransitionEngine | epic | STANDARD | feature | local_plan | direto | epic-0008 | FEAT-0012 |
 | FEAT-0014 | DONE | Roteamento semântico de skills por domínio da feature | epic | STANDARD | feature | local_plan | direto | epic-0008 | - |
-| FEAT-0015 | READY | ADR mandatório automático para features com impacto arquitetural declarado | epic | STANDARD | feature | local_plan | padrao | epic-0008 | - |
-| FEAT-0016 | BLOCKED | Protocolo de meta-evolução do SDD e comando sdd audit | epic | STANDARD | feature | local_plan | padrao | epic-0008 | FEAT-0012, FEAT-0013, FEAT-0014, FEAT-0015 |
-| FEAT-0017 | READY | Sanitização semântica de títulos na propagação INS → DEB → EPIC → FEAT | epic | STANDARD | feature | local_plan | padrao | epic-0008 | - |
+| FEAT-0015 | DONE | ADR mandatório automático para features com impacto arquitetural declarado | epic | STANDARD | feature | local_plan | padrao | epic-0008 | - |
+| FEAT-0016 | DONE | Protocolo de meta-evolução do SDD e comando sdd audit | epic | STANDARD | feature | local_plan | padrao | epic-0008 | FEAT-0012, FEAT-0013, FEAT-0014, FEAT-0015 |
+| FEAT-0017 | IN_PROGRESS | Sanitização semântica de títulos na propagação INS → DEB → EPIC → FEAT | epic | STANDARD | feature | local_plan | padrao | epic-0008 | - |
 | FEAT-0018 | DONE | Adotar DevTrack Foundation API como backend padrão do OpenSDD | direct | STANDARD | documentation | direct_tasks | rigoroso | - | - |

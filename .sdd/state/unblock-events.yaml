@@ -4,3 +4,7 @@ events:
     unblocked_by: FEAT-0012
     created_at: 2026-04-14T05:40:40.333Z
     status: NEW
+  - feature_id: FEAT-0016
+    unblocked_by: FEAT-0015
+    created_at: 2026-04-16T14:36:46.551Z
+    status: NEW

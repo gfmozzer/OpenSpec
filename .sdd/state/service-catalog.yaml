@@ -10,9 +10,9 @@ services:
     external_dependencies: []
   - id: backend
     name: backend
-    responsibility: Consolidado por FEAT-0014
+    responsibility: Consolidado por FEAT-0016
     owner_refs:
-      - FEAT-0014
+      - FEAT-0016
     repo_paths: []
     contracts: []
     external_dependencies: []

@@ -3,7 +3,7 @@
 Documento gerado a partir de `.sdd/state/backlog.yaml`.
 
 ## Global
-- DONE: 15/18 (83%)
+- DONE: 17/18 (94%)
 
 ## Por EPIC/RAD
 | EPIC/RAD | DONE | Total | Percentual |
@@ -15,4 +15,4 @@ Documento gerado a partir de `.sdd/state/backlog.yaml`.
 | EPIC-0005 | 2 | 2 | 100% |
 | EPIC-0006 | 1 | 1 | 100% |
 | EPIC-0007 | 1 | 1 | 100% |
-| EPIC-0008 | 3 | 6 | 50% |
+| EPIC-0008 | 5 | 6 | 83% |
