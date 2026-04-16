@@ -195,6 +195,8 @@ records:
     type: DEB
     title: "Debate: Elevar a qualidade automatizada do projeto com foco em cobertura
       unitária máxima viável, definição de cobertura "
+    title_canonical: Elevar a qualidade automatizada do projeto com foco em
+      cobertura
     status: APPROVED
     origin_prompt: Debate originado de INS-0006
     related_ids:
@@ -204,8 +206,7 @@ records:
     updated_at: 2026-04-13T03:52:07.211Z
   - id: EPIC-0006
     type: EPIC
-    title: "Debate: Elevar a qualidade automatizada do projeto com foco em cobertura
-      unitária máxima viável, definição de cobertura "
+    title: Elevar a qualidade automatizada do projeto com foco em cobertura
     status: DONE
     related_ids:
       - DEB-0006
@@ -230,6 +231,8 @@ records:
     type: DEB
     title: "Debate: Mapear sistematicamente as lacunas de cobertura automatizada da
       ferramenta, com foco em command wrappers, CLI en"
+    title_canonical: Mapear sistematicamente as lacunas de cobertura automatizada
+      da
     status: APPROVED
     origin_prompt: Debate originado de INS-0007
     related_ids:
@@ -239,8 +242,8 @@ records:
     updated_at: 2026-04-13T04:34:46.012Z
   - id: EPIC-0007
     type: EPIC
-    title: "Debate: Mapear sistematicamente as lacunas de cobertura automatizada da
-      ferramenta, com foco em command wrappers, CLI en"
+    title: Mapear sistematicamente as lacunas de cobertura automatizada da
+      ferramenta
     status: DONE
     related_ids:
       - DEB-0007

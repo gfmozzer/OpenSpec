@@ -539,8 +539,8 @@ items:
     done_at: 2026-04-13T02:32:30.319Z
     unblocked_at: ""
   - id: FEAT-0010
-    title: "Debate: Elevar a qualidade automatizada do projeto com foco em cobertura
-      unitária máxima viável, definição de cobertura"
+    title: Elevar a qualidade automatizada do projeto com foco em cobertura
+      unitária máxima viável
     status: DONE
     origin_type: epic
     origin_ref: EPIC-0006
