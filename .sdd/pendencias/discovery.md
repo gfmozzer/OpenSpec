@@ -19,9 +19,9 @@ Documento gerado a partir de `.sdd/state/discovery-index.yaml`.
 | EPIC-0003 | EPIC | SPLIT | Guardrails de estrutura, diretórios e qualidade do SDD | DEB-0004, INS-0004, FEAT-0004, FEAT-0005, FEAT-0006 |
 | EPIC-0004 | EPIC | DONE | Migração mandatória de estado SDD | DEB-0005, INS-0005, FEAT-0009 |
 | EPIC-0005 | EPIC | SPLIT | Impacto de renomear RADAR para EPIC | DEB-0002, INS-0002, FEAT-0002, FEAT-0008 |
-| EPIC-0006 | EPIC | DONE | Debate: Elevar a qualidade automatizada do projeto com foco em cobertura unitária máxima viável, definição de cobertura  | DEB-0006, INS-0006, FEAT-0010 |
-| EPIC-0007 | EPIC | DONE | Debate: Mapear sistematicamente as lacunas de cobertura automatizada da ferramenta, com foco em command wrappers, CLI en | DEB-0007, INS-0007, FEAT-0011 |
-| EPIC-0008 | EPIC | SPLIT | Hardening estrutural do SDD — modo dual, lentes reais e meta-evolução | DEB-0008, INS-0008, FEAT-0012, FEAT-0013, FEAT-0014, FEAT-0015, FEAT-0016, FEAT-0017 |
+| EPIC-0006 | EPIC | DONE | Elevar a qualidade automatizada do projeto com foco em cobertura | DEB-0006, INS-0006, FEAT-0010 |
+| EPIC-0007 | EPIC | DONE | Mapear sistematicamente as lacunas de cobertura automatizada da ferramenta | DEB-0007, INS-0007, FEAT-0011 |
+| EPIC-0008 | EPIC | DONE | Hardening estrutural do SDD — modo dual, lentes reais e meta-evolução | DEB-0008, INS-0008, FEAT-0012, FEAT-0013, FEAT-0014, FEAT-0015, FEAT-0016, FEAT-0017 |
 | EPIC-0009 | EPIC | READY | Estratégia de convivência entre projetos com IDs de 3 e 4 dígitos | DEB-0009, INS-0009 |
 | INS-0001 | INS | DEBATED | Onboard vazio deve orientar próximos passos | DEB-0001 |
 | INS-0002 | INS | DEBATED | RADAR deve virar EPIC | DEB-0002 |

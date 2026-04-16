@@ -539,8 +539,8 @@ items:
     done_at: 2026-04-13T02:32:30.319Z
     unblocked_at: ""
   - id: FEAT-0010
-    title: Elevar a qualidade automatizada do projeto com foco em cobertura
-      unitária máxima viável
+    title: Elevar a qualidade automatizada do projeto com foco em cobertura unitária
+      máxima viável
     status: DONE
     origin_type: epic
     origin_ref: EPIC-0006
@@ -919,7 +919,7 @@ items:
     unblocked_at: 2026-04-16T14:36:46.551Z
   - id: FEAT-0017
     title: Sanitização semântica de títulos na propagação INS → DEB → EPIC → FEAT
-    status: IN_PROGRESS
+    status: DONE
     origin_type: epic
     origin_ref: EPIC-0008
     scale: STANDARD
@@ -936,7 +936,7 @@ items:
     execution_kind: feature
     planning_mode: local_plan
     flow_mode: padrao
-    current_stage: execucao
+    current_stage: consolidacao
     gates:
       proposta:
         status: rascunho
@@ -968,18 +968,19 @@ items:
     change_name: feat-0017-sanitizacao-semantica-titulos-propagacao
     branch_name: ""
     worktree_path: ""
+    start_commit_sha: 257e350fbbc38d962cb36195048e1eda805141b5
     requires_adr: false
     frontend_impact_status: none
-    frontend_impact_reason: Sanitização de títulos é operação interna do SDD sem superfície de produto.
-    frontend_impact_declared_at: 2026-04-13T00:00:00.000Z
+    frontend_impact_reason: Sanitização semântica de títulos atua somente em estado
+      SDD/CLI e não altera superfície de frontend.
+    frontend_impact_declared_at: 2026-04-16T18:48:25.522Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
     spec_refs: []
-    last_sync_at: 2026-04-16T18:39:58.243Z
+    last_sync_at: 2026-04-16T18:48:43.312Z
     archived_at: ""
-    done_at: ""
+    done_at: 2026-04-16T18:48:43.312Z
     unblocked_at: ""
-    start_commit_sha: 257e350fbbc38d962cb36195048e1eda805141b5
   - id: FEAT-0011
     title: Ampliar cobertura automatizada nos comandos com lógica real e branches
       relevantes

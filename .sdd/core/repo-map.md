@@ -22,6 +22,7 @@ Documento gerado a partir de `.sdd/state/repo-map.yaml`.
 | openspec/changes/archive/feat-0014-roteamento-semantico-skills-por-dominio | change-archive | backend | Consolidado no finalize FEAT-0014 |
 | openspec/changes/archive/feat-0015-adr-mandatorio-automatico-impacto-arquitetural | change-archive | backend | Consolidado no finalize FEAT-0015 |
 | openspec/changes/archive/feat-0016-protocolo-meta-evolucao-sdd-audit | change-archive | backend | Consolidado no finalize FEAT-0016 |
+| openspec/changes/archive/feat-0017-sanitizacao-semantica-titulos-propagacao | change-archive | backend | Consolidado no finalize FEAT-0017 |
 | openspec/changes/archive/feat-0018-adotar-devtrack-foundation-api-como-back | change-archive | docs | Consolidado no finalize FEAT-0018 |
 | package.json | manifest | - | Manifesto principal |
 | src | source | - | Codigo-fonte principal |

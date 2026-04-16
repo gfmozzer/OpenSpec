@@ -17,6 +17,7 @@ Documento gerado a partir de `.sdd/state/integration-contracts.yaml`.
 - capacidade-de-negocio::FEAT-0014
 - capacidade-de-negocio::FEAT-0015
 - capacidade-de-negocio::FEAT-0016
+- capacidade-de-negocio::FEAT-0017
 - distribution:npm
 - documentacao-atualizada::FEAT-0018
 - implementacao-concluida::FEAT-0018

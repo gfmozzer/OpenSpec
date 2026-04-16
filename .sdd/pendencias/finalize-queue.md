@@ -20,4 +20,5 @@ Documento gerado a partir de `.sdd/state/finalize-queue.yaml`.
 | FEAT-0014 | DONE | Finalizado manualmente: FEAT-0014 | 2026-04-14 | 2026-04-14 |
 | FEAT-0015 | DONE | Finalizado manualmente: FEAT-0015 | 2026-04-16 | 2026-04-16 |
 | FEAT-0016 | DONE | Finalizado manualmente: FEAT-0016 | 2026-04-16 | 2026-04-16 |
+| FEAT-0017 | DONE | Finalizado manualmente: FEAT-0017 | 2026-04-16 | 2026-04-16 |
 | FEAT-0018 | DONE | Finalizado manualmente: FEAT-0018 | 2026-04-14 | 2026-04-14 |

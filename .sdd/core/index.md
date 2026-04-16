@@ -6,7 +6,7 @@ Este documento e gerado automaticamente a partir dos arquivos em `.sdd/state/`.
 - Registros de discovery: 29
 - Features no backlog: 18
 - Itens de divida tecnica: 0
-- Itens na fila de finalize: 17
+- Itens na fila de finalize: 18
 - Catalogo de skills: 64 skills / 7 bundles
 - Fontes brutas indexadas: 0
 - Modulo de frontend: ativado

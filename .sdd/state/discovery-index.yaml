@@ -195,8 +195,7 @@ records:
     type: DEB
     title: "Debate: Elevar a qualidade automatizada do projeto com foco em cobertura
       unitária máxima viável, definição de cobertura "
-    title_canonical: Elevar a qualidade automatizada do projeto com foco em
-      cobertura
+    title_canonical: Elevar qualidade automatizada com foco em cobertura
     status: APPROVED
     origin_prompt: Debate originado de INS-0006
     related_ids:
@@ -231,8 +230,7 @@ records:
     type: DEB
     title: "Debate: Mapear sistematicamente as lacunas de cobertura automatizada da
       ferramenta, com foco em command wrappers, CLI en"
-    title_canonical: Mapear sistematicamente as lacunas de cobertura automatizada
-      da
+    title_canonical: Mapear lacunas de cobertura automatizada da ferramenta
     status: APPROVED
     origin_prompt: Debate originado de INS-0007
     related_ids:
@@ -242,8 +240,7 @@ records:
     updated_at: 2026-04-13T04:34:46.012Z
   - id: EPIC-0007
     type: EPIC
-    title: Mapear sistematicamente as lacunas de cobertura automatizada da
-      ferramenta
+    title: Mapear sistematicamente as lacunas de cobertura automatizada da ferramenta
     status: DONE
     related_ids:
       - DEB-0007
@@ -279,7 +276,7 @@ records:
   - id: EPIC-0008
     type: EPIC
     title: Hardening estrutural do SDD — modo dual, lentes reais e meta-evolução
-    status: SPLIT
+    status: DONE
     origin_prompt: "Implementar os cinco eixos de hardening do SDD: (1)
       enriquecimento de prompts por artefato, (2) lentes como bloqueadores reais
       de transição, (3) roteamento semântico de skills, (4) ADR mandatório para
@@ -296,7 +293,7 @@ records:
       - FEAT-0016
       - FEAT-0017
     created_at: 2026-04-13T00:00:00.000Z
-    updated_at: 2026-04-13T00:00:00.000Z
+    updated_at: 2026-04-16T18:48:43.312Z
   - id: INS-0009
     type: INS
     title: Convivência entre IDs de 3 e 4 dígitos por projeto

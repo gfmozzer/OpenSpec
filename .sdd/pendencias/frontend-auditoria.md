@@ -20,5 +20,5 @@ Documento gerado a partir de `.sdd/state/backlog.yaml` + `.sdd/state/frontend-ga
 | FEAT-0014 | DONE | none | Somente impacto de backend e regras SDD no typescript sem interface de usuario | - | - |
 | FEAT-0015 | DONE | none | Geração e validação de ADR obrigatório ocorrem no backend/CLI sem superfície de produto. | - | - |
 | FEAT-0016 | DONE | none | Comando de auditoria e protocolo de meta-evolucao atuam apenas em CLI/estado SDD, sem superficie de frontend. | - | - |
-| FEAT-0017 | IN_PROGRESS | none | Sanitização de títulos é operação interna do SDD sem superfície de produto. | - | - |
+| FEAT-0017 | DONE | none | Sanitização semântica de títulos atua somente em estado SDD/CLI e não altera superfície de frontend. | - | - |
 | FEAT-0018 | DONE | none | Planejamento arquitetural e documental para backend padrao, sem superficie funcional de frontend. | - | - |

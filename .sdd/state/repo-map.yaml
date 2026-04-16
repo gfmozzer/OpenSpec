@@ -118,3 +118,7 @@ items:
     kind: change-archive
     service_ref: backend
     notes: Consolidado no finalize FEAT-0016
+  - path: openspec/changes/archive/feat-0017-sanitizacao-semantica-titulos-propagacao
+    kind: change-archive
+    service_ref: backend
+    notes: Consolidado no finalize FEAT-0017

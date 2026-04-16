@@ -157,3 +157,16 @@
 - A auditoria agora computa um `score` de saúde e sinaliza recomendação explícita de abertura de INS quando o resultado fica abaixo do limiar configurado.
 - O arquivo `.sdd/config.yaml` passou a suportar o bloco `meta_evolution` como contrato configurável (`enabled`, `audit_interval_days`, `placeholder_markers`, `health_alert_threshold`), com defaults aplicados no bootstrap.
 - Foram adicionados testes dedicados (`test/core/sdd-audit.test.ts`) para cenários saudável e degradado, garantindo cobertura mínima de regressão funcional da nova capacidade.
+
+## Atualizacao 2026-04-16/3
+- FEAT-0017 entrou em implementacao com reconciliacao previa de contexto e dados ativos (spec/plan/changelog sem placeholders).
+- Foi introduzido `title_canonical` no `DiscoveryRecord` para suportar propagacao semantica limpa de titulos entre `INS`/`DEB` e transicao para `EPIC`.
+- A criacao de `INS` e `DEB` agora persiste automaticamente `title_canonical` (max 60), removendo prefixos funcionais (`Debate:`/`Insight:`) e normalizando espacos.
+- A transicao `DEB -> EPIC` passou a priorizar `debate.title_canonical` para evitar herdar titulos legados com prefixos funcionais.
+- O `sdd check` foi endurecido para falhar quando encontrar `EPIC` ou `FEAT` com tokens proibidos no titulo: `Debate:`, `Insight:`, `(preencher`, `(placeholder`.
+- Para manter o repositorio operacional com os novos guardrails, foram reconciliados titulos legados em `.sdd/state/discovery-index.yaml` (`EPIC-0006` e `EPIC-0007`) e `.sdd/state/backlog.yaml` (`FEAT-0010`).
+- Evidencias desta rodada:
+  - `pnpm test test/core/sdd-operations.test.ts test/core/sdd-check.test.ts` aprovado.
+  - `pnpm run build` aprovado.
+  - `pnpm run lint` aprovado.
+  - `node dist/cli/index.js sdd check --render --json` aprovado com `valid=true`.

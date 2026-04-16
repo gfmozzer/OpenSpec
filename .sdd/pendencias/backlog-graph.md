@@ -49,7 +49,7 @@ Documento gerado a partir de `.sdd/state/backlog.yaml`.
   - lock domains: nenhum
 
 ## EPIC-0006
-- FEAT-0010 [DONE] Debate: Elevar a qualidade automatizada do projeto com foco em cobertura unitária máxima viável, definição de cobertura
+- FEAT-0010 [DONE] Elevar a qualidade automatizada do projeto com foco em cobertura unitária máxima viável
   - tipo: feature | modo: local_plan | fluxo: padrao | grupo: radar-epic-0006
   - depende de: nenhuma
   - lock domains: nenhum
@@ -81,7 +81,7 @@ Documento gerado a partir de `.sdd/state/backlog.yaml`.
   - tipo: feature | modo: local_plan | fluxo: padrao | grupo: epic-0008
   - depende de: FEAT-0012, FEAT-0013, FEAT-0014, FEAT-0015
   - lock domains: nenhum
-- FEAT-0017 [IN_PROGRESS] Sanitização semântica de títulos na propagação INS → DEB → EPIC → FEAT
+- FEAT-0017 [DONE] Sanitização semântica de títulos na propagação INS → DEB → EPIC → FEAT
   - tipo: feature | modo: local_plan | fluxo: padrao | grupo: epic-0008
   - depende de: nenhuma
   - lock domains: nenhum
