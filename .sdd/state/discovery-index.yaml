@@ -1,10 +1,10 @@
 version: 1
 counters:
-  INS: 10
-  DEB: 10
+  INS: 11
+  DEB: 11
   RAD: 0
-  EPIC: 9
-  FEAT: 18
+  EPIC: 10
+  FEAT: 22
   FGAP: 0
   TD: 0
 records:
@@ -353,3 +353,48 @@ records:
       - INS-0010
     created_at: 2026-04-15T20:11:48.014Z
     updated_at: 2026-04-15T20:11:48.014Z
+  - id: INS-0011
+    type: INS
+    title: "Robustez estrutural do OpenSDD: dedup, isolamento, integridade e
+      auditoria"
+    title_canonical: "Robustez estrutural do OpenSDD: dedup, isolamento, integrida"
+    status: DEBATED
+    origin_prompt: Incrementar a robustez estrutural do OpenSDD contra duplicidade
+      de IDs e codigos, fuga de contexto entre projetos, mistura semantica em
+      titulos propagados, fragilidade do algoritmo de similaridade, ausencia de
+      integridade referencial cross-entity, consolidacao rasa da memoria
+      canonica no finalize, falta de auditoria de transicoes de estado e
+      cobertura parcial de lentes e validadores. O objetivo e fortalecer a
+      capacidade da ferramenta de orquestrar e organizar o desenvolvimento desde
+      o insight ate a consolidacao, com barreiras inteligentes contra
+      repetibilidade, perda de contexto e degradacao progressiva do estado.
+    related_ids:
+      - DEB-0011
+    created_at: 2026-04-17T01:01:34.321Z
+    updated_at: 2026-04-17T01:01:41.753Z
+  - id: DEB-0011
+    type: DEB
+    title: "Debate: Dedup cross-entity, isolamento de projeto, integridade
+      referencial, consolidacao inteligente, auditoria de trans"
+    title_canonical: Dedup cross-entity, isolamento de projeto, integridade refer
+    status: APPROVED
+    origin_prompt: Debate originado de INS-0011
+    related_ids:
+      - INS-0011
+      - EPIC-0010
+    created_at: 2026-04-17T01:01:41.753Z
+    updated_at: 2026-04-17T01:02:43.339Z
+  - id: EPIC-0010
+    type: EPIC
+    title: "Robustez estrutural do OpenSDD: dedup, integridade referencial,
+      consolidacao inteligente e auditoria de transicoes"
+    status: SPLIT
+    related_ids:
+      - DEB-0011
+      - INS-0011
+      - FEAT-0019
+      - FEAT-0020
+      - FEAT-0021
+      - FEAT-0022
+    created_at: 2026-04-17T01:02:43.339Z
+    updated_at: 2026-04-17T01:03:01.649Z

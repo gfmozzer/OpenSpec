@@ -4,8 +4,8 @@ meta_evolution:
   enabled: true
   audit_interval_days: 180
   placeholder_markers:
-    - "(preencher"
-    - "(placeholder"
+    - (preencher
+    - (placeholder
     - todo
     - tbd
   health_alert_threshold: 75
@@ -14,4 +14,4 @@ frontend:
 views:
   autoRender: true
 state_version: 2
-last_migrated_at: 2026-04-13T04:47:55.612Z
+last_migrated_at: 2026-04-17T01:17:27.133Z

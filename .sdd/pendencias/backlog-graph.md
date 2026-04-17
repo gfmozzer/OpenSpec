@@ -86,6 +86,24 @@ Documento gerado a partir de `.sdd/state/backlog.yaml`.
   - depende de: nenhuma
   - lock domains: nenhum
 
+## EPIC-0010
+- FEAT-0019 [READY] Integridade referencial cross-entity no check com severidade graduada
+  - tipo: feature | modo: local_plan | fluxo: padrao | grupo: radar-epic-0010
+  - depende de: nenhuma
+  - lock domains: nenhum
+- FEAT-0020 [READY] Transition-log append-only e remocao do ciclo ARCHIVED para DONE
+  - tipo: feature | modo: local_plan | fluxo: padrao | grupo: radar-epic-0010
+  - depende de: nenhuma
+  - lock domains: nenhum
+- FEAT-0021 [READY] Deduplicacao cross-entity em insight debate e decide com warn-and-link
+  - tipo: feature | modo: local_plan | fluxo: padrao | grupo: radar-epic-0010
+  - depende de: nenhuma
+  - lock domains: nenhum
+- FEAT-0022 [READY] Corrigir heuristica serviceId e merge field-wise no finalize
+  - tipo: feature | modo: local_plan | fluxo: padrao | grupo: radar-epic-0010
+  - depende de: nenhuma
+  - lock domains: nenhum
+
 ## sem-origem
 - FEAT-0018 [DONE] Adotar DevTrack Foundation API como backend padrão do OpenSDD
   - tipo: documentation | modo: direct_tasks | fluxo: rigoroso | grupo: -

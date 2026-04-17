@@ -1103,3 +1103,239 @@ items:
     archived_at: ""
     done_at: 2026-04-14T02:35:00.320Z
     unblocked_at: ""
+  - id: FEAT-0019
+    title: Integridade referencial cross-entity no check com severidade graduada
+    status: READY
+    origin_type: epic
+    origin_ref: EPIC-0010
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0010
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: proposta
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0010
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: ""
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: ""
+    requires_adr: false
+    frontend_impact_status: unknown
+    frontend_impact_reason: ""
+    frontend_impact_declared_at: ""
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-17T01:03:01.610Z
+    archived_at: ""
+    done_at: ""
+    unblocked_at: ""
+  - id: FEAT-0020
+    title: Transition-log append-only e remocao do ciclo ARCHIVED para DONE
+    status: READY
+    origin_type: epic
+    origin_ref: EPIC-0010
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0010
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: proposta
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0010
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: ""
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: ""
+    requires_adr: false
+    frontend_impact_status: unknown
+    frontend_impact_reason: ""
+    frontend_impact_declared_at: ""
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-17T01:03:01.624Z
+    archived_at: ""
+    done_at: ""
+    unblocked_at: ""
+  - id: FEAT-0021
+    title: Deduplicacao cross-entity em insight debate e decide com warn-and-link
+    status: READY
+    origin_type: epic
+    origin_ref: EPIC-0010
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0010
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: proposta
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0010
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: ""
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: ""
+    requires_adr: false
+    frontend_impact_status: unknown
+    frontend_impact_reason: ""
+    frontend_impact_declared_at: ""
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-17T01:03:01.637Z
+    archived_at: ""
+    done_at: ""
+    unblocked_at: ""
+  - id: FEAT-0022
+    title: Corrigir heuristica serviceId e merge field-wise no finalize
+    status: READY
+    origin_type: epic
+    origin_ref: EPIC-0010
+    scale: STANDARD
+    summary: ""
+    blocked_by: []
+    touches:
+      - backend
+    lock_domains: []
+    parallel_group: radar-epic-0010
+    execution_kind: feature
+    planning_mode: local_plan
+    flow_mode: padrao
+    current_stage: proposta
+    gates:
+      proposta:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      planejamento:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+      tarefas:
+        status: rascunho
+        approved_at: ""
+        approved_by: ""
+        note: ""
+    acceptance_refs:
+      - EPIC-0010
+    produces:
+      - capacidade-de-negocio
+    consumes: []
+    priority_score: 0
+    dependency_count: 0
+    agent_role: ""
+    recommended_skills:
+      - architecture
+      - concise-planning
+      - context-window-management
+    change_name: ""
+    branch_name: ""
+    worktree_path: ""
+    start_commit_sha: ""
+    requires_adr: false
+    frontend_impact_status: unknown
+    frontend_impact_reason: ""
+    frontend_impact_declared_at: ""
+    frontend_surface_tokens: []
+    frontend_gap_refs: []
+    spec_refs: []
+    last_sync_at: 2026-04-17T01:03:01.649Z
+    archived_at: ""
+    done_at: ""
+    unblocked_at: ""
