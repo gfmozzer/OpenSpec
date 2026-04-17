@@ -122,3 +122,15 @@ items:
     kind: change-archive
     service_ref: backend
     notes: Consolidado no finalize FEAT-0017
+  - path: openspec/changes/archive/feat-0020-transition-log-append-only-e-remocao-do
+    kind: change-archive
+    service_ref: backend
+    notes: Finalize FEAT-0020
+  - path: openspec/changes/archive/feat-0021-deduplicacao-cross-entity-em-insight-deb
+    kind: change-archive
+    service_ref: backend
+    notes: Finalize FEAT-0021
+  - path: openspec/changes/archive/feat-0022-corrigir-heuristica-serviceid-e-merge-fi
+    kind: change-archive
+    service_ref: backend
+    notes: Finalize FEAT-0022

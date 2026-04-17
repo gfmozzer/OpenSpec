@@ -118,6 +118,20 @@ describe('sdd operations', () => {
     ).rejects.toThrow(/incompleto/i);
   });
 
+  it('emits warn-and-link when a new insight is semantically similar to an existing one', async () => {
+    await new SddInsightCommand().execute(testDir, 'Nova estrategia de autorizacao');
+    const second = await new SddInsightCommand().execute(testDir, 'Nova estratégia autorização');
+
+    expect(second.warnings).toHaveLength(1);
+    expect(second.warnings[0].level).toBe('warning');
+
+    const discoveryIndex = await readYamlFile<Record<string, any>>(
+      path.join(testDir, '.sdd', 'state', 'discovery-index.yaml')
+    );
+    const insight2 = discoveryIndex.records.find((record: any) => record.id === 'INS-0002');
+    expect(insight2.warning_links).toContain('INS-0001');
+  });
+
   it('computes next features with graph dependencies and lock conflicts', async () => {
     const insight = await new SddInsightCommand().execute(testDir, 'Melhorar autorizacao por workspace');
     const debate = await new SddDebateCommand().execute(testDir, insight.id);
@@ -156,6 +170,27 @@ describe('sdd operations', () => {
 
     const finalize = await new SddFinalizeCommand().execute(testDir, { allReady: true });
     expect(finalize.finalized).toContain('FEAT-0001');
+
+    const transitionLog = await readYamlFile<Record<string, any>>(
+      path.join(testDir, '.sdd', 'state', 'transition-log.yaml')
+    );
+    expect(
+      transitionLog.events.some(
+        (event: any) =>
+          event.entity_id === 'FEAT-0001' &&
+          event.from === 'READY' &&
+          event.to === 'IN_PROGRESS' &&
+          event.source_command === 'sdd start'
+      )
+    ).toBe(true);
+    expect(
+      transitionLog.events.some(
+        (event: any) =>
+          event.entity_id === 'FEAT-0001' &&
+          event.to === 'DONE' &&
+          event.source_command === 'sdd finalize'
+      )
+    ).toBe(true);
 
     const context = await new SddContextCommand().execute(testDir, 'FEAT-0001');
     expect(context.target_type).toBe('FEAT');
@@ -492,7 +527,7 @@ describe('sdd operations', () => {
     expect(created.blocked_by).toContain('FEAT-0001');
   });
 
-  it('deduplicates breakdown by strict/normal and allows duplicates with off', async () => {
+  it('uses strict exact dedupe, warn-and-link on normal, and allows duplicates with off', async () => {
     const insight = await new SddInsightCommand().execute(testDir, 'Projeto de usuarios');
     const debate = await new SddDebateCommand().execute(testDir, insight.id);
     await completeDebateTemplate(testDir, debate.id);
@@ -518,15 +553,22 @@ describe('sdd operations', () => {
       dedupe: 'normal',
       titles: ['Api usuarios'],
     });
-    expect(normalDuplicate.created).toHaveLength(0);
-    expect(normalDuplicate.linked_existing).toContain('FEAT-0001');
+    expect(normalDuplicate.created).toContain('FEAT-0002');
+    expect(normalDuplicate.warnings).toHaveLength(1);
+    expect(normalDuplicate.warnings[0].candidates[0].id).toBe('FEAT-0001');
+
+    const backlogAfterWarn = await readYamlFile<Record<string, any>>(
+      path.join(testDir, '.sdd', 'state', 'backlog.yaml')
+    );
+    const warnedFeature = backlogAfterWarn.items.find((item: any) => item.id === 'FEAT-0002');
+    expect(warnedFeature.warning_links).toContain('FEAT-0001');
 
     const offDuplicate = await new SddBreakdownCommand().execute(testDir, 'EPIC-0001', {
       mode: 'flat',
       dedupe: 'off',
       titles: ['API de usuarios'],
     });
-    expect(offDuplicate.created).toContain('FEAT-0002');
+    expect(offDuplicate.created).toContain('FEAT-0003');
   });
 
   it('ranks next features by impact using dependent graph', async () => {
@@ -625,6 +667,52 @@ describe('sdd operations', () => {
     const unblockedViewPath = path.join(testDir, '.sdd', 'pendencias', 'unblocked.md');
     const unblockedView = await fs.readFile(unblockedViewPath, 'utf-8');
     expect(unblockedView).toContain('FEAT-0002');
+  });
+
+  it('keeps catalogs stable when finalize runs more than once for the same feature', async () => {
+    const start = await new SddStartCommand().execute(testDir, 'Consolidar catalogos');
+    const archiveDir = path.join(testDir, 'openspec', 'changes', 'archive', start.changeName);
+    await fs.mkdir(archiveDir, { recursive: true });
+
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = await readYamlFile<Record<string, any>>(backlogPath);
+    const feat1 = backlog.items.find((item: any) => item.id === 'FEAT-0001');
+    feat1.summary = 'Resumo consolidado estavel';
+    feat1.frontend_impact_status = 'none';
+    feat1.frontend_impact_reason = 'Mudanca sem efeito de interface.';
+    feat1.touches = ['backend'];
+    feat1.consumes = ['auth'];
+    feat1.produces = ['billing'];
+    await writeYamlFile(backlogPath, backlog);
+
+    await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-0001' });
+
+    const firstSnapshot = {
+      serviceCatalog: await fs.readFile(path.join(testDir, '.sdd', 'state', 'service-catalog.yaml'), 'utf-8'),
+      techStack: await fs.readFile(path.join(testDir, '.sdd', 'state', 'tech-stack.yaml'), 'utf-8'),
+      integrationContracts: await fs.readFile(
+        path.join(testDir, '.sdd', 'state', 'integration-contracts.yaml'),
+        'utf-8'
+      ),
+      repoMap: await fs.readFile(path.join(testDir, '.sdd', 'state', 'repo-map.yaml'), 'utf-8'),
+    };
+
+    const rerun = await new SddFinalizeCommand().execute(testDir, { ref: 'FEAT-0001' });
+    expect(rerun.finalized).toHaveLength(0);
+
+    const secondSnapshot = {
+      serviceCatalog: await fs.readFile(path.join(testDir, '.sdd', 'state', 'service-catalog.yaml'), 'utf-8'),
+      techStack: await fs.readFile(path.join(testDir, '.sdd', 'state', 'tech-stack.yaml'), 'utf-8'),
+      integrationContracts: await fs.readFile(
+        path.join(testDir, '.sdd', 'state', 'integration-contracts.yaml'),
+        'utf-8'
+      ),
+      repoMap: await fs.readFile(path.join(testDir, '.sdd', 'state', 'repo-map.yaml'), 'utf-8'),
+    };
+
+    expect(secondSnapshot).toEqual(firstSnapshot);
+    expect(firstSnapshot.serviceCatalog).not.toContain('Consolidado por');
+    expect(firstSnapshot.integrationContracts.match(/auth::FEAT-0001/g)?.length).toBe(1);
   });
 
   it('creates required ADR on start and does not overwrite existing ADR', async () => {

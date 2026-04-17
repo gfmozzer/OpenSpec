@@ -22,7 +22,7 @@ Documento gerado a partir de `.sdd/state/backlog.yaml` + `.sdd/state/frontend-ga
 | FEAT-0016 | DONE | none | Comando de auditoria e protocolo de meta-evolucao atuam apenas em CLI/estado SDD, sem superficie de frontend. | - | - |
 | FEAT-0017 | DONE | none | Sanitização semântica de títulos atua somente em estado SDD/CLI e não altera superfície de frontend. | - | - |
 | FEAT-0018 | DONE | none | Planejamento arquitetural e documental para backend padrao, sem superficie funcional de frontend. | - | - |
-| FEAT-0019 | READY | unknown | - | - | - |
-| FEAT-0020 | READY | unknown | - | - | - |
-| FEAT-0021 | READY | unknown | - | - | - |
-| FEAT-0022 | READY | unknown | - | - | - |
+| FEAT-0019 | IN_PROGRESS | unknown | - | - | - |
+| FEAT-0020 | DONE | none | Atuacao exclusiva no logger de backend | - | - |
+| FEAT-0021 | DONE | none | Atuacao restrita ao Motor de CLI abstrata na deduplicacao | - | - |
+| FEAT-0022 | DONE | none | Logica Idempotente segura e reestruturada para geracao de YAMLs | - | - |

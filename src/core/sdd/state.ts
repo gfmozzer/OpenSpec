@@ -9,6 +9,7 @@ import {
   IntegrationContractsStateSchema,
   FrontendDecisionsStateSchema,
   UnblockEventsStateSchema,
+  TransitionLogStateSchema,
   FrontendGapsStateSchema,
   FrontendMapStateSchema,
   RepoMapStateSchema,
@@ -34,6 +35,7 @@ import {
   type TechStackState,
   type TechDebtState,
   type UnblockEventsState,
+  type TransitionLogState,
 } from './types.js';
 import { CLI_NAME } from '../branding.js';
 import {
@@ -107,6 +109,7 @@ export interface SddPaths {
     finalizeQueue: string;
     skillCatalog: string;
     unblockEvents: string;
+    transitionLog: string;
     frontendGaps: string;
     frontendMap: string;
     architecture: string;
@@ -127,6 +130,7 @@ export interface SddStateSnapshot {
   finalizeQueue: FinalizeQueueState;
   skillCatalog: SkillCatalogState;
   unblockEvents: UnblockEventsState;
+  transitionLog: TransitionLogState;
   frontendGaps?: FrontendGapsState;
   frontendMap?: FrontendMapState;
   architecture: ArchitectureState;
@@ -455,6 +459,7 @@ export function resolveSddPaths(projectRoot: string, config: SddRuntimeConfig): 
       finalizeQueue: path.join(stateDir, 'finalize-queue.yaml'),
       skillCatalog: path.join(stateDir, 'skill-catalog.yaml'),
       unblockEvents: path.join(stateDir, 'unblock-events.yaml'),
+      transitionLog: path.join(stateDir, 'transition-log.yaml'),
       frontendGaps: path.join(stateDir, 'frontend-gaps.yaml'),
       frontendMap: path.join(stateDir, 'frontend-map.yaml'),
       architecture: path.join(stateDir, 'architecture.yaml'),
@@ -605,6 +610,7 @@ export async function ensureBaseFiles(paths: SddPaths, config: SddRuntimeConfig)
   await writeYamlIfMissing(paths.stateFiles.finalizeQueue, { version: 1, items: [] });
   await ensureCuratedSkillCatalog(paths.stateFiles.skillCatalog);
   await writeYamlIfMissing(paths.stateFiles.unblockEvents, { version: 1, events: [] });
+  await writeYamlIfMissing(paths.stateFiles.transitionLog, { version: 1, events: [] });
   await writeYamlIfMissing(paths.stateFiles.architecture, { version: 1, nodes: [] });
   await writeYamlIfMissing(paths.stateFiles.serviceCatalog, { version: 1, services: [] });
   await writeYamlIfMissing(paths.stateFiles.techStack, { version: 1, items: [] });
@@ -709,6 +715,7 @@ export async function loadStateSnapshot(
   const finalizeQueue = FinalizeQueueStateSchema.parse(await readYaml(paths.stateFiles.finalizeQueue));
   const skillCatalog = SkillCatalogStateSchema.parse(await readYaml(paths.stateFiles.skillCatalog));
   const unblockEvents = UnblockEventsStateSchema.parse(await readYaml(paths.stateFiles.unblockEvents));
+  const transitionLog = TransitionLogStateSchema.parse(await readYaml(paths.stateFiles.transitionLog));
   const architecture = ArchitectureStateSchema.parse(await readYaml(paths.stateFiles.architecture));
   const serviceCatalog = ServiceCatalogStateSchema.parse(await readYaml(paths.stateFiles.serviceCatalog));
   const techStack = TechStackStateSchema.parse(await readYaml(paths.stateFiles.techStack));
@@ -746,6 +753,7 @@ export async function loadStateSnapshot(
     finalizeQueue,
     skillCatalog,
     unblockEvents,
+    transitionLog,
     frontendGaps,
     frontendMap,
     architecture,
@@ -807,6 +815,13 @@ export async function saveUnblockEventsState(
   state: UnblockEventsState
 ): Promise<void> {
   await writeYaml(paths.stateFiles.unblockEvents, state);
+}
+
+export async function saveTransitionLogState(
+  paths: SddPaths,
+  state: TransitionLogState
+): Promise<void> {
+  await writeYaml(paths.stateFiles.transitionLog, state);
 }
 
 export async function saveFrontendGapsState(

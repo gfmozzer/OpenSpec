@@ -29,6 +29,7 @@ import {
   saveServiceCatalogState,
   saveSourceIndexState,
   saveTechStackState,
+  saveTransitionLogState,
   saveUnblockEventsState,
   type SddPaths,
   type SddRuntimeConfig,
@@ -46,9 +47,20 @@ import type {
   SkillCatalogEntry,
   SourceDocumentRecord,
   SkillRoutingRule,
+  TransitionLogEvent,
 } from './types.js';
 import { renderViews } from './views.js';
 import { syncSddGuideDocs } from './docs-sync.js';
+import { normalizeSemanticText, warnAndLink } from './dedup.js';
+import {
+  mergeArchitectureNode,
+  mergeFrontendDecisionRecord,
+  mergeRepoMapRecord,
+  mergeServiceRecord,
+  mergeTechStackRecord,
+  stableUniqueStrings,
+  upsertByKey,
+} from './merge-catalog.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -801,9 +813,24 @@ export class SddInsightCommand {
       status: 'NEW',
       origin_prompt: trimmed,
       related_ids: [],
+      warning_links: [],
       created_at: now,
       updated_at: now,
     };
+
+    const semanticWarning = warnAndLink(
+      'INS',
+      titleCanonical,
+      snapshot.discoveryIndex.records
+        .filter((existing) => existing.type === 'INS' || existing.type === 'DEB')
+        .map((existing) => ({
+          id: existing.id,
+          title: existing.title_canonical || existing.title,
+        }))
+    );
+    if (semanticWarning.severity === 'warning') {
+      record.warning_links = semanticWarning.warningLinks;
+    }
 
     snapshot.discoveryIndex.records.push(record);
     await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
@@ -812,7 +839,20 @@ export class SddInsightCommand {
     await fs.writeFile(filePath, markdownInsightTemplate(id, title, trimmed), 'utf-8');
     await persistAndRender(paths, config, options?.render);
 
-    return { id, title, filePath };
+    return {
+      id,
+      title,
+      filePath,
+      warnings:
+        semanticWarning.severity === 'warning'
+          ? semanticWarning.candidates.map((candidate) => ({
+              level: 'warning' as const,
+              entity_id: candidate.id,
+              score: candidate.score,
+              message: `Possível duplicidade semântica com ${candidate.id} (${candidate.score.toFixed(2)})`,
+            }))
+          : [],
+    };
   }
 }
 
@@ -845,17 +885,25 @@ export class SddDebateCommand {
       status: 'OPEN',
       origin_prompt: `Debate originado de ${insight.id}${options?.agent ? ` por ${options.agent}` : ''}`,
       related_ids: [insight.id],
+      warning_links: [],
       created_at: now,
       updated_at: now,
     };
 
-    TransitionEngine.assertValid(insight.type, insight.status, 'DEBATED');
-    insight.status = 'DEBATED';
-    insight.related_ids = Array.from(new Set([...insight.related_ids, id]));
-    insight.updated_at = now;
+    applyLoggedTransition(snapshot.transitionLog.events, insight.type, insight, 'DEBATED', {
+      sourceCommand: 'sdd debate',
+      actor: options?.agent || 'system',
+      reason: `Insight promovido para debate ${id}`,
+      timestamp: now,
+      afterTransition: (currentInsight) => {
+        currentInsight.related_ids = Array.from(new Set([...currentInsight.related_ids, id]));
+        currentInsight.updated_at = now;
+      },
+    });
 
     snapshot.discoveryIndex.records.push(debate);
     await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
+    await saveTransitionLogState(paths, snapshot.transitionLog);
 
     const filePath = path.join(paths.discoveryDebatesDir, `${id}-${slugify(title)}.md`);
     await fs.writeFile(filePath, markdownDebateTemplate(insight, id), 'utf-8');
@@ -895,14 +943,23 @@ export class SddDecideCommand {
 
     const now = nowIso();
     const targetStatus = outcome === 'radar' || outcome === 'epic' ? 'APPROVED' : 'DISCARDED';
-    TransitionEngine.assertValid(debate.type, debate.status, targetStatus);
-    debate.status = targetStatus;
-    debate.updated_at = now;
+    applyLoggedTransition(snapshot.transitionLog.events, debate.type, debate, targetStatus, {
+      sourceCommand: 'sdd decide',
+      reason:
+        outcome === 'discard'
+          ? `Debate descartado por ${debate.id}`
+          : `Debate aprovado e promovido para ${outcome === 'epic' ? 'epic' : 'radar'}`,
+      timestamp: now,
+      afterTransition: (currentDebate) => {
+        currentDebate.updated_at = now;
+      },
+    });
 
     if (outcome === 'discard') {
       const discardPath = path.join(paths.discoveryDiscardedDir, `${debate.id}-${slugify(debate.title)}.md`);
       await fs.writeFile(discardPath, markdownDiscardTemplate(debate, options?.rationale), 'utf-8');
       await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
+      await saveTransitionLogState(paths, snapshot.transitionLog);
       await persistAndRender(paths, config, options?.render);
       return { outcome, debateId, discardPath };
     }
@@ -917,6 +974,7 @@ export class SddDecideCommand {
       status: 'READY',
       origin_prompt: options?.rationale,
       related_ids: [debate.id, ...debate.related_ids],
+      warning_links: [],
       created_at: now,
       updated_at: now,
     };
@@ -924,6 +982,7 @@ export class SddDecideCommand {
     debate.related_ids = Array.from(new Set([...debate.related_ids, radarId]));
     snapshot.discoveryIndex.records.push(radarRecord);
     await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
+    await saveTransitionLogState(paths, snapshot.transitionLog);
 
     const radarPath = path.join(paths.discoveryEpicDir, `${radarId}-${slugify(radarTitle)}.md`);
     await fs.writeFile(radarPath, markdownRadarTemplate(debate, radarId, options?.rationale), 'utf-8');
@@ -1013,6 +1072,7 @@ function buildBacklogItem(
     frontend_impact_declared_at: '',
     frontend_surface_tokens: [],
     frontend_gap_refs: [],
+    warning_links: [],
     spec_refs: [],
     last_sync_at: nowIso(),
     archived_at: '',
@@ -1093,23 +1153,7 @@ function classifyFeatureShape(title: string): {
 }
 
 function normalizeTitle(value: string): string {
-  return slugify(value.replace(/\s+/g, ' '));
-}
-
-function similarity(a: string, b: string): number {
-  if (a === b) return 1;
-  const stopWords = new Set(['a', 'an', 'and', 'as', 'com', 'da', 'das', 'de', 'do', 'dos', 'e', 'for', 'na', 'no', 'o', 'para', 'por', 'the', 'to']);
-  const filterTokens = (value: string): string[] => {
-    const tokens = value.split('-').filter(Boolean);
-    const filtered = tokens.filter((token) => !stopWords.has(token));
-    return filtered.length > 0 ? filtered : tokens;
-  };
-  const sa = new Set(filterTokens(a));
-  const sb = new Set(filterTokens(b));
-  const intersection = [...sa].filter((token) => sb.has(token)).length;
-  const union = new Set([...sa, ...sb]).size;
-  if (union === 0) return 0;
-  return intersection / union;
+  return normalizeSemanticText(value).replace(/\s+/g, '-');
 }
 
 function intersects(a: string[], b: string[]): boolean {
@@ -1399,6 +1443,11 @@ export class SddBreakdownCommand {
     const linkedExisting: string[] = [];
     const rewiredMap = new Map<string, Set<string>>();
     const skippedDuplicates: Array<{ title: string; existing_feature_id: string }> = [];
+    const semanticWarnings: Array<{
+      title: string;
+      severity: 'warning';
+      candidates: Array<{ id: string; score: number }>;
+    }> = [];
     const parallelGroup = `radar-${radar.id.toLowerCase()}`;
     const existingItems = snapshot.backlog.items.slice();
 
@@ -1409,14 +1458,10 @@ export class SddBreakdownCommand {
       const normalizedTitle = normalizeTitle(title);
 
       const duplicate = existingItems.find((item) => {
-        if (dedupe === 'off') return false;
+        if (dedupe !== 'strict') return false;
         const sameOrigin = item.origin_ref === radar.id;
         const itemNorm = normalizeTitle(item.title);
-        if (dedupe === 'strict') {
-          return sameOrigin && itemNorm === normalizedTitle;
-        }
-        const sim = similarity(itemNorm, normalizedTitle);
-        return sim >= 0.85 && intersects(item.touches, shape.touches);
+        return sameOrigin && itemNorm === normalizedTitle;
       });
 
       if (duplicate) {
@@ -1424,6 +1469,20 @@ export class SddBreakdownCommand {
         skippedDuplicates.push({ title, existing_feature_id: duplicate.id });
         continue;
       }
+
+      const semanticMatch =
+        dedupe === 'off'
+          ? { severity: 'none' as const, warningLinks: [], candidates: [] }
+          : warnAndLink(
+              'FEAT',
+              title,
+              existingItems
+                .filter((item) => item.origin_ref === radar.id || intersects(item.touches, shape.touches))
+                .map((item) => ({
+                  id: item.id,
+                  title: item.title,
+                }))
+            );
 
       const id = await allocateEntityId(paths, 'FEAT');
       syncCounterFromId(snapshot.discoveryIndex, id);
@@ -1446,6 +1505,17 @@ export class SddBreakdownCommand {
           consumes: shape.consumes,
         }
       );
+      if (semanticMatch.severity === 'warning') {
+        item.warning_links = semanticMatch.warningLinks;
+        semanticWarnings.push({
+          title,
+          severity: 'warning',
+          candidates: semanticMatch.candidates.map((candidate) => ({
+            id: candidate.id,
+            score: candidate.score,
+          })),
+        });
+      }
       snapshot.backlog.items.push(item);
       existingItems.push(item);
       created.push(item);
@@ -1481,8 +1551,11 @@ export class SddBreakdownCommand {
         }
         if (item.blocked_by.length > 0) {
           item.consumes = Array.from(new Set([...item.consumes, ...item.blocked_by]));
-          TransitionEngine.assertValid('FEAT', item.status, 'BLOCKED');
-          item.status = 'BLOCKED';
+          applyLoggedTransition(snapshot.transitionLog.events, 'FEAT', item, 'BLOCKED', {
+            sourceCommand: 'sdd breakdown',
+            reason: `Dependencias definidas no breakdown ${radar.id}`,
+            timestamp: nowIso(),
+          });
         }
       }
     }
@@ -1512,8 +1585,11 @@ export class SddBreakdownCommand {
           }
         }
         if (addedDeps.size > 0) {
-          TransitionEngine.assertValid('FEAT', createdItem.status, 'BLOCKED');
-          createdItem.status = 'BLOCKED';
+          applyLoggedTransition(snapshot.transitionLog.events, 'FEAT', createdItem, 'BLOCKED', {
+            sourceCommand: 'sdd breakdown',
+            reason: `Dependencias incrementais detectadas para ${createdItem.id}`,
+            timestamp: nowIso(),
+          });
           const deps = rewiredMap.get(createdItem.id) || new Set<string>();
           for (const dep of addedDeps) deps.add(dep);
           rewiredMap.set(createdItem.id, deps);
@@ -1524,14 +1600,20 @@ export class SddBreakdownCommand {
     updateDependencyMetadata(snapshot.backlog.items);
 
     if (radar.status !== 'SPLIT') {
-      TransitionEngine.assertValid(radar.type, radar.status, 'SPLIT');
-      radar.status = 'SPLIT';
-      radar.updated_at = nowIso();
+      applyLoggedTransition(snapshot.transitionLog.events, radar.type, radar, 'SPLIT', {
+        sourceCommand: 'sdd breakdown',
+        reason: `EPIC/RAD ${radar.id} quebrado em features`,
+        timestamp: nowIso(),
+        afterTransition: (currentRadar) => {
+          currentRadar.updated_at = nowIso();
+        },
+      });
     }
     radar.related_ids = Array.from(new Set([...radar.related_ids, ...created.map((item) => item.id)]));
 
     await saveBacklogState(paths, snapshot.backlog);
     await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
+    await saveTransitionLogState(paths, snapshot.transitionLog);
     await persistAndRender(paths, config, options?.render);
 
     return {
@@ -1545,6 +1627,7 @@ export class SddBreakdownCommand {
           added_blocked_by: Array.from(deps).sort(),
         })),
       skipped_duplicates: skippedDuplicates,
+      warnings: semanticWarnings,
     };
   }
 }
@@ -1648,7 +1731,7 @@ export class SddIngestDepositoCommand {
     }
 
     let radarId = options?.radarId || '';
-    let radar = radarId
+    let radar: DiscoveryRecord | undefined = radarId
       ? snapshot.discoveryIndex.records.find((record) => record.id === radarId && (record.type === 'RAD' || record.type === 'EPIC'))
       : undefined;
 
@@ -1662,6 +1745,7 @@ export class SddIngestDepositoCommand {
         status: 'READY',
         origin_prompt: `Gerado por ingestao de deposito em ${now}`,
         related_ids: [],
+        warning_links: [],
         created_at: now,
         updated_at: now,
       };
@@ -1673,6 +1757,8 @@ export class SddIngestDepositoCommand {
         'utf-8'
       );
     }
+
+    resolveRadar(radar);
 
     await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
     await saveSourceIndexState(paths, snapshot.sourceIndex);
@@ -1919,13 +2005,17 @@ export class SddStartCommand {
       }
     }
 
-    TransitionEngine.assertValid('FEAT', feature.status, 'IN_PROGRESS', {
+    applyLoggedTransition(snapshot.transitionLog.events, 'FEAT', feature, 'IN_PROGRESS', {
+      sourceCommand: 'sdd start',
       forceTransition: options?.forceTransition,
-      lensViolations: startLensViolations
+      lensViolations: startLensViolations,
+      reason: `Feature iniciada em workspace ativo`,
+      timestamp: now,
+      afterTransition: (currentFeature) => {
+        currentFeature.current_stage = 'execucao';
+        currentFeature.last_sync_at = now;
+      },
     });
-    feature.status = 'IN_PROGRESS';
-    feature.current_stage = 'execucao';
-    feature.last_sync_at = now;
     if (!feature.start_commit_sha) {
       feature.start_commit_sha = await gitHeadCommit(projectRoot);
     }
@@ -1946,9 +2036,14 @@ export class SddStartCommand {
       if (radar && (radar.type === 'RAD' || radar.type === 'EPIC')) {
         const shouldPromoteParent = radar.status === 'READY' || radar.status === 'PLANNED';
         if (shouldPromoteParent) {
-          TransitionEngine.assertValid(radar.type, radar.status, 'IN_PROGRESS');
-          radar.status = 'IN_PROGRESS';
-          radar.updated_at = now;
+          applyLoggedTransition(snapshot.transitionLog.events, radar.type, radar, 'IN_PROGRESS', {
+            sourceCommand: 'sdd start',
+            reason: `Feature filha ${feature.id} iniciou execucao`,
+            timestamp: now,
+            afterTransition: (currentRadar) => {
+              currentRadar.updated_at = now;
+            },
+          });
         }
       }
     }
@@ -1968,6 +2063,7 @@ export class SddStartCommand {
     updateDependencyMetadata(snapshot.backlog.items);
     await saveBacklogState(paths, snapshot.backlog);
     await saveDiscoveryIndexState(paths, snapshot.discoveryIndex);
+    await saveTransitionLogState(paths, snapshot.transitionLog);
     await persistAndRender(paths, config, options?.render);
 
     return {
@@ -2013,10 +2109,8 @@ async function buildFinalizeQueue(
       });
     }
 
-    if (item.status !== 'ARCHIVED') {
-      TransitionEngine.assertValid('FEAT', item.status, 'ARCHIVED');
-      item.status = 'ARCHIVED';
-      item.archived_at = nowIso();
+    if (item.status === 'ARCHIVED') {
+      item.archived_at = item.archived_at || nowIso();
     }
   }
 
@@ -2052,13 +2146,22 @@ ${unlocked.length > 0 ? unlocked.map((id) => `- ${id}`).join('\n') : '- Nenhum'}
 `;
 }
 
-function upsertArray<T>(array: T[], predicate: (item: T) => boolean, nextValue: T): void {
-  const idx = array.findIndex(predicate);
-  if (idx >= 0) {
-    array[idx] = nextValue;
-    return;
+function applyLoggedTransition<T extends { id: string; status: string }>(
+  transitionLog: TransitionLogEvent[],
+  entityType: string,
+  entity: T,
+  toStatus: string,
+  options: {
+    sourceCommand: string;
+    actor?: string;
+    reason?: string;
+    timestamp?: string;
+    forceTransition?: boolean;
+    lensViolations?: string[];
+    afterTransition?: (entity: T) => void;
   }
-  array.push(nextValue);
+): void {
+  TransitionEngine.applyTransition(entityType, entity, toStatus, transitionLog, options);
 }
 
 function gateSatisfied(status: string): boolean {
@@ -2096,6 +2199,7 @@ export class SddFinalizeCommand {
       await saveFinalizeQueueState(paths, snapshot.finalizeQueue);
       await saveBacklogState(paths, snapshot.backlog);
       await saveUnblockEventsState(paths, snapshot.unblockEvents);
+      await saveTransitionLogState(paths, snapshot.transitionLog);
       await persistAndRender(paths, config, options?.render);
       return {
         finalized: [],
@@ -2132,6 +2236,14 @@ export class SddFinalizeCommand {
     for (const featureId of targets) {
       const feature = snapshot.backlog.items.find((item) => item.id === featureId);
       if (!feature) continue;
+      if (feature.status === 'DONE') {
+        const queue = snapshot.finalizeQueue.items.find((item) => item.feature_id === featureId);
+        if (queue) {
+          queue.status = 'DONE';
+          queue.completed_at = queue.completed_at || now;
+        }
+        continue;
+      }
       if (
         feature.flow_mode === 'rigoroso' &&
         (!gateSatisfied(feature.gates.proposta.status) ||
@@ -2261,18 +2373,22 @@ export class SddFinalizeCommand {
       }
 
       try {
-        TransitionEngine.assertValid('FEAT', feature.status, 'DONE', {
+        applyLoggedTransition(snapshot.transitionLog.events, 'FEAT', feature, 'DONE', {
+          sourceCommand: 'sdd finalize',
           forceTransition: options?.forceTransition,
-          lensViolations
+          lensViolations,
+          reason: `Finalize consolidado para ${feature.id}`,
+          timestamp: now,
+          afterTransition: (currentFeature) => {
+            currentFeature.current_stage = 'consolidacao';
+            currentFeature.done_at = now;
+            currentFeature.last_sync_at = now;
+          },
         });
       } catch (err: any) {
         docWarnings.push(`${feature.id} ${err.message}`);
         continue;
       }
-      feature.status = 'DONE';
-      feature.current_stage = 'consolidacao';
-      feature.done_at = now;
-      feature.last_sync_at = now;
 
       const queue = snapshot.finalizeQueue.items.find((item) => item.feature_id === featureId);
       if (queue) {
@@ -2297,18 +2413,22 @@ export class SddFinalizeCommand {
           if (radar && (radar.type === 'RAD' || radar.type === 'EPIC')) {
             const targetStatus = RADAR_TO_DISCOVERY_STATUS.DONE;
             if (radar.status !== targetStatus) {
-              TransitionEngine.assertValid(radar.type, radar.status, targetStatus);
-              radar.status = targetStatus;
-              radar.updated_at = now;
+              applyLoggedTransition(snapshot.transitionLog.events, radar.type, radar, targetStatus, {
+                sourceCommand: 'sdd finalize',
+                reason: `Todas as features derivadas de ${radar.id} foram concluídas`,
+                timestamp: now,
+                afterTransition: (currentRadar) => {
+                  currentRadar.updated_at = now;
+                },
+              });
             }
           }
         }
       }
 
       // Consolida memória macro canônica com dados objetivos da feature finalizada.
-      upsertArray(
+      upsertByKey(
         snapshot.architecture.nodes,
-        (node) => node.id === feature.id,
         {
           id: feature.id,
           name: feature.title,
@@ -2316,63 +2436,67 @@ export class SddFinalizeCommand {
           description: feature.summary || '',
           repo_paths: feature.worktree_path ? [feature.worktree_path] : [],
           depends_on: feature.blocked_by,
-        }
+        },
+        (node) => node.id,
+        mergeArchitectureNode
       );
       updatedCoreDocs.add(coreDocRef(paths, 'arquitetura.md'));
 
       const serviceId = feature.touches[0] || feature.execution_kind;
-      upsertArray(
+      upsertByKey(
         snapshot.serviceCatalog.services,
-        (service) => service.id === serviceId,
         {
           id: serviceId,
           name: serviceId,
-          responsibility: `Consolidado por ${feature.id}`,
+          responsibility: feature.summary || '',
           owner_refs: [feature.id],
           repo_paths: feature.worktree_path ? [feature.worktree_path] : [],
           contracts: feature.consumes,
           external_dependencies: [],
-        }
+        },
+        (service) => service.id,
+        mergeServiceRecord
       );
       updatedCoreDocs.add(coreDocRef(paths, 'servicos.md'));
 
       for (const tech of feature.touches) {
-        if (!snapshot.techStack.items.some((entry) => entry.layer === tech && entry.technology === tech)) {
-          snapshot.techStack.items.push({
+        upsertByKey(
+          snapshot.techStack.items,
+          {
             layer: tech,
             technology: tech,
             version: '',
             purpose: `Area impactada por ${feature.id}`,
             constraints: feature.lock_domains,
-          });
-        }
+          },
+          (entry) => `${entry.layer}::${entry.technology}`,
+          mergeTechStackRecord
+        );
       }
       updatedCoreDocs.add(coreDocRef(paths, 'spec-tecnologica.md'));
 
       const contractTokens = Array.from(new Set([...feature.consumes, ...feature.produces]));
-      for (const token of contractTokens) {
-        const contractRef = `${token}::${feature.id}`;
-        if (!snapshot.integrationContracts.contracts.includes(contractRef)) {
-          snapshot.integrationContracts.contracts.push(contractRef);
-        }
-      }
+      snapshot.integrationContracts.contracts = stableUniqueStrings([
+        ...snapshot.integrationContracts.contracts,
+        ...contractTokens.map((token) => `${token}::${feature.id}`),
+      ]);
 
-      upsertArray(
+      upsertByKey(
         snapshot.repoMap.items,
-        (item) => item.path === `openspec/changes/archive/${feature.change_name}`,
         {
           path: `openspec/changes/archive/${feature.change_name || feature.id.toLowerCase()}`,
           kind: 'change-archive',
           service_ref: serviceId,
-          notes: `Consolidado no finalize ${feature.id}`,
-        }
+          notes: feature.summary || `Finalize ${feature.id}`,
+        },
+        (item) => item.path,
+        mergeRepoMapRecord
       );
       updatedCoreDocs.add(coreDocRef(paths, 'repo-map.md'));
 
       if (config.frontend.enabled && snapshot.frontendDecisions && feature.execution_kind === 'frontend_coverage') {
-        upsertArray(
+        upsertByKey(
           snapshot.frontendDecisions.items,
-          (entry) => entry.id === `FD-${feature.id}`,
           {
             id: `FD-${feature.id}`,
             title: `Decisao de frontend para ${feature.id}`,
@@ -2382,7 +2506,9 @@ export class SddFinalizeCommand {
             related_refs: [feature.id, feature.origin_ref || ''].filter(Boolean),
             route_refs: [],
             adr_refs: [`ADR-${feature.id}`],
-          }
+          },
+          (entry) => entry.id,
+          mergeFrontendDecisionRecord
         );
         updatedCoreDocs.add(coreDocRef(paths, 'frontend-decisions.md'));
       }
@@ -2447,6 +2573,7 @@ export class SddFinalizeCommand {
     await saveBacklogState(paths, snapshot.backlog);
     await saveFinalizeQueueState(paths, snapshot.finalizeQueue);
     await saveUnblockEventsState(paths, snapshot.unblockEvents);
+    await saveTransitionLogState(paths, snapshot.transitionLog);
     await saveArchitectureState(paths, snapshot.architecture);
     await saveServiceCatalogState(paths, snapshot.serviceCatalog);
     await saveTechStackState(paths, snapshot.techStack);

@@ -87,20 +87,20 @@ Documento gerado a partir de `.sdd/state/backlog.yaml`.
   - lock domains: nenhum
 
 ## EPIC-0010
-- FEAT-0019 [READY] Integridade referencial cross-entity no check com severidade graduada
+- FEAT-0019 [IN_PROGRESS] Integridade referencial cross-entity no check com severidade graduada
   - tipo: feature | modo: local_plan | fluxo: padrao | grupo: radar-epic-0010
   - depende de: nenhuma
   - lock domains: nenhum
-- FEAT-0020 [READY] Transition-log append-only e remocao do ciclo ARCHIVED para DONE
+- FEAT-0020 [DONE] Transition-log append-only e remocao do ciclo ARCHIVED para DONE
   - tipo: feature | modo: local_plan | fluxo: padrao | grupo: radar-epic-0010
   - depende de: nenhuma
   - lock domains: nenhum
-- FEAT-0021 [READY] Deduplicacao cross-entity em insight debate e decide com warn-and-link
-  - tipo: feature | modo: local_plan | fluxo: padrao | grupo: radar-epic-0010
+- FEAT-0021 [DONE] Deduplicacao cross-entity em insight debate e decide com warn-and-link
+  - tipo: feature | modo: local_plan | fluxo: direto | grupo: radar-epic-0010
   - depende de: nenhuma
   - lock domains: nenhum
-- FEAT-0022 [READY] Corrigir heuristica serviceId e merge field-wise no finalize
-  - tipo: feature | modo: local_plan | fluxo: padrao | grupo: radar-epic-0010
+- FEAT-0022 [DONE] Corrigir heuristica serviceId e merge field-wise no finalize
+  - tipo: feature | modo: local_plan | fluxo: direto | grupo: radar-epic-0010
   - depende de: nenhuma
   - lock domains: nenhum
 

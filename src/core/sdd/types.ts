@@ -127,6 +127,7 @@ export const DiscoveryRecordSchema = z
     status: DiscoveryStatusSchema,
     origin_prompt: NullableStringSchema,
     related_ids: StringArraySchema,
+    warning_links: StringArraySchema,
     created_at: NullableStringSchema,
     updated_at: NullableStringSchema,
   })
@@ -143,50 +144,69 @@ export const DiscoveryRecordSchema = z
     }
   });
 
-export const BacklogItemSchema = z.object({
-  id: z.string().regex(ID_PATTERNS.feature, 'Invalid FEAT id format'),
-  title: z.string().min(1),
-  status: BacklogStatusSchema,
-  origin_type: OriginTypeSchema,
-  origin_ref: NullableStringSchema,
-  scale: ScaleSchema.default('STANDARD'),
-  summary: NullableStringSchema,
-  blocked_by: StringArraySchema,
-  touches: StringArraySchema,
-  lock_domains: StringArraySchema,
-  parallel_group: NullableStringSchema,
-  execution_kind: ExecutionKindSchema.default('feature'),
-  planning_mode: PlanningModeSchema.default('local_plan'),
-  flow_mode: FlowModeSchema.default('padrao'),
-  current_stage: FlowStageSchema.default('proposta'),
-  gates: BacklogGatesSchema.default({
-    proposta: { status: 'rascunho' },
-    planejamento: { status: 'rascunho' },
-    tarefas: { status: 'rascunho' },
-  }),
-  acceptance_refs: StringArraySchema,
-  produces: StringArraySchema,
-  consumes: StringArraySchema,
-  priority_score: z.number().default(0),
-  dependency_count: z.number().int().nonnegative().default(0),
-  agent_role: NullableStringSchema,
-  recommended_skills: StringArraySchema,
-  change_name: NullableStringSchema,
-  branch_name: NullableStringSchema,
-  worktree_path: NullableStringSchema,
-  start_commit_sha: NullableStringSchema,
-  requires_adr: z.boolean().default(false),
-  frontend_impact_status: FrontendImpactStatusSchema.default('unknown'),
-  frontend_impact_reason: NullableStringSchema,
-  frontend_impact_declared_at: NullableStringSchema,
-  frontend_surface_tokens: StringArraySchema,
-  frontend_gap_refs: StringArraySchema,
-  spec_refs: StringArraySchema,
-  last_sync_at: NullableStringSchema,
-  archived_at: NullableStringSchema,
-  done_at: NullableStringSchema,
-  unblocked_at: NullableStringSchema,
-});
+export const BacklogItemSchema = z
+  .object({
+    id: z.string().regex(ID_PATTERNS.feature, 'Invalid FEAT id format'),
+    title: z.string().min(1),
+    status: BacklogStatusSchema,
+    origin_type: OriginTypeSchema,
+    origin_ref: NullableStringSchema,
+    scale: ScaleSchema.default('STANDARD'),
+    summary: NullableStringSchema,
+    blocked_by: StringArraySchema,
+    touches: StringArraySchema,
+    lock_domains: StringArraySchema,
+    parallel_group: NullableStringSchema,
+    execution_kind: ExecutionKindSchema.default('feature'),
+    planning_mode: PlanningModeSchema.default('local_plan'),
+    flow_mode: FlowModeSchema.default('padrao'),
+    current_stage: FlowStageSchema.default('proposta'),
+    gates: BacklogGatesSchema.default({
+      proposta: { status: 'rascunho' },
+      planejamento: { status: 'rascunho' },
+      tarefas: { status: 'rascunho' },
+    }),
+    acceptance_refs: StringArraySchema,
+    produces: StringArraySchema,
+    consumes: StringArraySchema,
+    priority_score: z.number().default(0),
+    dependency_count: z.number().int().nonnegative().default(0),
+    agent_role: NullableStringSchema,
+    recommended_skills: StringArraySchema,
+    change_name: NullableStringSchema,
+    branch_name: NullableStringSchema,
+    worktree_path: NullableStringSchema,
+    start_commit_sha: NullableStringSchema,
+    requires_adr: z.boolean().default(false),
+    frontend_impact_status: FrontendImpactStatusSchema.default('unknown'),
+    frontend_impact_reason: NullableStringSchema,
+    frontend_impact_declared_at: NullableStringSchema,
+    frontend_surface_tokens: StringArraySchema,
+    frontend_gap_refs: StringArraySchema,
+    warning_links: StringArraySchema,
+    spec_refs: StringArraySchema,
+    last_sync_at: NullableStringSchema,
+    archived_at: NullableStringSchema,
+    done_at: NullableStringSchema,
+    unblocked_at: NullableStringSchema,
+  })
+  .superRefine((item, ctx) => {
+    if (item.origin_type !== 'direct' && item.origin_type !== 'fast_track') {
+      if (!item.origin_ref || item.origin_ref.trim() === '') {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `BacklogItem origin_ref cannot be empty when origin_type is '${item.origin_type}'`,
+        });
+      } else if (item.origin_type === 'epic' || item.origin_type === 'radar') {
+        if (!ID_PATTERNS.epicOrRadar.test(item.origin_ref)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `BacklogItem origin_ref "${item.origin_ref}" does not match EPIC/RAD prefix required for origins epic/radar`,
+          });
+        }
+      }
+    }
+  });
 
 export const TechDebtRecordSchema = z.object({
   id: z.string().regex(ID_PATTERNS.techDebt, 'Invalid TD id format'),
@@ -211,6 +231,19 @@ export const UnblockEventSchema = z.object({
   unblocked_by: z.string().regex(ID_PATTERNS.feature, 'Invalid FEAT id format'),
   created_at: NullableStringSchema,
   status: z.enum(['NEW', 'SEEN']).default('NEW'),
+});
+
+export const TransitionLogEventSchema = z.object({
+  entity_type: z.string().min(1),
+  entity_id: z.string().min(1),
+  from: z.string().min(1),
+  to: z.string().min(1),
+  actor: z.string().min(1),
+  reason: NullableStringSchema,
+  timestamp: z.string().min(1),
+  source_command: z.string().min(1),
+  force_transition: z.boolean().default(false),
+  lens_violations: StringArraySchema,
 });
 
 export const SkillCatalogEntrySchema = z.object({
@@ -371,6 +404,11 @@ export const UnblockEventsStateSchema = z.object({
   events: z.array(UnblockEventSchema).default([]),
 });
 
+export const TransitionLogStateSchema = z.object({
+  version: z.literal(1),
+  events: z.array(TransitionLogEventSchema).default([]),
+});
+
 export const SkillCatalogStateSchema = z.object({
   version: z.literal(1),
   skills: z.array(SkillCatalogEntrySchema).default([]),
@@ -434,6 +472,7 @@ export type BacklogItem = z.infer<typeof BacklogItemSchema>;
 export type TechDebtRecord = z.infer<typeof TechDebtRecordSchema>;
 export type FinalizeQueueItem = z.infer<typeof FinalizeQueueItemSchema>;
 export type UnblockEvent = z.infer<typeof UnblockEventSchema>;
+export type TransitionLogEvent = z.infer<typeof TransitionLogEventSchema>;
 export type SkillCatalogEntry = z.infer<typeof SkillCatalogEntrySchema>;
 export type SkillBundle = z.infer<typeof SkillBundleSchema>;
 export type SourceDocumentRecord = z.infer<typeof SourceDocumentRecordSchema>;
@@ -449,6 +488,7 @@ export type BacklogState = z.infer<typeof BacklogStateSchema>;
 export type TechDebtState = z.infer<typeof TechDebtStateSchema>;
 export type FinalizeQueueState = z.infer<typeof FinalizeQueueStateSchema>;
 export type UnblockEventsState = z.infer<typeof UnblockEventsStateSchema>;
+export type TransitionLogState = z.infer<typeof TransitionLogStateSchema>;
 export type SkillCatalogState = z.infer<typeof SkillCatalogStateSchema>;
 export type SourceIndexState = z.infer<typeof SourceIndexStateSchema>;
 export type FrontendGapsState = z.infer<typeof FrontendGapsStateSchema>;

@@ -1,4 +1,4 @@
-import { BacklogItem } from './types.js';
+import { BacklogItem, TransitionLogEvent } from './types.js';
 
 export type EntityStatus = string;
 
@@ -29,7 +29,7 @@ export class TransitionEngine {
       BLOCKED: ['READY', 'IN_PROGRESS', 'ARCHIVED'],
       IN_PROGRESS: ['DONE', 'BLOCKED', 'ARCHIVED'],
       DONE: ['ARCHIVED'],
-      ARCHIVED: ['DONE'],
+      ARCHIVED: [],
     },
   };
 
@@ -71,6 +71,43 @@ export class TransitionEngine {
         console.warn(`[WARNING] Transição forçada de ${entityType} para ${toStatus} ignorando as seguintes violações de Lente:\n- ${options.lensViolations.join('\n- ')}`);
       }
     }
+  }
+
+  static applyTransition<T extends { id: string; status: EntityStatus }>(
+    entityType: string,
+    entity: T,
+    toStatus: EntityStatus,
+    transitionLog: TransitionLogEvent[],
+    options?: {
+      actor?: string;
+      reason?: string;
+      timestamp?: string;
+      sourceCommand?: string;
+      forceTransition?: boolean;
+      lensViolations?: string[];
+      afterTransition?: (entity: T) => void;
+    }
+  ): TransitionLogEvent {
+    const fromStatus = entity.status;
+    this.assertValid(entityType, fromStatus, toStatus, options);
+
+    const event: TransitionLogEvent = {
+      entity_type: entityType,
+      entity_id: entity.id,
+      from: fromStatus,
+      to: toStatus,
+      actor: options?.actor || 'system',
+      reason: options?.reason || '',
+      timestamp: options?.timestamp || new Date().toISOString(),
+      source_command: options?.sourceCommand || 'unknown',
+      force_transition: Boolean(options?.forceTransition),
+      lens_violations: options?.lensViolations || [],
+    };
+
+    entity.status = toStatus;
+    options?.afterTransition?.(entity);
+    transitionLog.push(event);
+    return event;
   }
 
   /**

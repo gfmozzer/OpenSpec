@@ -1,0 +1,52 @@
+version: 1
+events:
+  - entity_type: FEAT
+    entity_id: FEAT-0020
+    from: IN_PROGRESS
+    to: DONE
+    actor: system
+    reason: Finalize consolidado para FEAT-0020
+    timestamp: 2026-04-17T03:59:10.203Z
+    source_command: sdd finalize
+    force_transition: false
+    lens_violations: []
+  - entity_type: FEAT
+    entity_id: FEAT-0021
+    from: READY
+    to: IN_PROGRESS
+    actor: system
+    reason: Feature iniciada em workspace ativo
+    timestamp: 2026-04-17T03:59:46.693Z
+    source_command: sdd start
+    force_transition: false
+    lens_violations: []
+  - entity_type: FEAT
+    entity_id: FEAT-0022
+    from: READY
+    to: IN_PROGRESS
+    actor: system
+    reason: Feature iniciada em workspace ativo
+    timestamp: 2026-04-17T03:59:47.552Z
+    source_command: sdd start
+    force_transition: false
+    lens_violations: []
+  - entity_type: FEAT
+    entity_id: FEAT-0021
+    from: IN_PROGRESS
+    to: DONE
+    actor: system
+    reason: Finalize consolidado para FEAT-0021
+    timestamp: 2026-04-17T03:59:48.325Z
+    source_command: sdd finalize
+    force_transition: false
+    lens_violations: []
+  - entity_type: FEAT
+    entity_id: FEAT-0022
+    from: IN_PROGRESS
+    to: DONE
+    actor: system
+    reason: Finalize consolidado para FEAT-0022
+    timestamp: 2026-04-17T03:59:49.174Z
+    source_command: sdd finalize
+    force_transition: false
+    lens_violations: []

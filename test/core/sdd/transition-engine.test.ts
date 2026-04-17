@@ -24,6 +24,36 @@ describe('TransitionEngine', () => {
     );
   });
 
+  it('bloqueia rollback estrutural de FEAT arquivada para DONE', () => {
+    expect(() => TransitionEngine.assertValid('FEAT', 'ARCHIVED', 'DONE')).toThrow(
+      "Transição estrutural bloqueada (Transition Engine): FEAT não pode transitar de 'ARCHIVED' para 'DONE'. (Permitidos: )"
+    );
+  });
+
+  it('aplica transicao e registra evento append-only no log', () => {
+    const transitionLog: any[] = [];
+    const feature = { id: 'FEAT-0020', status: 'READY' };
+
+    const event = TransitionEngine.applyTransition('FEAT', feature, 'IN_PROGRESS', transitionLog, {
+      sourceCommand: 'sdd start',
+      actor: 'codex',
+      reason: 'Inicio da feature',
+      timestamp: '2026-04-16T00:00:00.000Z',
+    });
+
+    expect(feature.status).toBe('IN_PROGRESS');
+    expect(transitionLog).toHaveLength(1);
+    expect(event).toMatchObject({
+      entity_type: 'FEAT',
+      entity_id: 'FEAT-0020',
+      from: 'READY',
+      to: 'IN_PROGRESS',
+      actor: 'codex',
+      reason: 'Inicio da feature',
+      source_command: 'sdd start',
+    });
+  });
+
   it('retorna guardrails padrao ao iniciar uma feature', () => {
     const result = TransitionEngine.validateFeatureStartGuardrails({
       id: 'FEAT-0010',

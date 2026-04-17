@@ -44,6 +44,7 @@ items:
     frontend_impact_declared_at: 2026-04-12T00:00:00.000Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-03-08T11:33:23.388Z
     archived_at: ""
@@ -104,6 +105,7 @@ items:
     frontend_impact_declared_at: 2026-04-11T08:12:03.028Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-11T08:12:20.724Z
     archived_at: ""
@@ -164,6 +166,7 @@ items:
     frontend_impact_declared_at: 2026-04-11T08:12:41.273Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-11T08:12:46.885Z
     archived_at: ""
@@ -224,6 +227,7 @@ items:
     frontend_impact_declared_at: 2026-04-11T08:13:08.514Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-11T08:13:21.419Z
     archived_at: ""
@@ -287,6 +291,7 @@ items:
     frontend_impact_declared_at: 2026-04-12T06:10:00.000Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-12T08:16:57.000Z
     archived_at: ""
@@ -349,6 +354,7 @@ items:
     frontend_impact_declared_at: 2026-04-12T06:10:00.000Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-12T08:15:02.437Z
     archived_at: ""
@@ -411,6 +417,7 @@ items:
     frontend_impact_declared_at: 2026-04-12T06:10:00.000Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-12T08:16:57.000Z
     archived_at: ""
@@ -473,6 +480,7 @@ items:
     frontend_impact_declared_at: 2026-04-12T06:10:00.000Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-12T08:14:28.555Z
     archived_at: ""
@@ -533,6 +541,7 @@ items:
     frontend_impact_declared_at: 2026-04-13T02:30:32.675Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-13T02:32:30.319Z
     archived_at: ""
@@ -594,6 +603,7 @@ items:
     frontend_impact_declared_at: 2026-04-13T03:59:45.803Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-13T04:00:24.026Z
     archived_at: ""
@@ -655,6 +665,7 @@ items:
     frontend_impact_declared_at: 2026-04-14T05:40:29.832Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-14T05:40:40.333Z
     archived_at: ""
@@ -717,6 +728,7 @@ items:
     frontend_impact_declared_at: 2026-04-14T06:03:25.561Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-14T06:03:26.870Z
     archived_at: ""
@@ -780,6 +792,7 @@ items:
     frontend_impact_declared_at: 2026-04-14T06:21:39.578Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-14T06:21:40.402Z
     archived_at: ""
@@ -843,6 +856,7 @@ items:
     frontend_impact_declared_at: 2026-04-16T14:36:33.413Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-16T14:36:46.551Z
     archived_at: ""
@@ -912,6 +926,7 @@ items:
     frontend_impact_declared_at: 2026-04-16T18:04:42.587Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-16T18:04:59.970Z
     archived_at: ""
@@ -976,6 +991,7 @@ items:
     frontend_impact_declared_at: 2026-04-16T18:48:25.522Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-16T18:48:43.312Z
     archived_at: ""
@@ -1039,6 +1055,7 @@ items:
     frontend_impact_declared_at: 2026-04-14T03:54:37.788Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-14T03:55:17.129Z
     archived_at: ""
@@ -1098,6 +1115,7 @@ items:
     frontend_impact_declared_at: 2026-04-14T02:33:57.655Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
     last_sync_at: 2026-04-14T02:35:00.320Z
     archived_at: ""
@@ -1105,7 +1123,7 @@ items:
     unblocked_at: ""
   - id: FEAT-0019
     title: Integridade referencial cross-entity no check com severidade graduada
-    status: READY
+    status: IN_PROGRESS
     origin_type: epic
     origin_ref: EPIC-0010
     scale: STANDARD
@@ -1118,7 +1136,7 @@ items:
     execution_kind: feature
     planning_mode: local_plan
     flow_mode: padrao
-    current_stage: proposta
+    current_stage: execucao
     gates:
       proposta:
         status: rascunho
@@ -1147,24 +1165,25 @@ items:
       - architecture
       - concise-planning
       - context-window-management
-    change_name: ""
+    change_name: feat-0019-integridade-referencial-cross-entity-no
     branch_name: ""
     worktree_path: ""
-    start_commit_sha: ""
+    start_commit_sha: 08691c2fc4b09ea64eb1a0a37e03f7bc89de0d54
     requires_adr: false
     frontend_impact_status: unknown
     frontend_impact_reason: ""
     frontend_impact_declared_at: ""
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
-    last_sync_at: 2026-04-17T01:03:01.610Z
+    last_sync_at: 2026-04-17T01:28:30.403Z
     archived_at: ""
     done_at: ""
     unblocked_at: ""
   - id: FEAT-0020
     title: Transition-log append-only e remocao do ciclo ARCHIVED para DONE
-    status: READY
+    status: DONE
     origin_type: epic
     origin_ref: EPIC-0010
     scale: STANDARD
@@ -1177,7 +1196,7 @@ items:
     execution_kind: feature
     planning_mode: local_plan
     flow_mode: padrao
-    current_stage: proposta
+    current_stage: consolidacao
     gates:
       proposta:
         status: rascunho
@@ -1206,24 +1225,25 @@ items:
       - architecture
       - concise-planning
       - context-window-management
-    change_name: ""
+    change_name: feat-0020-transition-log-append-only-e-remocao-do
     branch_name: ""
     worktree_path: ""
-    start_commit_sha: ""
+    start_commit_sha: 08691c2fc4b09ea64eb1a0a37e03f7bc89de0d54
     requires_adr: false
-    frontend_impact_status: unknown
-    frontend_impact_reason: ""
-    frontend_impact_declared_at: ""
+    frontend_impact_status: none
+    frontend_impact_reason: Atuacao exclusiva no logger de backend
+    frontend_impact_declared_at: 2026-04-17T03:58:57.531Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
-    last_sync_at: 2026-04-17T01:03:01.624Z
+    last_sync_at: 2026-04-17T03:59:10.203Z
     archived_at: ""
-    done_at: ""
+    done_at: 2026-04-17T03:59:10.203Z
     unblocked_at: ""
   - id: FEAT-0021
     title: Deduplicacao cross-entity em insight debate e decide com warn-and-link
-    status: READY
+    status: DONE
     origin_type: epic
     origin_ref: EPIC-0010
     scale: STANDARD
@@ -1235,16 +1255,16 @@ items:
     parallel_group: radar-epic-0010
     execution_kind: feature
     planning_mode: local_plan
-    flow_mode: padrao
-    current_stage: proposta
+    flow_mode: direto
+    current_stage: consolidacao
     gates:
       proposta:
-        status: rascunho
+        status: nao_exigida
         approved_at: ""
         approved_by: ""
         note: ""
       planejamento:
-        status: rascunho
+        status: nao_exigida
         approved_at: ""
         approved_by: ""
         note: ""
@@ -1265,24 +1285,25 @@ items:
       - architecture
       - concise-planning
       - context-window-management
-    change_name: ""
+    change_name: feat-0021-deduplicacao-cross-entity-em-insight-deb
     branch_name: ""
     worktree_path: ""
-    start_commit_sha: ""
+    start_commit_sha: 08691c2fc4b09ea64eb1a0a37e03f7bc89de0d54
     requires_adr: false
-    frontend_impact_status: unknown
-    frontend_impact_reason: ""
-    frontend_impact_declared_at: ""
+    frontend_impact_status: none
+    frontend_impact_reason: Atuacao restrita ao Motor de CLI abstrata na deduplicacao
+    frontend_impact_declared_at: 2026-04-17T03:59:08.605Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
-    last_sync_at: 2026-04-17T01:03:01.637Z
+    last_sync_at: 2026-04-17T03:59:48.325Z
     archived_at: ""
-    done_at: ""
+    done_at: 2026-04-17T03:59:48.325Z
     unblocked_at: ""
   - id: FEAT-0022
     title: Corrigir heuristica serviceId e merge field-wise no finalize
-    status: READY
+    status: DONE
     origin_type: epic
     origin_ref: EPIC-0010
     scale: STANDARD
@@ -1294,16 +1315,16 @@ items:
     parallel_group: radar-epic-0010
     execution_kind: feature
     planning_mode: local_plan
-    flow_mode: padrao
-    current_stage: proposta
+    flow_mode: direto
+    current_stage: consolidacao
     gates:
       proposta:
-        status: rascunho
+        status: nao_exigida
         approved_at: ""
         approved_by: ""
         note: ""
       planejamento:
-        status: rascunho
+        status: nao_exigida
         approved_at: ""
         approved_by: ""
         note: ""
@@ -1324,18 +1345,19 @@ items:
       - architecture
       - concise-planning
       - context-window-management
-    change_name: ""
+    change_name: feat-0022-corrigir-heuristica-serviceid-e-merge-fi
     branch_name: ""
     worktree_path: ""
-    start_commit_sha: ""
+    start_commit_sha: 08691c2fc4b09ea64eb1a0a37e03f7bc89de0d54
     requires_adr: false
-    frontend_impact_status: unknown
-    frontend_impact_reason: ""
-    frontend_impact_declared_at: ""
+    frontend_impact_status: none
+    frontend_impact_reason: Logica Idempotente segura e reestruturada para geracao de YAMLs
+    frontend_impact_declared_at: 2026-04-17T03:59:09.461Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
+    warning_links: []
     spec_refs: []
-    last_sync_at: 2026-04-17T01:03:01.649Z
+    last_sync_at: 2026-04-17T03:59:49.174Z
     archived_at: ""
-    done_at: ""
+    done_at: 2026-04-17T03:59:49.174Z
     unblocked_at: ""

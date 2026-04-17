@@ -150,3 +150,21 @@ nodes:
       "(preencher" ou "(placeholder".
     repo_paths: []
     depends_on: []
+  - id: FEAT-0020
+    name: Transition-log append-only e remocao do ciclo ARCHIVED para DONE
+    kind: feature
+    description: ""
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0021
+    name: Deduplicacao cross-entity em insight debate e decide com warn-and-link
+    kind: feature
+    description: ""
+    repo_paths: []
+    depends_on: []
+  - id: FEAT-0022
+    name: Corrigir heuristica serviceId e merge field-wise no finalize
+    kind: feature
+    description: ""
+    repo_paths: []
+    depends_on: []
