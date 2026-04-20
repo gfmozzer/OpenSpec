@@ -1123,7 +1123,7 @@ items:
     unblocked_at: ""
   - id: FEAT-0019
     title: Integridade referencial cross-entity no check com severidade graduada
-    status: IN_PROGRESS
+    status: DONE
     origin_type: epic
     origin_ref: EPIC-0010
     scale: STANDARD
@@ -1136,7 +1136,7 @@ items:
     execution_kind: feature
     planning_mode: local_plan
     flow_mode: padrao
-    current_stage: execucao
+    current_stage: consolidacao
     gates:
       proposta:
         status: rascunho
@@ -1170,16 +1170,17 @@ items:
     worktree_path: ""
     start_commit_sha: 08691c2fc4b09ea64eb1a0a37e03f7bc89de0d54
     requires_adr: false
-    frontend_impact_status: unknown
-    frontend_impact_reason: ""
-    frontend_impact_declared_at: ""
+    frontend_impact_status: none
+    frontend_impact_reason: Validação de integridade referencial e flag de CLI sem
+      alteração de interface de usuário ou rotas frontend.
+    frontend_impact_declared_at: 2026-04-20T16:01:25.329Z
     frontend_surface_tokens: []
     frontend_gap_refs: []
     warning_links: []
     spec_refs: []
-    last_sync_at: 2026-04-17T01:28:30.403Z
+    last_sync_at: 2026-04-20T16:04:05.992Z
     archived_at: ""
-    done_at: ""
+    done_at: 2026-04-20T16:04:05.992Z
     unblocked_at: ""
   - id: FEAT-0020
     title: Transition-log append-only e remocao do ciclo ARCHIVED para DONE

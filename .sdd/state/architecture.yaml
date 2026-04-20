@@ -168,3 +168,9 @@ nodes:
     description: ""
     repo_paths: []
     depends_on: []
+  - id: FEAT-0019
+    name: Integridade referencial cross-entity no check com severidade graduada
+    kind: feature
+    description: ""
+    repo_paths: []
+    depends_on: []

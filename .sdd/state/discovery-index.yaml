@@ -1,9 +1,9 @@
 version: 1
 counters:
-  INS: 11
-  DEB: 11
+  INS: 12
+  DEB: 12
   RAD: 0
-  EPIC: 10
+  EPIC: 11
   FEAT: 22
   FGAP: 0
   TD: 0
@@ -419,7 +419,7 @@ records:
     type: EPIC
     title: "Robustez estrutural do OpenSDD: dedup, integridade referencial,
       consolidacao inteligente e auditoria de transicoes"
-    status: SPLIT
+    status: DONE
     related_ids:
       - DEB-0011
       - INS-0011
@@ -429,4 +429,49 @@ records:
       - FEAT-0022
     warning_links: []
     created_at: 2026-04-17T01:02:43.339Z
-    updated_at: 2026-04-17T01:03:01.649Z
+    updated_at: 2026-04-20T16:04:05.992Z
+  - id: INS-0012
+    type: INS
+    title: Contrato canônico backend/frontend com enforcement real
+    title_canonical: Contrato canônico backend/frontend com enforcement real
+    status: DEBATED
+    origin_prompt: Criar um contrato canônico explícito no OpenSDD para backend e
+      frontend, com enforcement real sobre geração por agentes, templates,
+      nomenclatura, estrutura de pacotes, contratos e regras básicas, sempre que
+      o usuário indicar uma referência obrigatória. Hoje o SDD já registra
+      referências e possui alguns guardrails estruturais, mas ainda permite
+      decisões fora do modelo canônico, especialmente no salto entre referência
+      declarada e artefato gerado. Isso produz retrabalho, desalinhamento
+      arquitetural e impacto direto em tempo e oportunidade de negócio. A
+      discussão precisa cobrir guardrails semânticos, validação de aderência,
+      roteamento de prompts/templates por referência, política de override com
+      ADR, strict mode e uma base estruturada de referência para backend e
+      frontend.
+    related_ids:
+      - DEB-0012
+    warning_links: []
+    created_at: 2026-04-17T19:08:24.834Z
+    updated_at: 2026-04-17T19:08:32.786Z
+  - id: DEB-0012
+    type: DEB
+    title: Enforcement real de referências canônicas no SDD
+    title_canonical: Enforcement real de referências canônicas no SDD
+    status: APPROVED
+    origin_prompt: Debate originado de INS-0012 para transformar referências
+      canônicas de backend e frontend em contrato operacional do OpenSDD
+    related_ids:
+      - INS-0012
+      - EPIC-0011
+    warning_links: []
+    created_at: 2026-04-17T19:08:32.786Z
+    updated_at: 2026-04-17T19:57:15.864Z
+  - id: EPIC-0011
+    type: EPIC
+    title: Enforcement real de referências canônicas no SDD
+    status: READY
+    related_ids:
+      - DEB-0012
+      - INS-0012
+    warning_links: []
+    created_at: 2026-04-17T19:57:15.864Z
+    updated_at: 2026-04-17T19:57:15.864Z

@@ -155,3 +155,13 @@ opencode.json
 
 # Codex
 .codex/
+
+# IDEs and local tooling
+.idea/
+
+# Local repository-only artifacts
+coverage_output.txt
+test-lenses.ts
+README_OLD.md
+VISAO-GERAL-FLUXO-SDD.md
+VISAO-GERAL-FLUXO-SDD.renderizado.html

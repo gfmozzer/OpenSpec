@@ -14,3 +14,18 @@ Baixo. Todas as edições ocorrem em tempo estático do CLI e não causam efeito
 
 ## Criterios de Resiliencia
 - Adotar checagens em O(1) sempre que possível armazenando refs num `Set` em memória derivado do Memory Snapshot de entrada na hora do pipeline de *check*, de modo a não abrandar o CLI que precisa rodar a cada comando `check`.
+
+## Impacto Arquitetural
+- O impacto fica restrito ao runtime SDD de validação estática, principalmente `SddCheckCommand` e a superfície CLI de `sdd check`.
+- A checagem passa a tratar referências cruzadas como contrato operacional do Memory Root, mantendo compatibilidade em modo padrão e permitindo enforcement rígido via `--strict`.
+- Não há introdução de serviço persistente, banco, worker ou nova camada arquitetural; a mudança opera sobre snapshots YAML já carregados em memória.
+
+## Impacto Frontend
+- Sem impacto frontend declarado.
+- A feature não altera rotas, componentes, sitemap, menus, assets visuais ou comportamento de interface de usuário.
+- O comando `frontend-impact` foi registrado com status `none` porque a entrega atua apenas em validação, CLI e documentação operacional.
+
+## Contratos Afetados
+- `opensdd sdd check` passa a aceitar `--strict` para promover violações referenciais de warning para error.
+- O contrato padrão continua retrocompatível: referências órfãs em projetos legados aparecem como avisos `[LEGACY]`.
+- O relatório JSON de `SddCheckCommand` preserva o shape existente (`valid`, `errors`, `warnings`, `summary`) e usa os arrays já existentes para comunicar a severidade.

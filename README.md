@@ -40,6 +40,7 @@ Para o backend padrao oficial, o OpenSDD deve operar com uma fronteira clara:
 - `devtrack-foundation-api` e a fonte canonica de arquitetura backend, bundles/skills `foundation-*` e eventual starter backend.
 - `devtrack-tools-opensdd` e a camada de distribuicao que instala runtime SDD, perfis, templates e materializacao controlada dessa referencia em projetos derivados.
 - Este repositorio nao deve passar a manter um backend canonico paralelo; quando houver adocao da Foundation, ela deve acontecer por profile/bootstrap/distribuicao.
+- O mapa derivado da arvore de pacotes da referencia backend fica em [docs/foundation-backend-reference-structure.md](docs/foundation-backend-reference-structure.md) e deve ser tratado como referencia operacional, nao como nova fonte canonica.
 
 ## O que fica instalado no projeto
 
@@ -358,6 +359,7 @@ Bootstrap:
 - `opensdd install --tools all`
 - `opensdd sdd init-context`
 - `opensdd sdd check --render`
+- `opensdd sdd check --render --strict`
 - `opensdd sdd audit`
 - `opensdd sdd ingest-deposito`
 
@@ -387,6 +389,10 @@ Guia detalhado em portugues:
 - [Historia da Marina (uso pratico)](docs/historia-marina-uso-pratico.md)
 - [Release e Rollback](docs/release.md)
 - [Kit estatico do SDD](kits/opensdd-static-kit/README.md)
+- [Guia de contribuicao](CONTRIBUTING.md)
+- [Politica de seguranca](SECURITY.md)
+- [Codigo de conduta](CODE_OF_CONDUCT.md)
+- [Suporte](SUPPORT.md)
 
 Guia interno do sistema:
 
@@ -399,6 +405,7 @@ Guia interno do sistema:
 pnpm install
 pnpm run build
 pnpm test
+pnpm run lint
 ```
 
 Loop local do CLI:
@@ -423,6 +430,33 @@ npm install -g @gfmozzer/opensdd
 
 Fallback suportado:
 - instalacao por tarball (`npm pack` + `npm install -g ./gfmozzer-opensdd-<versao>.tgz`)
+
+## Colaboracao
+
+Para contribuir com seguranca e previsibilidade:
+
+- siga [CONTRIBUTING.md](CONTRIBUTING.md);
+- reporte vulnerabilidades por [SECURITY.md](SECURITY.md);
+- respeite o [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md);
+- use [SUPPORT.md](SUPPORT.md) para escolher o canal certo.
+
+Este repositório foi preparado para ser público com foco em:
+
+- licença MIT explícita;
+- automação de CI e smoke test de instalação;
+- templates de issue e PR;
+- atualização automática de dependências;
+- hygiene de versionamento para evitar artefatos locais e arquivos sensíveis no repositório.
+
+## Telemetria e privacidade
+
+O CLI possui telemetria anônima de uso com desenho privacy-first:
+
+- sem captura de argumentos, conteúdo ou caminhos de arquivos;
+- desabilitada em CI;
+- opt-out via `OPENSPEC_TELEMETRY=0` ou `DO_NOT_TRACK=1`.
+
+Se você identificar comportamento diferente disso, reporte via [SECURITY.md](SECURITY.md).
 
 ## Licenca
 

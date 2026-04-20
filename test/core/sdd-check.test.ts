@@ -183,4 +183,109 @@ describe('SddCheckCommand', () => {
     expect(report.errors.some((error) => error.includes('EPIC EPIC-0001 possui titulo invalido'))).toBe(true);
     expect(report.errors.some((error) => error.includes('FEAT FEAT-0001 possui titulo invalido'))).toBe(true);
   });
+
+  it('warns on referential integrity issues by default and fails them in strict mode', async () => {
+    const discoveryPath = path.join(testDir, '.sdd', 'state', 'discovery-index.yaml');
+    const discovery = parseYaml(await fs.readFile(discoveryPath, 'utf-8')) as Record<string, any>;
+    discovery.records = [
+      {
+        id: 'EPIC-0001',
+        type: 'EPIC',
+        title: 'Epic com referencia quebrada',
+        status: 'READY',
+        related_ids: ['FEAT-9999'],
+      },
+    ];
+    await fs.writeFile(discoveryPath, stringifyYaml(discovery), 'utf-8');
+
+    const backlogPath = path.join(testDir, '.sdd', 'state', 'backlog.yaml');
+    const backlog = parseYaml(await fs.readFile(backlogPath, 'utf-8')) as Record<string, any>;
+    backlog.items = [
+      {
+        id: 'FEAT-0001',
+        title: 'Feature com referencias cruzadas',
+        status: 'READY',
+        origin_type: 'epic',
+        origin_ref: 'EPIC-9999',
+        blocked_by: ['FEAT-9999'],
+        touches: [],
+        lock_domains: [],
+        recommended_skills: [],
+        frontend_gap_refs: [],
+        spec_refs: [],
+      },
+    ];
+    await fs.writeFile(backlogPath, stringifyYaml(backlog), 'utf-8');
+
+    const finalizePath = path.join(testDir, '.sdd', 'state', 'finalize-queue.yaml');
+    const finalizeQueue = parseYaml(await fs.readFile(finalizePath, 'utf-8')) as Record<string, any>;
+    finalizeQueue.items = [
+      {
+        feature_id: 'FEAT-9999',
+        status: 'DONE',
+      },
+    ];
+    await fs.writeFile(finalizePath, stringifyYaml(finalizeQueue), 'utf-8');
+
+    const unblockPath = path.join(testDir, '.sdd', 'state', 'unblock-events.yaml');
+    const unblockEvents = parseYaml(await fs.readFile(unblockPath, 'utf-8')) as Record<string, any>;
+    unblockEvents.events = [
+      {
+        feature_id: 'FEAT-0001',
+        unblocked_by: 'FEAT-9999',
+        status: 'NEW',
+      },
+    ];
+    await fs.writeFile(unblockPath, stringifyYaml(unblockEvents), 'utf-8');
+
+    const defaultReport = await new SddCheckCommand().execute(testDir, { render: false });
+    expect(defaultReport.valid).toBe(true);
+    expect(defaultReport.errors).toHaveLength(0);
+    expect(
+      defaultReport.warnings.some((warning) =>
+        warning.includes('[LEGACY] FEAT FEAT-0001 aponta para origin_ref="EPIC-9999"')
+      )
+    ).toBe(true);
+    expect(
+      defaultReport.warnings.some((warning) =>
+        warning.includes('[LEGACY] Discovery EPIC-0001 tem related_id="FEAT-9999"')
+      )
+    ).toBe(true);
+    expect(
+      defaultReport.warnings.some((warning) =>
+        warning.includes('[LEGACY] Fila de Finalize possui entrada para feature_id="FEAT-9999"')
+      )
+    ).toBe(true);
+    expect(
+      defaultReport.warnings.some((warning) =>
+        warning.includes('[LEGACY] Unblock event disparado por unblocked_by="FEAT-9999"')
+      )
+    ).toBe(true);
+
+    const strictReport = await new SddCheckCommand().execute(testDir, {
+      render: false,
+      strict: true,
+    });
+    expect(strictReport.valid).toBe(false);
+    expect(
+      strictReport.errors.some((error) =>
+        error.includes('FEAT FEAT-0001 aponta para origin_ref="EPIC-9999"')
+      )
+    ).toBe(true);
+    expect(
+      strictReport.errors.some((error) =>
+        error.includes('Discovery EPIC-0001 tem related_id="FEAT-9999"')
+      )
+    ).toBe(true);
+    expect(
+      strictReport.errors.some((error) =>
+        error.includes('Fila de Finalize possui entrada para feature_id="FEAT-9999"')
+      )
+    ).toBe(true);
+    expect(
+      strictReport.errors.some((error) =>
+        error.includes('Unblock event disparado por unblocked_by="FEAT-9999"')
+      )
+    ).toBe(true);
+  });
 });

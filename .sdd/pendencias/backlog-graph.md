@@ -87,7 +87,7 @@ Documento gerado a partir de `.sdd/state/backlog.yaml`.
   - lock domains: nenhum
 
 ## EPIC-0010
-- FEAT-0019 [IN_PROGRESS] Integridade referencial cross-entity no check com severidade graduada
+- FEAT-0019 [DONE] Integridade referencial cross-entity no check com severidade graduada
   - tipo: feature | modo: local_plan | fluxo: padrao | grupo: radar-epic-0010
   - depende de: nenhuma
   - lock domains: nenhum

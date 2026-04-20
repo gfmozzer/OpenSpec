@@ -68,7 +68,7 @@ jobs:
         run: pnpm run build
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm run test:coverage
 
       - name: Upload test coverage
         uses: actions/upload-artifact@v4
@@ -129,14 +129,6 @@ jobs:
 
       - name: Run tests
         run: pnpm test
-
-      - name: Upload test coverage
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report-main
-          path: coverage/
-          retention-days: 7
 
   cli-install-smoke:
     name: CLI Install Smoke (${{ matrix.label }})

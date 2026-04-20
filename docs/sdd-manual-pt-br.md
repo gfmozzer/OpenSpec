@@ -697,6 +697,7 @@ Observacao:
 | `opensdd sdd init-context` | Inspeciona projeto existente e completa contexto inicial |
 | `opensdd sdd iniciar-contexto` | Alias em portugues para `opensdd sdd init-context` |
 | `opensdd sdd check --render` | Valida e renderiza |
+| `opensdd sdd check --render --strict` | Valida, renderiza e transforma avisos de integridade referencial em erros |
 | `opensdd sdd checar --render` | Alias em portugues para `opensdd sdd check --render` |
 | `opensdd sdd ingest-deposito` | Varrer depósito e gerar trilha executável inicial |
 | `opensdd sdd ingestao-deposito` | Alias em portugues para `opensdd sdd ingest-deposito` |

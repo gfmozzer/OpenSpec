@@ -91,6 +91,8 @@ Discovery pipeline for ideas:
 - Update tests whenever behavior changes.
 - Prefer YAML state as source of truth in SDD (`.sdd/state/*.yaml`), with Markdown views generated from state.
 - Do not edit generated artifacts manually when there is a render/sync command for them.
+- Treat this repository as public-by-default: never commit secrets, local IDE noise, private credentials, or real user data.
+- Keep open-source collaboration assets in sync when workflow, release, security, or contribution expectations change (`CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue/PR templates).
 
 ## Validation Before Finishing
 

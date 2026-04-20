@@ -36,6 +36,7 @@ interface SddInitCliOptions {
 interface SddCheckCliOptions {
   render?: boolean;
   json?: boolean;
+  strict?: boolean;
 }
 
 interface SddInitContextCliOptions {
@@ -798,12 +799,14 @@ export function registerSddCommand(program: Command): void {
     .description('Valida arquivos de estado .sdd e opcionalmente gera views')
     .alias('checar')
     .option('--render', 'Gera views Markdown apos validacao bem-sucedida')
+    .option('--strict', 'Eleva avisos de integridade referencial a erros')
     .option('--json', 'Retorna relatorio em JSON')
     .action(async (targetPath = '.', options?: SddCheckCliOptions) => {
       await ensureMandatorySddMigration(targetPath);
       const command = new SddCheckCommand();
       const report = await command.execute(targetPath, {
         render: options?.render,
+        strict: options?.strict,
       });
 
       if (options?.json) {

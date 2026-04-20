@@ -24,6 +24,7 @@ Documento gerado a partir de `.sdd/state/repo-map.yaml`.
 | openspec/changes/archive/feat-0016-protocolo-meta-evolucao-sdd-audit | change-archive | backend | Consolidado no finalize FEAT-0016 |
 | openspec/changes/archive/feat-0017-sanitizacao-semantica-titulos-propagacao | change-archive | backend | Consolidado no finalize FEAT-0017 |
 | openspec/changes/archive/feat-0018-adotar-devtrack-foundation-api-como-back | change-archive | docs | Consolidado no finalize FEAT-0018 |
+| openspec/changes/archive/feat-0019-integridade-referencial-cross-entity-no | change-archive | backend | Finalize FEAT-0019 |
 | openspec/changes/archive/feat-0020-transition-log-append-only-e-remocao-do | change-archive | backend | Finalize FEAT-0020 |
 | openspec/changes/archive/feat-0021-deduplicacao-cross-entity-em-insight-deb | change-archive | backend | Finalize FEAT-0021 |
 | openspec/changes/archive/feat-0022-corrigir-heuristica-serviceid-e-merge-fi | change-archive | backend | Finalize FEAT-0022 |

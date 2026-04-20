@@ -1,0 +1,29 @@
+name: Sugerir melhoria
+description: Proponha uma nova capacidade ou melhoria de colaboração/ergonomia
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema ou oportunidade
+      description: Qual dor real esta mudança resolve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta
+      description: Descreva a solução desejada em alto nível.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impacto esperado
+      description: UX, DX, segurança, colaboração, performance, compatibilidade etc.

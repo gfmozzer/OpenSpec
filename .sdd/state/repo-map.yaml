@@ -134,3 +134,7 @@ items:
     kind: change-archive
     service_ref: backend
     notes: Finalize FEAT-0022
+  - path: openspec/changes/archive/feat-0019-integridade-referencial-cross-entity-no
+    kind: change-archive
+    service_ref: backend
+    notes: Finalize FEAT-0019

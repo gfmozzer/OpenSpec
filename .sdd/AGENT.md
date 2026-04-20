@@ -28,6 +28,8 @@ Fontes canônicas:
 3. Sempre mantenha rastreabilidade por ID (`INS/DEB/EPIC/FEAT/FGAP/TD`), aceitando `RAD` apenas como legado.
 4. Finalize sempre com `opensdd sdd finalize` para consolidar memória.
 5. Mantenha coerência estrutural entre `start`, `check`, `archive` e `finalize`: transições passam pelo `TransitionEngine` e o fechamento valida as lentes estruturais do workspace ativo.
+6. Como este repositório é público, trate segurança e colaboração como parte da entrega: mantenha `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md` e templates de issue/PR sincronizados quando o fluxo mudar.
+7. Nunca persistir segredos, tokens, dumps locais, arquivos de IDE ou artefatos temporários nas mudanças.
 
 ## Fronteira canônica de backend
 

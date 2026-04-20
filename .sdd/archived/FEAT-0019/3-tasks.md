@@ -19,4 +19,6 @@ Aqui documentamos os passos de execucao, organizados em forma de checklist rastr
 ### 4) Conclusão 
 - [x] 4.1 Modificar arquivos de testes localizados em `test/` confirmando os unit checks.
 - [x] 4.2 Executar `pnpm run test` localmente para atestar regressões.
-- [x] 4.3 Fazer tracking de estado (commit git e finalize) da feature.
+- [x] 4.3 Declarar `opensdd sdd frontend-impact FEAT-0019 --status none` para registrar ausência de impacto visual.
+- [x] 4.4 Atualizar `README.md` e documentação operacional com o uso de `sdd check --strict`.
+- [x] 4.5 Rodar `opensdd sdd finalize --ref FEAT-0019` para consolidar memória após validação final.

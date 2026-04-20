@@ -9,7 +9,12 @@ import {
   type FrontendGapRecord,
   type TechDebtRecord,
 } from './types.js';
-import { loadProjectSddConfig, loadStateSnapshot, resolveSddPaths } from './state.js';
+import {
+  loadProjectSddConfig,
+  loadStateSnapshot,
+  resolveSddPaths,
+  type SddStateSnapshot,
+} from './state.js';
 import { renderViews } from './views.js';
 import { syncSddGuideDocs, validateSddGuideDocs } from './docs-sync.js';
 
@@ -147,34 +152,42 @@ function validateBacklog(items: BacklogItem[], errors: string[], warnings: strin
 }
 
 function validateReferentialIntegrity(
-  snapshot: any,
+  snapshot: SddStateSnapshot,
   errors: string[],
   warnings: string[],
   isStrict: boolean
 ): void {
-  const discoveryIds = new Set<string>();
-  if (snapshot.discoveryIndex?.records) {
-    snapshot.discoveryIndex.records.forEach((r: any) => discoveryIds.add(r.id));
-  }
-  
-  const backlogIds = new Set<string>();
-  if (snapshot.backlog?.items) {
-    snapshot.backlog.items.forEach((f: any) => backlogIds.add(f.id));
-  }
+  const discoveryIds = new Set(snapshot.discoveryIndex.records.map((record) => record.id));
+  const backlogIds = new Set(snapshot.backlog.items.map((item) => item.id));
+  const frontendGapIds = new Set(snapshot.frontendGaps?.items.map((gap) => gap.id) ?? []);
+  const techDebtIds = new Set(snapshot.techDebt.items.map((item) => item.id));
+
+  const record = (message: string): void => {
+    if (isStrict) errors.push(message);
+    else warnings.push(`[LEGACY] ${message}`);
+  };
 
   for (const item of snapshot.backlog.items || []) {
-    if ((item.origin_type === 'epic' || item.origin_type === 'radar' || item.origin_type === 'INS' || item.origin_type === 'DEB') && item.origin_ref) {
+    if ((item.origin_type === 'epic' || item.origin_type === 'radar') && item.origin_ref) {
       if (!discoveryIds.has(item.origin_ref)) {
-        const msg = `FEAT ${item.id} aponta para origin_ref="${item.origin_ref}" que nao existe no index de discovery.`;
-        if (isStrict) errors.push(msg);
-        else warnings.push(`[LEGACY] ${msg}`);
+        record(
+          `FEAT ${item.id} aponta para origin_ref="${item.origin_ref}" que nao existe no index de discovery.`
+        );
       }
+    }
+    if (item.origin_type === 'frontend_gap' && item.origin_ref && !frontendGapIds.has(item.origin_ref)) {
+      record(
+        `FEAT ${item.id} aponta para frontend gap origin_ref="${item.origin_ref}" inexistente.`
+      );
+    }
+    if (item.origin_type === 'tech_debt' && item.origin_ref && !techDebtIds.has(item.origin_ref)) {
+      record(
+        `FEAT ${item.id} aponta para tech debt origin_ref="${item.origin_ref}" inexistente.`
+      );
     }
     for (const dep of item.blocked_by || []) {
       if (!backlogIds.has(dep)) {
-        const msg = `FEAT ${item.id} bloqueada por referencia inexistente: ${dep}`;
-        if (isStrict) errors.push(msg);
-        else warnings.push(`[LEGACY] ${msg}`);
+        record(`FEAT ${item.id} bloqueada por referencia inexistente: ${dep}`);
       }
     }
   }
@@ -182,9 +195,9 @@ function validateReferentialIntegrity(
   for (const rec of snapshot.discoveryIndex.records || []) {
     for (const rel of rec.related_ids || []) {
       if (!discoveryIds.has(rel) && !backlogIds.has(rel)) {
-        const msg = `Discovery ${rec.id} tem related_id="${rel}" referenciando ID inexistente no ecossistema (nem Discovery nem Backlog).`;
-        if (isStrict) errors.push(msg);
-        else warnings.push(`[LEGACY] ${msg}`);
+        record(
+          `Discovery ${rec.id} tem related_id="${rel}" referenciando ID inexistente no ecossistema (nem Discovery nem Backlog).`
+        );
       }
     }
   }
@@ -192,24 +205,24 @@ function validateReferentialIntegrity(
   if (snapshot.finalizeQueue?.items) {
     for (const fq of snapshot.finalizeQueue.items) {
       if (!backlogIds.has(fq.feature_id)) {
-        const msg = `Fila de Finalize possui entrada para feature_id="${fq.feature_id}" bloqueada por feature inexistente.`;
-        if (isStrict) errors.push(msg);
-        else warnings.push(`[LEGACY] ${msg}`);
+        record(
+          `Fila de Finalize possui entrada para feature_id="${fq.feature_id}" bloqueada por feature inexistente.`
+        );
       }
     }
   }
 
   if (snapshot.unblockEvents?.events) {
     for (const ev of snapshot.unblockEvents.events) {
-      if (!backlogIds.has(ev.feature_id) && ev.feature_id !== 'INITIAL') {
-        const msg = `Unblock event disparado para feature_id="${ev.feature_id}" que nao esta mais listada no backlog.`;
-        if (isStrict) errors.push(msg);
-        else warnings.push(`[LEGACY] ${msg}`);
+      if (!backlogIds.has(ev.feature_id)) {
+        record(
+          `Unblock event disparado para feature_id="${ev.feature_id}" que nao esta mais listada no backlog.`
+        );
       }
-      if (ev.unblocked_by && ev.unblocked_by !== 'INITIAL' && !backlogIds.has(ev.unblocked_by)) {
-        const msg = `Unblock event disparado por unblocked_by="${ev.unblocked_by}" apontando para FEAT inexistente.`;
-        if (isStrict) errors.push(msg);
-        else warnings.push(`[LEGACY] ${msg}`);
+      if (ev.unblocked_by && !backlogIds.has(ev.unblocked_by)) {
+        record(
+          `Unblock event disparado por unblocked_by="${ev.unblocked_by}" apontando para FEAT inexistente.`
+        );
       }
     }
   }

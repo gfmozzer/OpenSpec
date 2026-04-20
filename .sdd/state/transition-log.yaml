@@ -50,3 +50,43 @@ events:
     source_command: sdd finalize
     force_transition: false
     lens_violations: []
+  - entity_type: INS
+    entity_id: INS-0012
+    from: NEW
+    to: DEBATED
+    actor: system
+    reason: Insight promovido para debate DEB-0012
+    timestamp: 2026-04-17T19:08:32.786Z
+    source_command: sdd debate
+    force_transition: false
+    lens_violations: []
+  - entity_type: DEB
+    entity_id: DEB-0012
+    from: OPEN
+    to: APPROVED
+    actor: system
+    reason: Debate aprovado e promovido para radar
+    timestamp: 2026-04-17T19:57:15.864Z
+    source_command: sdd decide
+    force_transition: false
+    lens_violations: []
+  - entity_type: FEAT
+    entity_id: FEAT-0019
+    from: IN_PROGRESS
+    to: DONE
+    actor: system
+    reason: Finalize consolidado para FEAT-0019
+    timestamp: 2026-04-20T16:04:05.992Z
+    source_command: sdd finalize
+    force_transition: false
+    lens_violations: []
+  - entity_type: EPIC
+    entity_id: EPIC-0010
+    from: SPLIT
+    to: DONE
+    actor: system
+    reason: Todas as features derivadas de EPIC-0010 foram concluídas
+    timestamp: 2026-04-20T16:04:05.992Z
+    source_command: sdd finalize
+    force_transition: false
+    lens_violations: []

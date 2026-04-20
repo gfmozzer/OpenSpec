@@ -1,5 +1,84 @@
 # AI Context
 
+## Atualizacao 2026-04-17
+- O repositório foi adequado para exposição pública com foco em colaboração e hygiene operacional.
+- Foram adicionados artefatos de governança open source: `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md`, templates de issue/PR e `dependabot.yml`.
+- `README.md`, `AGENTS.md`, `AGENT.md`, `.sdd/AGENT.md`, `MAINTAINERS.md`, `LICENSE` e `docs/release.md` passaram a refletir explicitamente o uso público, a política de segurança e o fluxo de colaboração.
+- O release workflow deixou de depender de GitHub App específico do repositório antigo e passou a usar o `GITHUB_TOKEN` padrão com OIDC para npm, reduzindo acoplamento e facilitando forks/reuso.
+- A CI foi alinhada para gerar cobertura no job de PR e não tentar publicar artefatos inexistentes no matrix.
+- Foi descoberto e corrigido um problema real de empacotamento: o tarball não incluía `dist/`, quebrando a instalação global. A correção foi feita com `.npmignore` explícito e validada por `pnpm run check:pack-version` e `npm pack --dry-run`.
+- Foram removidos do repositório artefatos indevidos para contexto público, incluindo arquivos locais/legados e arquivos relacionados a sessão local de `ssh-agent`; `.idea/` saiu do versionamento e passou a ser ignorado.
+- Evidência local desta rodada:
+  - `pnpm run build` aprovado
+  - `pnpm run lint` aprovado
+  - `pnpm test` aprovado com `83` arquivos / `1449` testes passando
+  - `pnpm run check:pack-version` aprovado
+  - `npm pack --dry-run` aprovado com inclusão de `dist/`
+
+## Atualizacao 2026-04-17/2
+- Foi aberta a trilha de discovery `INS-0012` -> `DEB-0012` para tratar explicitamente o problema relatado pelo usuário: referências canônicas declaradas ainda não geram enforcement operacional suficiente em backend e frontend.
+- O insight foi consolidado com título canônico curto: `Contrato canônico backend/frontend com enforcement real`.
+- O debate `DEB-0012` foi preenchido manualmente com estrutura decisória completa, cobrindo:
+  - dor de negócio e retrabalho;
+  - alternativas A/B/C;
+  - evidências do estado atual do projeto;
+  - necessidade de contrato dual backend/frontend;
+  - guardrails, strict mode, overrides por ADR e métricas de aderência.
+- O debate conclui pela opção `C`: transformar referências canônicas em contrato operacional real no OpenSDD, com base explícita na Foundation para backend e criação de base canônica equivalente para frontend.
+- Foi alinhado o estado canônico em `.sdd/state/discovery-index.yaml` para evitar drift entre markdown e YAML nos títulos/descrições de `INS-0012` e `DEB-0012`.
+- Validação executada: `pnpm exec opensdd sdd check --render --json` retornou `valid=true`.
+- Warnings remanescentes do check não foram introduzidos por esta rodada: continuam restritos à `FEAT-0019` ativa (`frontend-impact` e checklist incompleto).
+
+## Atualizacao 2026-04-17/3
+- A lacuna entre "Foundation como referencia canonica" e "arvore detalhada operavel" foi reduzida com um artefato derivado em `docs/foundation-backend-reference-structure.md`.
+- O documento novo nao cria um canonico paralelo: ele explicita a regra de sincronizacao e declara a `devtrack-foundation-api` como fonte de verdade.
+- O escopo registrado no documento cobre a arvore completa de pacotes observada em `src/`, incluindo subcamadas internas como:
+  - `application/business/*/ports/in|out`
+  - `application/intelligence/agents/*/nodes|providers|tools`
+  - `domain/*/entities|events|repository-ports|types|validators`
+  - `presentation/rest/*/controllers|presentation-validators|guards|decorators`
+  - `infrastructure/adapters/*` e `shared/*`
+- O `README.md` passou a apontar para esse mapa derivado como referencia operacional para a estruturacao backend.
+
+## Atualizacao 2026-04-17/4
+- O `DEB-0012` foi promovido com sucesso para `EPIC-0011` via `pnpm exec opensdd sdd decide DEB-0012 --outcome epic`.
+- A promocao exigiu um ajuste real no proprio debate: a secao `Justificativa` do mediador estava semanticamente preenchida, mas em formato multiline nao reconhecido pelo validador literal do comando `decide`.
+- O `EPIC` gerado em `.sdd/discovery/3-epic/EPIC-0011-enforcement-real-de-referencias-canonicas-no-sdd.md` nasceu com placeholder em `Resumo aprovado`; o placeholder foi substituido manualmente por um resumo derivado do debate para evitar lixo operacional no estado discovery.
+- O estado canonico em `.sdd/state/discovery-index.yaml` agora conecta `INS-0012 -> DEB-0012 -> EPIC-0011`.
+- Validacao posterior: `pnpm exec opensdd sdd check --render --json` continuou com `valid=true`.
+- Warnings remanescentes seguem restritos a `FEAT-0019` e nao bloqueiam a trilha de discovery/promocao do `EPIC-0011`.
+
+## Atualizacao 2026-04-17/5
+- O usuario apontou corretamente que o `EPIC-0011` ainda estava raso demais em comparacao com o `DEB-0012`.
+- O documento do EPIC foi reescrito para refletir fielmente o debate aprovado, incluindo:
+  - origem completa (`DEB-0012`, `INS-0012`, decisao C);
+  - resumo aprovado mais robusto;
+  - frentes de desdobramento recomendadas (`P0` a `P5`);
+  - impacto arquitetural e consideracoes gerais;
+  - resultado esperado do Epic.
+- A reescrita evitou inventar FEATs ou criar decisao nova fora do debate; o foco foi documentar melhor o que ja foi aprovado.
+- Validacao posterior: `pnpm exec opensdd sdd check --render --json` permaneceu com `valid=true`.
+
+## Atualizacao 2026-04-17/6
+- O `EPIC-0011` foi aprofundado novamente para deixar de ser apenas um desdobramento conceitual e passar a funcionar como referencia arquitetural de implementacao.
+- Foram adicionadas secoes novas ao EPIC cobrindo:
+  - objetivo cognitivo e de controle estrutural;
+  - estrutura de pacotes recomendada para o novo subdominio `reference-contract`;
+  - pontos de integracao com `check.ts`, `operations.ts`, `transition-engine.ts`, `types.ts` e `views.ts`;
+  - fragmentos de codigo recomendados com justificativas tecnicas;
+  - guard rails prioritarios e politica de severidade (`info`, `warning`, `error`, `blocking`).
+- O foco dessa rodada foi explicitar como o OpenSDD deve ganhar mais cognitividade operacional para:
+  - reagir melhor a problemas comuns e complexos;
+  - reduzir perda de contexto;
+  - detectar variacao de plano;
+  - gerar alertas e bloqueios quando a referencia canonica for efetivamente ferida.
+- O documento passou a usar trechos do runtime real como ancora conceitual:
+  - `warnAndLink()` / `semanticSimilarity()` em `dedup.ts`;
+  - `TransitionEngine` em `transition-engine.ts`;
+  - `SddCheckCommand` em `check.ts`;
+  - `SddAuditCommand` em `operations.ts`.
+- Validacao posterior: `pnpm exec opensdd sdd check --render --json` continuou com `valid=true`.
+
 ## Estado ativo
 - Data: 2026-04-12
 - Objetivo: auditar profundamente os quatro debates SDD, concluir as features derivadas e reconciliar o estado persistido para deixar o repositório pronto para o próximo ciclo.
@@ -170,3 +249,21 @@
   - `pnpm run build` aprovado.
   - `pnpm run lint` aprovado.
   - `node dist/cli/index.js sdd check --render --json` aprovado com `valid=true`.
+
+## Atualizacao 2026-04-20
+- A pendencia ativa foi estruturada como fechamento da `FEAT-0019`, ligada ao `EPIC-0010`.
+- Decisao aplicada: a integridade referencial cross-entity deve manter compatibilidade por padrao, emitindo avisos `[LEGACY]`, e deve falhar em modo estrito quando `sdd check --strict` for usado.
+- Foi corrigida a lacuna operacional em que `SddCheckCommand` aceitava `strict`, mas o CLI `opensdd sdd check` ainda nao expunha `--strict`.
+- A validacao referencial passou a usar `SddStateSnapshot` tipado e cobre refs de discovery/backlog, `frontend_gap`, `tech_debt`, `finalizeQueue` e `unblockEvents`.
+- O impacto frontend da `FEAT-0019` foi declarado como `none`, pois a mudanca afeta validacao e CLI, sem rotas ou interface visual.
+- Documentacao operacional atualizada em `README.md` e `docs/sdd-manual-pt-br.md` para registrar `opensdd sdd check --render --strict`.
+- Evidencia parcial antes do finalize:
+  - `pnpm test test/core/sdd-check.test.ts test/commands/sdd-command.test.ts` aprovado.
+  - `pnpm exec tsc --noEmit` aprovado.
+- Fechamento operacional:
+  - `opensdd archive feat-0019-integridade-referencial-cross-entity-no --skip-specs -y` arquivou o change como `2026-04-20-feat-0019-integridade-referencial-cross-entity-no`.
+  - A primeira tentativa de `opensdd sdd finalize --ref FEAT-0019` bloqueou corretamente por lentes estruturais ausentes no plano; o plano foi completado com impacto arquitetural, impacto frontend e contratos afetados.
+  - `opensdd sdd finalize --ref FEAT-0019` concluiu a feature sem `--force-transition`, moveu o workspace para `.sdd/archived/FEAT-0019` e elevou o progresso global para `22/22`.
+  - `opensdd sdd check --render --strict --json` aprovou com `valid=true`, sem erros e sem warnings.
+  - `opensdd sdd next --json` retornou sem itens prontos, bloqueados ou em conflito.
+  - `pnpm run lint`, `pnpm run build` e `pnpm test` aprovaram; a suite completa fechou com `84` arquivos e `1451` testes passando.

@@ -22,7 +22,7 @@ Documento gerado a partir de `.sdd/state/backlog.yaml`.
 | FEAT-0016 | DONE | Protocolo de meta-evolução do SDD e comando sdd audit | epic | STANDARD | feature | local_plan | padrao | epic-0008 | FEAT-0012, FEAT-0013, FEAT-0014, FEAT-0015 |
 | FEAT-0017 | DONE | Sanitização semântica de títulos na propagação INS → DEB → EPIC → FEAT | epic | STANDARD | feature | local_plan | padrao | epic-0008 | - |
 | FEAT-0018 | DONE | Adotar DevTrack Foundation API como backend padrão do OpenSDD | direct | STANDARD | documentation | direct_tasks | rigoroso | - | - |
-| FEAT-0019 | IN_PROGRESS | Integridade referencial cross-entity no check com severidade graduada | epic | STANDARD | feature | local_plan | padrao | radar-epic-0010 | - |
+| FEAT-0019 | DONE | Integridade referencial cross-entity no check com severidade graduada | epic | STANDARD | feature | local_plan | padrao | radar-epic-0010 | - |
 | FEAT-0020 | DONE | Transition-log append-only e remocao do ciclo ARCHIVED para DONE | epic | STANDARD | feature | local_plan | padrao | radar-epic-0010 | - |
 | FEAT-0021 | DONE | Deduplicacao cross-entity em insight debate e decide com warn-and-link | epic | STANDARD | feature | local_plan | direto | radar-epic-0010 | - |
 | FEAT-0022 | DONE | Corrigir heuristica serviceId e merge field-wise no finalize | epic | STANDARD | feature | local_plan | direto | radar-epic-0010 | - |

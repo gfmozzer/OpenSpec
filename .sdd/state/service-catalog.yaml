@@ -16,6 +16,7 @@ services:
       - FEAT-0020
       - FEAT-0021
       - FEAT-0022
+      - FEAT-0019
     repo_paths: []
     contracts: []
     external_dependencies: []

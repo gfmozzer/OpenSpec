@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Reporte privado de segurança
+    url: https://github.com/gfmozzer/OpenSpec/security/policy
+    about: Vulnerabilidades devem seguir o fluxo privado descrito em SECURITY.md.
+  - name: Preciso de ajuda
+    url: https://github.com/gfmozzer/OpenSpec/blob/main/SUPPORT.md
+    about: Veja os canais corretos de suporte e colaboração.

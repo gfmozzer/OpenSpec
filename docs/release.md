@@ -1,5 +1,7 @@
 # Release and Rollback Guide
 
+This repository is prepared for public release through GitHub Actions + Changesets.
+
 ## Release checklist
 
 1. Ensure working tree is clean.
@@ -15,8 +17,15 @@ pnpm vitest run test/commands/feedback.test.ts
 3. Verify package metadata:
 - `name` is `@gfmozzer/opensdd`
 - `bin.opensdd` points to `./bin/opensdd.js`
+- `license` is `MIT`
+- `files` only includes the intended publish surface
 
-4. Merge to `main` and let release workflow publish.
+4. Confirm repository settings before first public publish:
+- npm trusted publishing / OIDC configured
+- required GitHub Actions permissions enabled
+- `CODEOWNERS`, `SECURITY.md` and support docs reviewed
+
+5. Merge to `main` and let the release workflow open/update the version PR and publish after merge.
 
 ## Manual fallback release (tarball)
 
@@ -60,6 +69,16 @@ npm deprecate @gfmozzer/opensdd@<broken-version> "Broken install. Use <fixed-ver
 
 2. Cut a patch release with fix.
 3. Publish and update release notes with migration instructions.
+
+## Public repository hygiene
+
+Before cutting a release, confirm that the diff does not include:
+
+- IDE-specific files
+- local credentials
+- debug logs
+- ad hoc test fixtures with real data
+- unpublished draft docs that conflict with the canonical README
 
 ## Windows recovery (broken global install)
 
